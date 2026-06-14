@@ -1,5 +1,5 @@
 /**
- * IconFlow API - The Unified Icon Engine v2
+ * Sednicon API - The Unified Icon Engine v2
  * Sources: Custom Brands → Simple Icons → Iconify (multi-set fallback chain)
  */
 

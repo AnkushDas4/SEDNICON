@@ -3,7 +3,43 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Icon Library — IconFlow</title>
+<title>Icon Library — Sednicon | Browse 200,000+ Free SVG Icons</title>
+<meta name="description" content="Browse and search the full Sednicon icon library — 200,000+ free SVG icons and brand logos. Customize color and size, then copy the ready-to-use URL or code."/>
+<meta name="keywords" content="icon library, SVG icons, free icons, browse icons, brand logos, icon search, Sednicon"/>
+<meta name="author" content="Sednium"/>
+<link rel="canonical" href="https://sednicon.sednium.com/library.html"/>
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://sednicon.sednium.com/library.html"/>
+<meta property="og:title" content="Icon Library — Sednicon"/>
+<meta property="og:description" content="Browse and search 200,000+ free SVG icons and brand logos. Customize color and size, then copy the ready-to-use URL or code."/>
+<meta property="og:image" content="https://sednicon.sednium.com/og-image.png"/>
+<meta property="og:site_name" content="Sednicon"/>
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:url" content="https://sednicon.sednium.com/library.html"/>
+<meta name="twitter:title" content="Icon Library — Sednicon"/>
+<meta name="twitter:description" content="Browse and search 200,000+ free SVG icons and brand logos. Customize color and size, then copy the ready-to-use URL or code."/>
+<meta name="twitter:image" content="https://sednicon.sednium.com/og-image.png"/>
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+
+<!-- Robots -->
+<meta name="robots" content="index, follow"/>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('sednicon-theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+  })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -23,7 +59,27 @@
     --accent: #2563eb; /* Vibrant Blue */
     --accent2: #ea580c;
     --accent3: #0284c7;
+    --bg-overlay: rgba(255,255,255,0.9);
+    --bg-overlay2: rgba(255,255,255,0.95);
   }
+
+  html.dark {
+    --bg: #0a0a0b;
+    --surface: #151517;
+    --surface2: #1c1c1f;
+    --surface3: #29292d;
+    --border: rgba(255,255,255,0.08);
+    --border-bright: rgba(255,255,255,0.15);
+    --text: #f5f5f5;
+    --text-muted: #a3a3a3;
+    --text-dim: #6b6b6b;
+    --accent: #5b8def;
+    --accent2: #fb923c;
+    --accent3: #38bdf8;
+    --bg-overlay: rgba(10,10,11,0.85);
+    --bg-overlay2: rgba(10,10,11,0.92);
+  }
+  html.dark body::before { opacity: 0.04; }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth;
@@ -38,6 +94,7 @@
     line-height: 1.6;
     overflow-x: hidden;
     cursor: none;
+    transition: background 0.3s ease, color 0.3s ease;
   }
 
   .cursor {
@@ -67,7 +124,7 @@
     padding: 20px 48px;
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--border);
-    background: rgba(255,255,255,0.9);
+    background: var(--bg-overlay);
     backdrop-filter: blur(20px);
   }
   .nav-logo {
@@ -82,6 +139,24 @@
   .nav-links::-webkit-scrollbar { display: none; }
   .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
   .nav-links a:hover, .nav-links a.active { color: var(--text); }
+
+  .theme-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: none;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover { color: var(--text); border-color: var(--border-bright); }
+  .theme-toggle .material-icons { font-size: 18px; }
+  .theme-toggle .icon-dark { display: none; }
+  html.dark .theme-toggle .icon-light { display: none; }
+  html.dark .theme-toggle .icon-dark { display: inline; }
 
   /* ── PAGE HEADER ── */
   .page-header {
@@ -127,7 +202,7 @@
   .controls-bar {
     position: sticky; top: 65px; z-index: 50;
     padding: 16px 48px;
-    background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+    background: var(--bg-overlay2); backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   }
@@ -138,7 +213,7 @@
     border-radius: 8px; padding: 0 14px; gap: 10px;
     transition: border-color 0.2s;
   }
-  .search-wrap:focus-within { border-color: var(--accent); background: #ffffff; }
+  .search-wrap:focus-within { border-color: var(--accent); background: var(--bg); }
   .search-wrap .material-icons { font-size: 18px; color: var(--text-dim); flex-shrink: 0; }
   .search-wrap input {
     flex: 1; background: transparent; border: none; outline: none;
@@ -251,7 +326,7 @@
     background: radial-gradient(circle at 50% 30%, rgba(37,99,235,0.06) 0%, transparent 70%);
     opacity: 0; transition: opacity 0.3s;
   }
-  .icon-item:hover { background: #ffffff; border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .icon-item:hover { background: var(--bg); border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .icon-item:hover::before { opacity: 1; }
   
   .icon-item img {
@@ -353,11 +428,15 @@
 <nav>
   <a href="index.html" class="nav-logo">
     <div class="nav-logo-dot"></div>
-    IconFlow
+    Sednicon
   </a>
   <ul class="nav-links">
     <li><a href="library.html" class="active">Icon Library</a></li>
     <li><a href="index.html#docs">Docs</a></li>
+    <li><button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+      <span class="material-icons icon-light">dark_mode</span>
+      <span class="material-icons icon-dark">light_mode</span>
+    </button></li>
   </ul>
 </nav>
 
@@ -368,15 +447,15 @@
     <p class="page-header-meta">Click any icon to instantly load it in the API Generator</p>
   </div>
   <div class="page-header-count">
-    <div class="count-num">10k+</div>
-    <div class="count-label">Total Icons</div>
+    <div class="count-num">200k+</div>
+    <div class="count-label">Searchable Icons</div>
   </div>
 </div>
 
 <div class="controls-bar">
   <div class="search-wrap">
     <span class="material-icons">search</span>
-    <input type="text" id="search-input" placeholder="Filter icons…" autocomplete="off"/>
+    <input type="text" id="search-input" placeholder="Search 200,000+ icons…" autocomplete="off"/>
   </div>
   <div class="color-ctrl">
     <label>Color</label>
@@ -413,8 +492,8 @@
 </button>
 
 <footer>
-  <a href="index.html" class="footer-logo">IconFlow</a>
-  <div class="footer-right">Powered by Vercel Edge · MIT License</div>
+  <a href="index.html" class="footer-logo">Sednicon</a>
+  <div class="footer-right">Built by <a href="https://sednium.com" target="_blank" rel="noopener" style="color:var(--accent3); text-decoration:none;">Sednium</a> · Powered by Vercel Edge · MIT License</div>
 </footer>
 
 <script>
@@ -435,8 +514,15 @@ animCursor();
 const backBtn = document.getElementById('back-top');
 window.addEventListener('scroll', () => backBtn.classList.toggle('visible', scrollY > 400));
 
+// ── THEME TOGGLE ──
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('sednicon-theme', isDark ? 'dark' : 'light');
+  updateAllIcons();
+});
+
 // ── DATA ──
-const BASE = 'https://icon-flow-pi.vercel.app/api/render';
+const BASE = 'https://sednicon.sednium.com/api/render';
 let iconSize = 32;
 let iconColor = '000000';
 
@@ -556,9 +642,11 @@ function renderAll(filter = '') {
   }
 
   let delay = 0;
+  let matchCount = 0;
   categories.forEach(cat => {
     const icons = lf ? cat.icons.filter(n => n.includes(lf)) : cat.icons;
     if (!icons.length) return;
+    matchCount += icons.length;
     html += `
       <div class="cat-section" id="cat-${cat.id}">
         <div class="cat-section-header">
@@ -571,10 +659,63 @@ function renderAll(filter = '') {
     delay += icons.length * 10;
   });
 
-  if (lf && !html.includes('cat-section')) {
-    html = `<div class="icon-grid"><div class="no-results"><span class="material-icons">search_off</span>No icons match "${filter}"</div></div>`;
+  if (lf && matchCount === 0) {
+    html = `<div class="icon-grid"><div class="no-results"><span class="material-icons">search_off</span>Searching 200,000+ icons for "${filter}"…</div></div>`;
   }
   content.innerHTML = html;
+
+  // Always supplement with live results from Iconify's full library when searching
+  if (lf) searchIconify(lf, matchCount === 0);
+}
+
+// ── ICONIFY LIVE SEARCH ──
+let iconifySearchTimer = null;
+let iconifySearchSeq = 0;
+function searchIconify(query, replaceContent) {
+  clearTimeout(iconifySearchTimer);
+  const seq = ++iconifySearchSeq;
+  iconifySearchTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&limit=48`);
+      const data = await res.json();
+      if (seq !== iconifySearchSeq) return; // stale response, a newer search superseded this
+      const icons = (data.icons || []);
+      const content = document.getElementById('library-content');
+      if (!icons.length) {
+        if (replaceContent) {
+          content.innerHTML = `<div class="icon-grid"><div class="no-results"><span class="material-icons">search_off</span>No icons match "${query}"</div></div>`;
+        }
+        return;
+      }
+      const colorHex = document.getElementById('lib-color-text').value.replace('#', '') || '000000';
+      const grid = icons.map((id, i) => {
+        const [prefix, name] = id.split(':');
+        const src = `https://api.iconify.design/${prefix}/${name}.svg?color=%23${colorHex}&width=${iconSize}&height=${iconSize}`;
+        return `
+        <a href="index.html?icon=${name}" class="icon-item" data-name="${name}" data-iconify="${id}" style="animation-delay:${i * 10}ms">
+          <img src="${src}" alt="${name}" loading="lazy"/>
+          <div class="icon-name">${name}</div>
+        </a>`;
+      }).join('');
+
+      const section = `
+        <div class="cat-section" id="cat-iconify-search">
+          <div class="cat-section-header">
+            <h2 class="cat-section-title"><span class="material-icons" style="margin-right:8px; vertical-align:middle; color:var(--accent)">travel_explore</span><span style="vertical-align:middle;">More results</span></h2>
+            <span class="cat-section-count">${icons.length}+ from Iconify</span>
+          </div>
+          <div class="icon-grid">${grid}</div>
+        </div>`;
+
+      if (replaceContent) {
+        content.innerHTML = section;
+      } else {
+        content.insertAdjacentHTML('beforeend', section);
+      }
+    } catch {
+      // Network/search failure — silently keep whatever curated results are shown
+    }
+  }, 350);
 }
 
 function updateAllIcons() {
@@ -592,6 +733,13 @@ function updateAllIcons() {
         img.onerror = null;
         img.src = fallbackSrc;
     };
+  });
+
+  // Refresh any icons loaded via the Iconify live search
+  const colorHex = document.getElementById('lib-color-text').value.replace('#', '') || '000000';
+  document.querySelectorAll('.icon-item[data-iconify] img').forEach(img => {
+    const [prefix, name] = img.closest('.icon-item').dataset.iconify.split(':');
+    img.src = `https://api.iconify.design/${prefix}/${name}.svg?color=%23${colorHex}&width=${iconSize}&height=${iconSize}`;
   });
 }
 
@@ -666,5 +814,9 @@ document.addEventListener('mouseout', e => {
 renderAll();
 renderCatBar();
 </script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

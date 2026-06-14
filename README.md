@@ -1,10 +1,10 @@
-# 🎨 IconFlow - Headless Design API
+# 🎨 Sednicon - Headless Design API
 
-![IconFlow](https://img.shields.io/badge/Status-Operational-success?style=flat-square)
+![Sednicon](https://img.shields.io/badge/Status-Operational-success?style=flat-square)
 ![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-black?style=flat-square&logo=vercel)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
 
-IconFlow is a lightning-fast, headless API that serves dynamic SVG icons directly via URL. It unites popular icon sets (Material Design, FontAwesome, etc.) and custom brand logos into one simple endpoint. 
+Sednicon is a lightning-fast, headless API that serves dynamic SVG icons directly via URL. It unites popular icon sets (Material Design, FontAwesome, etc.) and custom brand logos into one simple endpoint. 
 
 Just type the name, pick a color, set the size, and paste the URL into your project.
 
@@ -26,7 +26,7 @@ You don't need to install any heavy npm packages. Just use the URL.
 The easiest method. Perfect for Webflow, WordPress, or plain HTML.
 ```html
 <img 
-  src="[https://icon-flow-pi.vercel.app/api/render?q=google&color=red&size=24](https://your-domain.vercel.app/api/render?q=google&color=red&size=24)" 
+  src="https://sednicon.sednium.com/api/render?q=google&color=red&size=24" 
   alt="Google Logo" 
   width="24" 
 />
@@ -36,7 +36,7 @@ Build a dynamic icon component that changes based on props.
 ```jsx
 export const Icon = ({ name, color, size = 24 }) => (
   <img 
-    src={`https://icon-flow-pi.vercel.app/api/render?q=${name}&color=${color}&size=${size}`}
+    src={`https://sednicon.sednium.com/api/render?q=${name}&color=${color}&size=${size}`}
     className="w-6 h-6"
     alt={`${name} icon`}
   />
@@ -48,7 +48,7 @@ export const Icon = ({ name, color, size = 24 }) => (
 Perfect for pseudo-elements (::before) or custom buttons.
 ```css
 .btn-icon {
-  background-image: url('[https://icon-flow-pi.vercel.app/api/render?q=menu&color=white&size=20](https://your-domain.vercel.app/api/render?q=menu&color=white&size=20)');
+  background-image: url('https://sednicon.sednium.com/api/render?q=menu&color=white&size=20');
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -61,9 +61,9 @@ Perfect for pseudo-elements (::before) or custom buttons.
 |size     | number | 24      | 48, 128         | The width and height of the SVG in pixels.  |
 ```
 ### 📂 Project Structure
-IconFlow is split into a frontend generator and a backend edge function.
+Sednicon is split into a frontend generator and a backend edge function.
 ```
-iconflow/
+sednicon/
 ├── api/
 │   └── index.js      # The API Edge Function (Fetches & generates SVGs)
 ├── index.html        # The Frontend UI (Landing page & API Generator)

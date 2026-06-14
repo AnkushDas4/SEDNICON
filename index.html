@@ -3,7 +3,43 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>IconFlow — Headless Design API</title>
+<title>Sednicon — Headless Icon API | Free SVG Icons via URL</title>
+<meta name="description" content="Sednicon is a free, headless icon API serving 200,000+ SVG icons and brand logos via a single URL. Edge-deployed on Vercel for sub-50ms latency. No npm install, no API key — works in HTML, React, Vue, and Webflow."/>
+<meta name="keywords" content="icon API, SVG icon API, free icons, headless icons, icon CDN, brand logos API, dynamic SVG, icon generator, Sednicon"/>
+<meta name="author" content="Sednium"/>
+<link rel="canonical" href="https://sednicon.sednium.com/"/>
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://sednicon.sednium.com/"/>
+<meta property="og:title" content="Sednicon — Headless Icon API"/>
+<meta property="og:description" content="One URL, every icon. 200,000+ SVG icons and brand logos served instantly via a single API endpoint. Free, fast, and edge-deployed."/>
+<meta property="og:image" content="https://sednicon.sednium.com/og-image.png"/>
+<meta property="og:site_name" content="Sednicon"/>
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:url" content="https://sednicon.sednium.com/"/>
+<meta name="twitter:title" content="Sednicon — Headless Icon API"/>
+<meta name="twitter:description" content="One URL, every icon. 200,000+ SVG icons and brand logos served instantly via a single API endpoint. Free, fast, and edge-deployed."/>
+<meta name="twitter:image" content="https://sednicon.sednium.com/og-image.png"/>
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+
+<!-- Robots -->
+<meta name="robots" content="index, follow"/>
+
+<script>
+  (function() {
+    const saved = localStorage.getItem('sednicon-theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+  })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -24,7 +60,26 @@
     --accent2: #ea580c;
     --accent3: #0284c7;
     --glow: rgba(37,99,235,0.08);
+    --bg-overlay: rgba(255,255,255,0.9);
   }
+
+  html.dark {
+    --bg: #0a0a0b;
+    --surface: #151517;
+    --surface2: #1c1c1f;
+    --surface3: #29292d;
+    --border: rgba(255,255,255,0.08);
+    --border-bright: rgba(255,255,255,0.15);
+    --text: #f5f5f5;
+    --text-muted: #a3a3a3;
+    --text-dim: #6b6b6b;
+    --accent: #5b8def;
+    --accent2: #fb923c;
+    --accent3: #38bdf8;
+    --glow: rgba(91,141,239,0.12);
+    --bg-overlay: rgba(10,10,11,0.85);
+  }
+  html.dark body::before { opacity: 0.04; }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -41,6 +96,7 @@
     line-height: 1.6;
     overflow-x: hidden;
     cursor: none;
+    transition: background 0.3s ease, color 0.3s ease;
   }
 
   /* Custom cursor */
@@ -92,7 +148,7 @@
   }
   nav.scrolled {
     border-color: var(--border);
-    background: rgba(255,255,255,0.9);
+    background: var(--bg-overlay);
     backdrop-filter: blur(20px);
   }
   .nav-logo {
@@ -132,6 +188,23 @@
     transition: color 0.2s;
   }
   .nav-links a:hover { color: var(--text); }
+
+  .theme-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: none;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .theme-toggle:hover { color: var(--text); border-color: var(--border-bright); }
+  .theme-toggle .material-icons { font-size: 18px; }
+  .theme-toggle .icon-dark { display: none; }
+  html.dark .theme-toggle .icon-light { display: none; }
+  html.dark .theme-toggle .icon-dark { display: inline; }
   
   /* ── HERO ── */
   .hero {
@@ -382,7 +455,7 @@
   }
   .field input:focus, .field select:focus {
     border-color: var(--accent);
-    background: #ffffff;
+    background: var(--bg);
   }
   .color-row {
     display: flex;
@@ -839,6 +912,37 @@
     .docs-nav { display: none; }
     footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
     .divider-section { padding: 20px 24px; }
+
+    /* Responsive params table: stack as cards on narrow screens */
+    .params-table thead { display: none; }
+    .params-table, .params-table tbody, .params-table tr, .params-table td {
+      display: block;
+      width: 100%;
+    }
+    .params-table tr {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      padding: 4px 0;
+      background: var(--surface);
+    }
+    .params-table td {
+      border-bottom: none;
+      padding: 8px 16px;
+    }
+    .params-table td::before {
+      content: attr(data-label);
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .params-table td:first-child {
+      font-size: 15px;
+    }
   }
 </style>
 </head>
@@ -850,11 +954,15 @@
 <nav id="navbar">
   <a href="/" class="nav-logo">
     <div class="nav-logo-dot"></div>
-    IconFlow
+    Sednicon
   </a>
   <ul class="nav-links">
     <li><a href="library.html">Icon Library</a></li>
     <li><a href="#docs">Docs</a></li>
+    <li><button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+      <span class="material-icons icon-light">dark_mode</span>
+      <span class="material-icons icon-dark">light_mode</span>
+    </button></li>
   </ul>
 </nav>
 
@@ -885,7 +993,7 @@
     </div>
     <div class="hero-stats">
       <div>
-        <div class="hero-stat-value">10k+</div>
+        <div class="hero-stat-value">200k+</div>
         <div class="hero-stat-label">Icons</div>
       </div>
       <div>
@@ -938,6 +1046,7 @@
           <div class="format-tab" data-fmt="html">HTML</div>
           <div class="format-tab" data-fmt="css">CSS</div>
           <div class="format-tab" data-fmt="react">React</div>
+          <div class="format-tab" data-fmt="vue">Vue</div>
         </div>
 
         <div class="output-box" id="output-box"></div>
@@ -956,7 +1065,7 @@
 </div>
 
 <section class="features">
-  <div class="section-label">Why IconFlow</div>
+  <div class="section-label">Why Sednicon</div>
   <h2 class="section-title">Built for <em>speed</em><br>& simplicity.</h2>
   <div class="features-grid">
     <div class="feature-card">
@@ -981,7 +1090,7 @@
       <div class="feature-num">04</div>
       <div class="feature-icon"><span class="material-icons">auto_awesome</span></div>
       <div class="feature-title">Smart Fallbacks</div>
-      <p class="feature-desc">High-fidelity brand SVGs for top logos, then seamless routing to the 10k+ Iconify network for everything else.</p>
+      <p class="feature-desc">High-fidelity brand SVGs for top logos, then seamless routing to the 200,000+ Iconify network for everything else.</p>
     </div>
     <div class="feature-card">
       <div class="feature-num">05</div>
@@ -1021,7 +1130,7 @@
           </div>
           <pre><span class="token-comment">&lt;!-- Simple image embed --&gt;</span>
 <span class="token-tag">&lt;img</span>
-  <span class="token-key">src</span>=<span class="token-string">"https://icon-flow-pi.vercel.app/api/render?q=google&amp;color=000000&amp;size=32"</span>
+  <span class="token-key">src</span>=<span class="token-string">"https://sednicon.sednium.com/api/render?q=google&amp;color=000000&amp;size=32"</span>
   <span class="token-key">alt</span>=<span class="token-string">"Google"</span>
   <span class="token-key">width</span>=<span class="token-string">"32"</span>
 <span class="token-tag">/&gt;</span></pre>
@@ -1038,7 +1147,7 @@
           </div>
           <pre><span class="token-key">const</span> Icon = ({ name, color = <span class="token-string">'000000'</span>, size = 24 }) =&gt; (
   <span class="token-tag">&lt;img</span>
-    <span class="token-key">src</span>=<span class="token-string">{`https://icon-flow-pi.vercel.app/api/render?q=${name}&color=${color}&size=${size}`}</span>
+    <span class="token-key">src</span>=<span class="token-string">{`https://sednicon.sednium.com/api/render?q=${name}&color=${color}&size=${size}`}</span>
     <span class="token-key">width</span>=<span class="token-string">{size}</span>
     <span class="token-key">alt</span>=<span class="token-string">{`${name} icon`}</span>
   <span class="token-tag">/&gt;</span>
@@ -1058,7 +1167,7 @@
             <button class="code-copy" onclick="copyCode(this)"><span class="material-icons">content_copy</span> Copy</button>
           </div>
           <pre><span class="token-key">.btn-send</span> {
-  <span class="token-key">background-image</span>: <span class="token-string">url('https://icon-flow-pi.vercel.app/api/render?q=send&color=000000&size=20')</span>;
+  <span class="token-key">background-image</span>: <span class="token-string">url('https://sednicon.sednium.com/api/render?q=send&color=000000&size=20')</span>;
   <span class="token-key">background-repeat</span>: no-repeat;
   <span class="token-key">background-position</span>: center;
   <span class="token-key">background-size</span>: 20px 20px;
@@ -1081,22 +1190,22 @@
           </thead>
           <tbody>
             <tr>
-              <td>q</td>
-              <td><span class="tag">string</span></td>
-              <td>circle</td>
-              <td>Icon name or brand (e.g. <code style="color:var(--text);font-size:11px">rocket</code>, <code style="color:var(--text);font-size:11px">google</code>)</td>
+              <td data-label="Parameter">q</td>
+              <td data-label="Type"><span class="tag">string</span></td>
+              <td data-label="Default">circle</td>
+              <td data-label="Description">Icon name or brand (e.g. <code style="color:var(--text);font-size:11px">rocket</code>, <code style="color:var(--text);font-size:11px">google</code>)</td>
             </tr>
             <tr>
-              <td>color</td>
-              <td><span class="tag">string</span></td>
-              <td>000000</td>
-              <td>Hex code without # (e.g. <code style="color:var(--text);font-size:11px">FF0000</code>) or color name</td>
+              <td data-label="Parameter">color</td>
+              <td data-label="Type"><span class="tag">string</span></td>
+              <td data-label="Default">000000</td>
+              <td data-label="Description">Hex code without # (e.g. <code style="color:var(--text);font-size:11px">FF0000</code>) or color name</td>
             </tr>
             <tr>
-              <td>size</td>
-              <td><span class="tag">number</span></td>
-              <td>24</td>
-              <td>Width and height in pixels. Integer (e.g. <code style="color:var(--text);font-size:11px">48</code>)</td>
+              <td data-label="Parameter">size</td>
+              <td data-label="Type"><span class="tag">number</span></td>
+              <td data-label="Default">24</td>
+              <td data-label="Description">Width and height in pixels. Integer (e.g. <code style="color:var(--text);font-size:11px">48</code>)</td>
             </tr>
           </tbody>
         </table>
@@ -1107,13 +1216,13 @@
 
 <footer>
   <div class="footer-left">
-    <a href="/" class="footer-logo">IconFlow</a>
+    <a href="/" class="footer-logo">Sednicon</a>
     <div class="status-badge">
       <div class="status-dot"></div>
       System Operational
     </div>
   </div>
-  <div class="footer-right">Powered by Vercel Edge · MIT License</div>
+  <div class="footer-right">Built by <a href="https://sednium.com" target="_blank" rel="noopener" style="color:var(--accent3); text-decoration:none;">Sednium</a> · Powered by Vercel Edge · MIT License</div>
 </footer>
 
 <script>
@@ -1138,6 +1247,12 @@ document.querySelectorAll('a,button,[data-fmt],[data-target]').forEach(el => {
 const nav = document.getElementById('navbar');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
 
+// ── THEME TOGGLE ──
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('sednicon-theme', isDark ? 'dark' : 'light');
+});
+
 // ── TICKER ──
 const items = [
   { icon: 'rocket', label: 'Material Icons' },
@@ -1145,7 +1260,7 @@ const items = [
   { icon: 'bolt', label: 'Edge Powered' },
   { icon: 'palette', label: 'Any Color' },
   { icon: 'code', label: 'React Ready' },
-  { icon: 'grid_view', label: '10,000+ Icons' },
+  { icon: 'grid_view', label: '200,000+ Icons' },
   { icon: 'lock_open', label: 'Always Free' },
   { icon: 'speed', label: 'Sub-50ms' },
 ];
@@ -1154,7 +1269,7 @@ const all = [...items,...items,...items,...items];
 t.innerHTML = all.map(i => `<div class="ticker-item"><span class="material-icons">${i.icon}</span>${i.label}</div>`).join('');
 
 // ── GENERATOR ──
-const BASE = 'https://icon-flow-pi.vercel.app/api/render';
+const BASE = 'https://sednicon.sednium.com/api/render';
 let fmt = 'url';
 
 function getColor() {
@@ -1172,7 +1287,8 @@ function updateOutput() {
     url: url,
     html: `<img src="${url}" alt="${q}" width="${size}" />`,
     css: `.icon-${q} {\n  background-image: url('${url}');\n  background-size: ${size}px ${size}px;\n}`,
-    react: `<Icon name="${q}" color="${color}" size={${size}} />`
+    react: `<Icon name="${q}" color="${color}" size={${size}} />`,
+    vue: `<img :src="\`${BASE}?q=${q}&color=${color}&size=${size}\`" alt="${q}" width="${size}" />`
   };
   document.getElementById('output-box').textContent = texts[fmt];
   
@@ -1266,5 +1382,9 @@ document.querySelectorAll('.feature-card').forEach(el => {
   observer.observe(el);
 });
 </script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
