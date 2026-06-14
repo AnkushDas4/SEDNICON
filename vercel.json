@@ -1,5 +1,6 @@
 {
   "rewrites": [
     { "source": "/api/render", "destination": "/api/index.js" }
+    { "source": "/docs", "destination": "/docs.html" }
   ]
 }
