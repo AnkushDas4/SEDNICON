@@ -12,7 +12,7 @@
     },
     {
       "source": "/api/render",
-      "destination": "/api/index.js"
+      "destination": "/api/render.js"
     }
   ],
 
