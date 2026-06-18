@@ -48,9 +48,6 @@
   .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
   .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
   .nav-links a:hover, .nav-links a.active { color: var(--text); }
-  .btn-nav-signin { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--accent); color: #ffffff !important; border-radius: 6px; font-size: 11px !important; font-weight: 600; letter-spacing: 0.06em; text-decoration: none; border: none; cursor: pointer; transition: opacity 0.2s; }
-  .btn-nav-signin:hover { opacity: 0.88; }
-  .nav-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border-bright); object-fit: cover; }
   .theme-toggle { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
   .theme-toggle .material-icons { font-size: 18px; }
   .theme-toggle .icon-dark { display: none; }
@@ -126,32 +123,6 @@
   @media (max-width: 960px) { nav { padding: 16px 24px; } .nav-links { gap: 16px; }
     .nav-links li:not(:last-child):not(:nth-last-child(2)):not(:first-child) { display: none; } .page { padding: 100px 24px 60px; } .info-row { gap: 8px; } }
 
-  /* ── FLOATING TOP BAR ── */
-  .top-signin-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 14px; background: var(--accent); color: #ffffff;
-    border-radius: 20px; font-size: 12px; font-weight: 600;
-    letter-spacing: 0.04em; text-decoration: none;
-    transition: opacity 0.2s; white-space: nowrap;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 2px 12px rgba(37,99,235,0.25);
-  }
-  .top-signin-btn:hover { opacity: 0.88; }
-  .top-theme-btn {
-    display: flex; align-items: center; justify-content: center;
-    width: 34px; height: 34px; border-radius: 50%;
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text-muted); cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .top-theme-btn:hover { color: var(--text); border-color: var(--border-bright); }
-  .top-theme-btn .material-icons { font-size: 17px; }
-  .top-theme-btn .icon-dark { display: none; }
-  html.dark .top-theme-btn .icon-light { display: none; }
-  html.dark .top-theme-btn .icon-dark { display: inline; }
-  .nav-avatar-top { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; display: block; }
 
 </style>
 </head>
@@ -173,11 +144,6 @@
   position: fixed; top: 16px; right: 16px; z-index: 200;
   display: flex; align-items: center; gap: 8px;
 ">
-  <div id="top-auth-btn">
-    <a href="/generate" class="top-signin-btn" id="top-signin-link">
-      <span class="material-icons" style="font-size:15px;">login</span> Sign in
-    </a>
-  </div>
   <button class="top-theme-btn" id="top-theme-toggle" aria-label="Toggle dark mode">
     <span class="material-icons icon-light">dark_mode</span>
     <span class="material-icons icon-dark">light_mode</span>
@@ -282,8 +248,6 @@
 </div>
 
 <script type="module">
-import { initNav, signInWithGoogle } from '/js/auth.js';
-await initNav();
 
 document.getElementById('top-theme-toggle')?.addEventListener('click', () => {
   const isDark = document.documentElement.classList.toggle('dark');
