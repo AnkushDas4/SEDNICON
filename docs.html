@@ -34,9 +34,13 @@
 
 <script>
   (function() {
-    const saved = localStorage.getItem('sednicon-theme');
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    // Auto-update if system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      document.documentElement.classList.toggle('dark', e.matches);
+    });
   })();
 </script>
 
@@ -112,7 +116,7 @@
 
   /* Custom cursor: desktop (mouse) only */
   @media (hover: hover) and (pointer: fine) {
-    *, a, button, input, select, [data-fmt], [data-target], .theme-toggle, .icon-item, .format-tab {
+    *, a, button, input, select, [data-fmt], [data-target], .icon-item, .format-tab {
       cursor: none !important;
     }
     .cursor, .cursor-ring { display: block; }
@@ -199,21 +203,6 @@
   }
   .nav-links a:hover { color: var(--text); }
 
-  .theme-toggle {
-    display: flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--text-muted);
-    transition: color 0.2s, border-color 0.2s, background 0.2s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .theme-toggle:hover { color: var(--text); border-color: var(--border-bright); }
-  .theme-toggle .material-icons { font-size: 18px; }
-  .theme-toggle .icon-dark { display: none; }
-  html.dark .theme-toggle .icon-light { display: none; }
-  html.dark .theme-toggle .icon-dark { display: inline; }
   
   /* ── HERO ── */
   .hero {
@@ -993,16 +982,6 @@
   </ul>
 </nav>
 
-<!-- Floating auth + theme bar -->
-<div id="top-bar" style="
-  position: fixed; top: 16px; right: 16px; z-index: 200;
-  display: flex; align-items: center; gap: 8px;
-">
-  <button class="top-theme-btn" id="top-theme-toggle" aria-label="Toggle dark mode">
-    <span class="material-icons icon-light">dark_mode</span>
-    <span class="material-icons icon-dark">light_mode</span>
-  </button>
-</div>
 
 <section id="docs" style="padding-top:160px;">
   <div class="section-label">Documentation</div>
@@ -1360,10 +1339,6 @@ const nav = document.getElementById('navbar');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
 
 // ── THEME TOGGLE ──
-document.getElementById('top-theme-toggle')?.addEventListener('click', () => {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('sednicon-theme', isDark ? 'dark' : 'light');
-});
 
 // ── COPY CODE ──
 function copyCode(btn) {

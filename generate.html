@@ -11,9 +11,13 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/>
 <script>
   (function() {
-    const saved = localStorage.getItem('sednicon-theme');
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    // Auto-update if system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      document.documentElement.classList.toggle('dark', e.matches);
+    });
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -43,7 +47,7 @@
   /* Remove tap highlight on all interactive elements */
   a, button, [role="button"], input[type="button"], input[type="submit"],
   .provider-btn, .style-btn, .code-tab, .btn-generate, .btn-icon-action,
-  .history-item, .theme-toggle, .btn-nav-signin {
+  .history-item, .btn-nav-signin {
     -webkit-tap-highlight-color: transparent;
   }
   body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; transition: background 0.3s, color 0.3s; }
@@ -70,17 +74,6 @@
   }
   .btn-nav-signin:hover { opacity: 0.88; }
   .nav-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border-bright); object-fit: cover; }
-  .theme-toggle {
-    display: flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px;
-    background: var(--surface); color: var(--text-muted); cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-  }
-  .theme-toggle:hover { color: var(--text); border-color: var(--border-bright); }
-  .theme-toggle .material-icons { font-size: 18px; }
-  .theme-toggle .icon-dark { display: none; }
-  html.dark .theme-toggle .icon-light { display: none; }
-  html.dark .theme-toggle .icon-dark { display: inline; }
 
   /* ── PAGE LAYOUT ── */
   .page { padding-top: 100px; min-height: 100vh; }
@@ -295,32 +288,6 @@
     .provider-grid { grid-template-columns: repeat(3, 1fr); }
   }
 
-  /* ── FLOATING TOP BAR ── */
-  .top-signin-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 14px; background: var(--accent); color: #ffffff;
-    border-radius: 20px; font-size: 12px; font-weight: 600;
-    letter-spacing: 0.04em; text-decoration: none;
-    transition: opacity 0.2s; white-space: nowrap;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 2px 12px rgba(37,99,235,0.25);
-  }
-  .top-signin-btn:hover { opacity: 0.88; }
-  .top-theme-btn {
-    display: flex; align-items: center; justify-content: center;
-    width: 34px; height: 34px; border-radius: 50%;
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text-muted); cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .top-theme-btn:hover { color: var(--text); border-color: var(--border-bright); }
-  .top-theme-btn .material-icons { font-size: 17px; }
-  .top-theme-btn .icon-dark { display: none; }
-  html.dark .top-theme-btn .icon-light { display: none; }
-  html.dark .top-theme-btn .icon-dark { display: inline; }
-  .nav-avatar-top { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; display: block; }
 
 </style>
 </head>
@@ -340,20 +307,6 @@
   </ul>
 </nav>
 
-<!-- Floating auth + theme bar -->
-<div id="top-bar" style="
-  position: fixed; top: 16px; right: 16px; z-index: 200;
-  display: flex; align-items: center; gap: 8px;
-">
-  <div id="top-auth-btn">
-    <a href="/generate" class="top-signin-btn" id="top-signin-link">
-      <span class="material-icons" style="font-size:15px;">login</span> Sign in
-    </a>
-  </div>
-  <button class="top-theme-btn" id="top-theme-toggle" aria-label="Toggle dark mode">
-    <span class="material-icons icon-light">dark_mode</span>
-    <span class="material-icons icon-dark">light_mode</span>
-  </button>
 </div>
 
 <div class="page">
@@ -611,10 +564,6 @@
 import { initNav, signInWithGoogle, getUser, getSession, getSupabase } from '/js/auth.js';
 
 // ── THEME ──
-document.getElementById('top-theme-toggle')?.addEventListener('click', () => {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('sednicon-theme', isDark ? 'dark' : 'light');
-});
 
 // ── NAV SCROLL ──
 const nav = document.getElementById('navbar');

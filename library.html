@@ -34,9 +34,13 @@
 
 <script>
   (function() {
-    const saved = localStorage.getItem('sednicon-theme');
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    // Auto-update if system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      document.documentElement.classList.toggle('dark', e.matches);
+    });
   })();
 </script>
 
@@ -110,7 +114,7 @@
 
   /* Custom cursor: desktop (mouse) only */
   @media (hover: hover) and (pointer: fine) {
-    *, a, button, input, select, [data-fmt], [data-target], .theme-toggle, .icon-item {
+    *, a, button, input, select, [data-fmt], [data-target], .icon-item {
       cursor: none !important;
     }
     .cursor, .cursor-ring { display: block; }
@@ -156,22 +160,6 @@
   .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
   .nav-links a:hover, .nav-links a.active { color: var(--text); }
 
-  .theme-toggle {
-    display: flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--text-muted);
-    transition: color 0.2s, border-color 0.2s, background 0.2s;
-    -webkit-tap-highlight-color: transparent;
-    flex-shrink: 0;
-  }
-  .theme-toggle:hover { color: var(--text); border-color: var(--border-bright); }
-  .theme-toggle .material-icons { font-size: 18px; }
-  .theme-toggle .icon-dark { display: none; }
-  html.dark .theme-toggle .icon-light { display: none; }
-  html.dark .theme-toggle .icon-dark { display: inline; }
 
   /* ── PAGE HEADER ── */
   .page-header {
@@ -485,16 +473,6 @@
   </ul>
 </nav>
 
-<!-- Floating auth + theme bar -->
-<div id="top-bar" style="
-  position: fixed; top: 16px; right: 16px; z-index: 200;
-  display: flex; align-items: center; gap: 8px;
-">
-  <button class="top-theme-btn" id="top-theme-toggle" aria-label="Toggle dark mode">
-    <span class="material-icons icon-light">dark_mode</span>
-    <span class="material-icons icon-dark">light_mode</span>
-  </button>
-</div>
 
 <div class="page-header">
   <div>
@@ -589,23 +567,6 @@ const backBtn = document.getElementById('back-top');
 window.addEventListener('scroll', () => backBtn.classList.toggle('visible', scrollY > 400));
 
 // ── THEME TOGGLE ──
-document.getElementById('top-theme-toggle')?.addEventListener('click', () => {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('sednicon-theme', isDark ? 'dark' : 'light');
-
-  // If the user hasn't customized the color away from a default black/white,
-  // auto-switch the icon color so icons remain visible in the new theme.
-  const colorInput = document.getElementById('lib-color-text');
-  const current = colorInput.value.toLowerCase();
-  if (current === '#000000' || current === '#ffffff') {
-    const newColor = isDark ? '#ffffff' : '#000000';
-    colorInput.value = newColor;
-    document.getElementById('lib-color-picker').value = newColor;
-    syncSwatchActive(newColor);
-  }
-
-  updateAllIcons();
-});
 
 // ── DATA ──
 const BASE = 'https://sednicon.sednium.com/api/render';
@@ -942,7 +903,7 @@ document.addEventListener('mouseout', e => {
 
 // ── INIT ──
 // If the page loaded in dark mode, default icon color to white for visibility
-if (document.documentElement.classList.contains('dark')) {
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
   document.getElementById('lib-color-text').value = '#ffffff';
   document.getElementById('lib-color-picker').value = '#ffffff';
   syncSwatchActive('#ffffff');
