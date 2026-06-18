@@ -1002,6 +1002,34 @@
       font-size: 15px;
     }
   }
+
+  /* ── FLOATING TOP BAR ── */
+  .top-signin-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; background: var(--accent); color: #ffffff;
+    border-radius: 20px; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.04em; text-decoration: none;
+    transition: opacity 0.2s; white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.25);
+  }
+  .top-signin-btn:hover { opacity: 0.88; }
+  .top-theme-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .top-theme-btn:hover { color: var(--text); border-color: var(--border-bright); }
+  .top-theme-btn .material-icons { font-size: 17px; }
+  .top-theme-btn .icon-dark { display: none; }
+  html.dark .top-theme-btn .icon-light { display: none; }
+  html.dark .top-theme-btn .icon-dark { display: inline; }
+  .nav-avatar-top { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; display: block; }
+
 </style>
 </head>
 <body>
@@ -1015,23 +1043,29 @@
     Sednicon
   </a>
   <ul class="nav-links">
-    <li><a href="/library">Library</a>
-    <a href="/community">Community</a></li>
+    <li><a href="/library">Library</a></li>
     <li><a href="/community">Community</a></li>
     <li><a href="/generate">Generate</a></li>
     <li><a href="/docs">Docs</a></li>
     <li><a href="/status">Status</a></li>
-    <li id="nav-auth-btn">
-      <a href="/generate" class="btn-nav-signin" id="signin-btn">
-        <span class="material-icons" style="font-size:16px;">login</span> Sign in
-      </a>
-    </li>
-    <li><button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
-      <span class="material-icons icon-light">dark_mode</span>
-      <span class="material-icons icon-dark">light_mode</span>
-    </button></li>
   </ul>
 </nav>
+
+<!-- Floating auth + theme bar -->
+<div id="top-bar" style="
+  position: fixed; top: 16px; right: 16px; z-index: 200;
+  display: flex; align-items: center; gap: 8px;
+">
+  <div id="top-auth-btn">
+    <a href="/generate" class="top-signin-btn" id="top-signin-link">
+      <span class="material-icons" style="font-size:15px;">login</span> Sign in
+    </a>
+  </div>
+  <button class="top-theme-btn" id="top-theme-toggle" aria-label="Toggle dark mode">
+    <span class="material-icons icon-light">dark_mode</span>
+    <span class="material-icons icon-dark">light_mode</span>
+  </button>
+</div>
 
 <section class="hero">
   <div class="hero-grid"></div>
@@ -1227,10 +1261,10 @@
   </div>
   <div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
     <a href="/library" style="font-size:12px; color:var(--text-dim); text-decoration:none; letter-spacing:0.06em; text-transform:uppercase; transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Library</a>
+    <a href="/community" style="font-size:12px; color:var(--text-dim); text-decoration:none; letter-spacing:0.06em; text-transform:uppercase; transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Community</a>
     <a href="/generate" style="font-size:12px; color:var(--text-dim); text-decoration:none; letter-spacing:0.06em; text-transform:uppercase; transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Generate</a>
     <a href="/docs" style="font-size:12px; color:var(--text-dim); text-decoration:none; letter-spacing:0.06em; text-transform:uppercase; transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Docs</a>
     <a href="/status" style="font-size:12px; color:var(--text-dim); text-decoration:none; letter-spacing:0.06em; text-transform:uppercase; transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Status</a>
-    <a href="https://sednium.com" target="_blank" rel="noopener" style="font-size:12px; color:var(--text-dim); text-decoration:none; letter-spacing:0.06em; text-transform:uppercase; transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">Sednium</a>
   </div>
   <div class="footer-right">Built by <a href="https://sednium.com" target="_blank" rel="noopener" style="color:var(--accent3); text-decoration:none;">Sednium</a> · MIT License</div>
 </footer>
@@ -1258,7 +1292,7 @@ const nav = document.getElementById('navbar');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
 
 // ── THEME TOGGLE ──
-document.getElementById('theme-toggle').addEventListener('click', () => {
+document.getElementById('top-theme-toggle')?.addEventListener('click', () => {
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('sednicon-theme', isDark ? 'dark' : 'light');
 
@@ -1469,6 +1503,27 @@ loadCommunityPreview();
     }
   } catch { /* supabase not available */ }
 })();
+</script>
+<script>
+
+// ── FLOATING TOP BAR AUTH ──
+(async () => {
+  try {
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    const sb = createClient(
+      'https://ojsbvbohxojffkugwmub.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qc2J2Ym9oeG9qZmZrdWd3bXViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MDkxMjcsImV4cCI6MjA5NzA4NTEyN30.cwWSmtR55nM8dzkoWF3ORtwNQiqq2u14kG94V5KG318'
+    );
+    const { data: { user } } = await sb.auth.getUser();
+    const authBtn = document.getElementById('top-auth-btn');
+    if (authBtn && user) {
+      authBtn.innerHTML = user.user_metadata?.avatar_url
+        ? `<a href="/profile"><img src="${user.user_metadata.avatar_url}" class="nav-avatar-top" alt="Profile"/></a>`
+        : `<a href="/profile" class="top-signin-btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border);box-shadow:none;"><span class="material-icons" style="font-size:16px;">account_circle</span></a>`;
+    }
+  } catch {}
+})();
+
 </script>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };

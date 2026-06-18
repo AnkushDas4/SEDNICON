@@ -181,6 +181,34 @@
     .btn-generate-cta { margin-top: 8px; }
     footer { padding: 24px; flex-direction: column; align-items: flex-start; gap: 16px; }
   }
+
+  /* ── FLOATING TOP BAR ── */
+  .top-signin-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; background: var(--accent); color: #ffffff;
+    border-radius: 20px; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.04em; text-decoration: none;
+    transition: opacity 0.2s; white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.25);
+  }
+  .top-signin-btn:hover { opacity: 0.88; }
+  .top-theme-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .top-theme-btn:hover { color: var(--text); border-color: var(--border-bright); }
+  .top-theme-btn .material-icons { font-size: 17px; }
+  .top-theme-btn .icon-dark { display: none; }
+  html.dark .top-theme-btn .icon-light { display: none; }
+  html.dark .top-theme-btn .icon-dark { display: inline; }
+  .nav-avatar-top { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; display: block; }
+
 </style>
 </head>
 <body>
@@ -192,17 +220,25 @@
     <li><a href="/community" class="active">Community</a></li>
     <li><a href="/generate">Generate</a></li>
     <li><a href="/docs">Docs</a></li>
-    <li id="nav-auth-btn">
-      <a href="/generate" class="btn-nav-signin" id="signin-btn">
-        <span class="material-icons" style="font-size:16px;">login</span> Sign in
-      </a>
-    </li>
-    <li><button class="theme-toggle" id="theme-toggle">
-      <span class="material-icons icon-light">dark_mode</span>
-      <span class="material-icons icon-dark">light_mode</span>
-    </button></li>
+    <li><a href="/status">Status</a></li>
   </ul>
 </nav>
+
+<!-- Floating auth + theme bar -->
+<div id="top-bar" style="
+  position: fixed; top: 16px; right: 16px; z-index: 200;
+  display: flex; align-items: center; gap: 8px;
+">
+  <div id="top-auth-btn">
+    <a href="/generate" class="top-signin-btn" id="top-signin-link">
+      <span class="material-icons" style="font-size:15px;">login</span> Sign in
+    </a>
+  </div>
+  <button class="top-theme-btn" id="top-theme-toggle" aria-label="Toggle dark mode">
+    <span class="material-icons icon-light">dark_mode</span>
+    <span class="material-icons icon-dark">light_mode</span>
+  </button>
+</div>
 
 <div class="page">
 
@@ -294,7 +330,7 @@
 import { initNav, getUser, signInWithGoogle } from '/js/auth.js';
 
 // Theme
-document.getElementById('theme-toggle').addEventListener('click', () => {
+document.getElementById('top-theme-toggle')?.addEventListener('click', () => {
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('sednicon-theme', isDark ? 'dark' : 'light');
   rerenderColors();
