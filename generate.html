@@ -99,6 +99,7 @@
   }
   .btn-google-signin:hover { border-color: var(--border-bright); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
   .btn-google-signin svg { width: 20px; height: 20px; }
+  .btn-google-signin { -webkit-tap-highlight-color: transparent; }
 
   /* ── GENERATE LAYOUT ── */
   .generate-layout {
@@ -138,54 +139,84 @@
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
-  .field input, .field select {
-    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
-    padding: 8px 12px; font-family: 'Inter', sans-serif; font-size: 13px;
-    color: var(--text); transition: border-color 0.2s; -webkit-user-select: text; user-select: text;
+
+  /* Custom select wrapper */
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '';
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--text-dim);
+    pointer-events: none;
   }
-  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
-  .field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-family: 'Inter', sans-serif; font-size: 13px;
+    color: var(--text); transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-user-select: text; user-select: text; min-height: 44px;
+    appearance: none; -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+  }
+  .field select { padding-right: 32px; cursor: pointer; }
+  .field select option { background: var(--bg); color: var(--text); }
 
   /* Color row */
   .color-row { display: flex; align-items: center; gap: 10px; }
-  .color-preview { width: 36px; height: 36px; border-radius: 6px; border: 1px solid var(--border); flex-shrink: 0; }
-  .color-input-wrap { display: flex; align-items: center; gap: 8px; flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px 4px 4px; }
-  .color-input-wrap input[type="color"] { width: 28px; height: 28px; border: none; background: transparent; padding: 0; border-radius: 4px; }
+  .color-input-wrap {
+    display: flex; align-items: center; gap: 8px; flex: 1;
+    background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 4px 12px 4px 4px; min-height: 44px; transition: border-color 0.2s;
+  }
+  .color-input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+  .color-input-wrap input[type="color"] { width: 32px; height: 32px; border: none; background: transparent; padding: 0; border-radius: 6px; cursor: pointer; }
   .color-input-wrap input[type="text"] { background: transparent; border: none; outline: none; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); width: 80px; -webkit-user-select: text; user-select: text; }
 
-  /* Style toggle */
+  /* Style toggle — bigger touch targets */
   .style-toggle { display: flex; gap: 8px; }
   .style-btn {
-    flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 6px;
-    background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 500;
-    cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    flex: 1; padding: 12px 8px; border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--bg); color: var(--text-muted); font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.18s; display: flex; align-items: center;
+    justify-content: center; gap: 6px; min-height: 48px;
+    -webkit-tap-highlight-color: transparent;
   }
-  .style-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
-  .style-btn .material-icons { font-size: 16px; }
+  .style-btn:hover { border-color: var(--border-bright); color: var(--text); background: var(--surface); }
+  .style-btn.active { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
+  .style-btn .material-icons { font-size: 18px; }
 
   /* Provider selector */
-  .provider-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .provider-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .provider-btn {
-    padding: 10px 8px; border: 1px solid var(--border); border-radius: 8px;
-    background: var(--bg); cursor: pointer; text-align: center; transition: all 0.2s;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 12px 6px 10px; border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--bg); cursor: pointer; text-align: center; transition: all 0.18s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    min-height: 72px; -webkit-tap-highlight-color: transparent;
   }
-  .provider-btn:hover { border-color: var(--border-bright); }
-  .provider-btn.active { border-color: var(--accent); background: var(--glow); }
-  .provider-name { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .provider-btn:hover { border-color: var(--border-bright); background: var(--surface); transform: translateY(-1px); }
+  .provider-btn.active { border-color: var(--accent); background: rgba(37,99,235,0.06); box-shadow: 0 2px 8px rgba(37,99,235,0.15); }
+  .provider-name { font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.02em; }
   .provider-btn.active .provider-name { color: var(--accent); }
-  .provider-icon { font-size: 20px; }
+  .provider-logo { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+  .provider-logo svg { width: 24px; height: 24px; }
+  .provider-logo img { width: 24px; height: 24px; object-fit: contain; }
 
   /* API key field */
   .key-field-wrap { position: relative; }
-  .key-field-wrap input { width: 100%; padding-right: 40px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-  .key-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-dim); }
+  .key-field-wrap input { padding-right: 44px !important; }
+  .key-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-dim); padding: 4px; -webkit-tap-highlight-color: transparent; }
+  .key-toggle:hover { color: var(--text); }
   .key-toggle .material-icons { font-size: 18px; }
-  .key-hint { font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 4px; }
-  .key-hint .material-icons { font-size: 14px; }
+  .key-hint { font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+  .key-hint .material-icons { font-size: 14px; color: var(--accent3); }
   .key-save-row { display: flex; align-items: center; gap: 8px; }
-  .key-save-row input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
-  .key-save-row label { font-size: 12px; color: var(--text-muted); }
+  .key-save-row input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+  .key-save-row label { font-size: 12px; color: var(--text-muted); cursor: pointer; }
 
   /* Generate button */
   .btn-generate {
@@ -359,24 +390,28 @@
           <div class="field-row">
             <div class="field">
               <label>Size (px)</label>
-              <select id="gen-size">
-                <option value="16">16</option>
-                <option value="24" selected>24</option>
-                <option value="32">32</option>
-                <option value="48">48</option>
-                <option value="64">64</option>
-                <option value="128">128</option>
-              </select>
+              <div class="select-wrap">
+                <select id="gen-size">
+                  <option value="16">16</option>
+                  <option value="24" selected>24</option>
+                  <option value="32">32</option>
+                  <option value="48">48</option>
+                  <option value="64">64</option>
+                  <option value="128">128</option>
+                </select>
+              </div>
             </div>
             <div class="field">
               <label>Stroke Width</label>
-              <select id="gen-stroke-width">
-                <option value="1">1 — Thin</option>
-                <option value="1.5">1.5</option>
-                <option value="2" selected>2 — Regular</option>
-                <option value="2.5">2.5</option>
-                <option value="3">3 — Bold</option>
-              </select>
+              <div class="select-wrap">
+                <select id="gen-stroke-width">
+                  <option value="1">1 — Thin</option>
+                  <option value="1.5">1.5</option>
+                  <option value="2" selected>2 — Regular</option>
+                  <option value="2.5">2.5</option>
+                  <option value="3">3 — Bold</option>
+                </select>
+              </div>
             </div>
           </div>
           <div class="field">
@@ -419,49 +454,74 @@
         </div>
         <div class="panel-card-body">
           <div class="provider-grid" id="provider-grid">
+
             <button class="provider-btn active" data-provider="gemini">
-              <span class="provider-icon">✦</span>
+              <div class="provider-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 24A14.304 14.304 0 000 12 14.304 14.304 0 0012 0a14.304 14.304 0 0012 12 14.304 14.304 0 00-12 12" fill="#4285F4"/></svg>
+              </div>
               <span class="provider-name">Gemini</span>
             </button>
+
             <button class="provider-btn" data-provider="openai">
-              <span class="provider-icon">◎</span>
+              <div class="provider-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="color:var(--text)"><path d="M22.282 9.821a5.985 5.985 0 00-.516-4.91 6.046 6.046 0 00-6.51-2.9A6.065 6.065 0 004.981 4.18a5.985 5.985 0 00-3.998 2.9 6.046 6.046 0 00.743 7.097 5.98 5.98 0 00.51 4.911 6.051 6.051 0 006.515 2.9A5.985 5.985 0 0013.26 24a6.056 6.056 0 005.772-4.206 5.99 5.99 0 003.997-2.9 6.056 6.056 0 00-.747-7.073zM13.26 22.43a4.476 4.476 0 01-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 00.392-.681v-6.737l2.02 1.168a.071.071 0 01.038.052v5.583a4.504 4.504 0 01-4.494 4.494zM3.6 18.304a4.47 4.47 0 01-.535-3.014l.142.085 4.783 2.759a.771.771 0 00.78 0l5.843-3.369v2.332a.08.08 0 01-.033.062L9.74 19.95a4.5 4.5 0 01-6.14-1.646zM2.34 7.896a4.485 4.485 0 012.366-1.973V11.6a.766.766 0 00.388.676l5.815 3.355-2.02 1.168a.076.076 0 01-.071 0l-4.83-2.786A4.504 4.504 0 012.34 7.896zm16.597 3.855l-5.843-3.371 2.019-1.168a.076.076 0 01.072 0l4.83 2.786a4.494 4.494 0 01-.695 8.1v-5.677a.79.79 0 00-.383-.67zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 00-.785 0L9.409 9.23V6.897a.066.066 0 01.028-.061l4.83-2.787a4.5 4.5 0 016.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 01-.038-.057V6.075a4.5 4.5 0 017.375-3.453l-.142.08-4.778 2.758a.795.795 0 00-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/></svg>
+              </div>
               <span class="provider-name">OpenAI</span>
             </button>
+
             <button class="provider-btn" data-provider="anthropic">
-              <span class="provider-icon">◈</span>
+              <div class="provider-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="color:var(--text)"><path d="M13.827 3.52h3.603L24 20h-3.603l-6.57-16.48zm-3.654 0H6.57L0 20h3.603l1.378-3.504h6.737L10.34 13H6.933l2.24-5.688L13.173 20h3.603L10.173 3.52z"/></svg>
+              </div>
               <span class="provider-name">Claude</span>
             </button>
+
             <button class="provider-btn" data-provider="groq">
-              <span class="provider-icon">⚡</span>
+              <div class="provider-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="color:var(--text)"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 4.5a7.5 7.5 0 110 15 7.5 7.5 0 010-15zm0 3a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/></svg>
+              </div>
               <span class="provider-name">Groq</span>
             </button>
+
             <button class="provider-btn" data-provider="mistral">
-              <span class="provider-icon">◐</span>
+              <div class="provider-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="4" height="4" x="0" y="0" fill="#F7631B"/><rect width="4" height="4" x="8" y="0" fill="#F7631B"/><rect width="4" height="4" x="16" y="0" fill="#F7631B"/><rect width="4" height="4" x="0" y="8" fill="#F7631B"/><rect width="4" height="4" x="0" y="16" fill="#F7631B"/><rect width="4" height="4" x="8" y="8" fill="#F7631B"/><rect width="4" height="4" x="16" y="8" fill="#F7631B"/><rect width="4" height="4" x="16" y="16" fill="#F7631B"/></svg>
+              </div>
               <span class="provider-name">Mistral</span>
             </button>
+
             <button class="provider-btn" data-provider="nvidia">
-              <span class="provider-icon">▣</span>
+              <div class="provider-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#76B900"><path d="M9.0 4.5v-.97C9.41 3.49 9.83 3.47 10.25 3.47c2.76 0 4.56 2.33 4.56 2.33s-1.94 2.67-4.02 2.67c-.60 0-1.17-.16-1.79-.48V5.83c.48.58 1.09.87 1.73.87 1.02 0 1.71-.85 1.71-.85S11.2 4.5 9.9 4.5c-.31 0-.61.04-.9.04zM9.0 9.62v1.26c-3.64-.47-6.0-3.94-6.0-3.94S5.34 3.59 9.0 3.13v1.38c-.04 0-.08-.01-.12-.01-2.14 0-3.56 2.44-3.56 2.44S6.74 9.62 9.0 9.62zm0 .0c2.33.0 4.17-2.62 4.17-2.62S11.33 4.5 9.0 4.5v5.12zM2.0 6.94S4.55 11.5 9.0 11.5V10.7c-3.69-.43-5.97-3.76-5.97-3.76H2.0zm0 0"/></svg>
+              </div>
               <span class="provider-name">Nvidia</span>
             </button>
+
             <button class="provider-btn" data-provider="together">
-              <span class="provider-icon">∞</span>
+              <div class="provider-logo" style="font-size:22px; line-height:1;">🤝</div>
               <span class="provider-name">Together</span>
             </button>
+
             <button class="provider-btn" data-provider="openrouter">
-              <span class="provider-icon">⊕</span>
+              <div class="provider-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="color:var(--text)"><path d="M16.475 4.526a.75.75 0 00-.95 1.157l1.112.912H15.5C10.26 6.595 6 10.9 6 16.25v1a.75.75 0 001.5 0v-1C7.5 11.713 11.067 8.095 15.5 8.095h1.137l-1.112.912a.75.75 0 10.95 1.157l2.5-2.052a.75.75 0 000-1.534l-2.5-2.052zM12 4.75a.75.75 0 01.75-.75h.5a.75.75 0 010 1.5h-.5A.75.75 0 0112 4.75zM8.5 4a.75.75 0 000 1.5A6.5 6.5 0 0115 11a.75.75 0 001.5 0 8 8 0 00-8-8zM6 8.75A.75.75 0 016.75 8h.5a.75.75 0 010 1.5h-.5A.75.75 0 016 8.75z"/></svg>
+              </div>
               <span class="provider-name">OpenRouter</span>
             </button>
+
           </div>
 
-          <!-- Model selector (updates per provider) -->
+          <!-- Model selector -->
           <div class="field" style="margin-top:4px;">
             <label>Model</label>
-            <select id="gen-model">
-              <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-              <option value="gemini-3.5-flash">gemini-3.5-flash</option>
-              <option value="gemini-2.5-pro">gemini-2.5-pro</option>
-              <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
-            </select>
+            <div class="select-wrap">
+              <select id="gen-model">
+                <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                <option value="gemini-3.5-flash">gemini-3.5-flash</option>
+                <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
+              </select>
+            </div>
           </div>
           <div class="field" style="margin-top:4px;">
             <label>API Key <span id="key-status-label" style="color:var(--text-dim); font-weight:400;"></span></label>
