@@ -355,19 +355,22 @@ export default async function handler(request) {
     // ── Optionally save key ──
     if (saveKey && providedKey?.trim()) {
       const { encrypted, iv } = await encryptKey(providedKey.trim());
-      await supabaseQuery('/user_keys', 'POST', {
-        user_id: user.id,
-        provider,
-        encrypted_key: encrypted,
-        iv,
-        updated_at: new Date().toISOString(),
-      }).catch(async () => {
-        // Upsert: try PATCH if already exists
-        await supabaseQuery(
-          `/user_keys?user_id=eq.${user.id}&provider=eq.${provider}`,
-          'PATCH',
-          { encrypted_key: (await encryptKey(providedKey.trim())).encrypted, iv: (await encryptKey(providedKey.trim())).iv, updated_at: new Date().toISOString() }
-        );
+      // Use Supabase upsert (merge on conflict) via Prefer header
+      await fetch(`${SUPABASE_URL}/rest/v1/user_keys`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates',
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          provider,
+          encrypted_key: encrypted,
+          iv,
+          updated_at: new Date().toISOString(),
+        }),
       });
     }
 
