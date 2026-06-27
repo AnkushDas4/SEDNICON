@@ -103,6 +103,14 @@
     -moz-user-select: text;
     user-select: text;
   }
+  /* Allow selection on code/output areas so users can copy content */
+  .code-block pre,
+  .output-box,
+  .copy-btn {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
+  }
 
   body {
     background: var(--bg);
@@ -1376,9 +1384,24 @@ async function loadCommunityPreview() {
     const { icons } = await res.json();
     if (!icons?.length) return;
     const isDark = document.documentElement.classList.contains('dark');
+
+    // [api-4] Sanitize SVG before inserting into DOM to prevent XSS
+    function sanitizeSvgClient(svgString) {
+      const dangerousTagRe = /<(script|iframe|object|embed|foreignObject|applet|link|meta)[\s\S]*?>/gi;
+      const closingTagRe = /<\/(script|iframe|object|embed|foreignObject|applet)>/gi;
+      const eventAttrRe = /\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
+      const jsUrlRe = /(href|xlink:href)\s*=\s*["']\s*(javascript|data|vbscript):[^"']*["']/gi;
+      return svgString
+        .replace(dangerousTagRe, '')
+        .replace(closingTagRe, '')
+        .replace(eventAttrRe, '')
+        .replace(jsUrlRe, '');
+    }
+
     grid.innerHTML = icons.slice(0, 12).map(icon => {
-      const colored = icon.svg
-        .replace(/currentColor/g, isDark ? '#ffffff' : '#000000');
+      const colored = sanitizeSvgClient(
+        icon.svg.replace(/currentColor/g, isDark ? '#ffffff' : '#000000')
+      );
       return `
         <a href="/icon/${icon.id}" style="
           display:flex; flex-direction:column; align-items:center; gap:8px;
