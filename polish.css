@@ -1,0 +1,144 @@
+/* ══════════════════════════════════════════════════════════════════════
+   SEDNICON — UI POLISH LAYER
+   Loaded after each page's own <style> block. Uses only the existing
+   design tokens (--bg, --surface, --accent, --border, etc.) defined in
+   :root / html.dark — no new colors are introduced, so both themes stay
+   pixel-identical in palette. This file only upgrades depth, motion,
+   spacing rhythm, and interaction feedback.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Smoother global easing ── */
+* { -webkit-tap-highlight-color: transparent; }
+html { scroll-padding-top: 90px; }
+
+/* ── Custom scrollbar, on-brand ── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb {
+  background: var(--surface3);
+  border-radius: 8px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+* { scrollbar-width: thin; scrollbar-color: var(--surface3) var(--bg); }
+
+/* ── Selection color tied to accent ── */
+::selection { background: var(--accent); color: #fff; }
+
+/* ── Accessible focus ring everywhere (was missing/inconsistent) ── */
+a:focus-visible, button:focus-visible, input:focus-visible,
+textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Nav: crisper glass, subtle bottom glow on scroll ── */
+nav.scrolled {
+  box-shadow: 0 1px 0 var(--border), 0 12px 32px -16px var(--glow);
+}
+.nav-logo-dot {
+  box-shadow: 0 0 0 4px var(--glow);
+}
+
+/* ── Primary buttons: richer depth + press feedback ── */
+.btn-primary, .provider-btn, button[type="submit"] {
+  transition: transform 0.18s cubic-bezier(.2,.8,.2,1),
+              box-shadow 0.25s cubic-bezier(.2,.8,.2,1),
+              filter 0.2s;
+}
+.btn-primary:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 10px 28px -6px var(--glow), 0 2px 8px rgba(0,0,0,0.12);
+}
+.btn-primary:active { transform: translateY(0) scale(0.98); }
+
+.btn-ghost { transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.18s; }
+.btn-ghost:hover { background: var(--surface); transform: translateY(-1px); }
+.btn-ghost:active { transform: translateY(0); }
+
+/* ── Cards: consistent elevation language across pages ── */
+.feature-card, .code-block, .docs-nav-item, .service-row,
+.provider-chip, .field, [class$="-card"] {
+  transition: transform 0.25s cubic-bezier(.2,.8,.2,1),
+              box-shadow 0.25s cubic-bezier(.2,.8,.2,1),
+              border-color 0.25s;
+}
+.feature-card:hover, [class$="-card"]:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-bright);
+  box-shadow: 0 16px 40px -20px rgba(0,0,0,0.35), 0 0 0 1px var(--border) inset;
+}
+.feature-icon {
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), background 0.25s;
+}
+.feature-card:hover .feature-icon { transform: scale(1.08) rotate(-3deg); }
+
+/* ── Status / provider pills: soft glow instead of flat fill ── */
+.status-pill, .provider-chip, .token-tag {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.status-pill:hover, .provider-chip:hover { box-shadow: 0 6px 16px -8px var(--glow); }
+.status-pill-dot { box-shadow: 0 0 0 3px var(--glow); }
+
+/* ── Code blocks: sharper contrast + copy affordance ── */
+.code-block {
+  box-shadow: 0 1px 0 var(--border) inset, 0 8px 24px -18px rgba(0,0,0,0.4);
+}
+.code-copy {
+  transition: opacity 0.2s, transform 0.2s, background 0.2s;
+}
+.code-copy:hover { transform: translateY(-1px); }
+
+/* ── Inputs: clearer active state ── */
+input, textarea, select {
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+/* ── Section titles: tighter, more intentional rhythm ── */
+.section-title, .doc-section-title, .feature-title {
+  letter-spacing: -0.01em;
+}
+
+/* ── Color swatches: pop on hover, ring on select ── */
+.color-swatch {
+  transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+}
+.color-swatch:hover { transform: scale(1.12); }
+.color-swatch.active, .color-swatch[aria-selected="true"] {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
+
+/* ── Format / size / style tab groups: smoother active-state slide ── */
+.format-tab, .style-btn, .size-btn {
+  transition: background 0.2s, color 0.2s, transform 0.15s, border-color 0.2s;
+}
+.format-tab:active, .style-btn:active, .size-btn:active { transform: scale(0.96); }
+.format-tab.active, .style-btn.active, .size-btn.active {
+  box-shadow: 0 4px 14px -6px var(--glow);
+}
+
+/* ── Feature numbers: subtle depth instead of flat text ── */
+.feature-num {
+  text-shadow: 0 2px 12px var(--glow);
+}
+
+/* ── Reduce motion for users who ask for it ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Small-screen spacing tightening (many pages use desktop-first padding) ── */
+@media (max-width: 640px) {
+  .hero-left, .hero-right { padding-left: 24px !important; padding-right: 24px !important; }
+  nav { padding-left: 20px !important; padding-right: 20px !important; }
+}

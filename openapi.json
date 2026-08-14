@@ -3,7 +3,7 @@
   "info": {
     "title": "Sednicon API",
     "description": "Sednicon is a lightweight, headless icon rendering API that generates customizable SVG icons on the fly via a single URL. No installation, no dependencies, no API key — just a URL. Backed by Iconify's 200,000+ icon network with a multi-set fallback chain, so a valid SVG is always returned.",
-    "version": "3.0.0",
+    "version": "4.0.0",
     "contact": {
       "name": "Sednium",
       "url": "https://sednium.com"
@@ -21,6 +21,11 @@
   ],
   "tags": [
     { "name": "Icons", "description": "Render dynamic SVG icons" },
+    { "name": "AI Generate", "description": "AI-powered SVG icon generation" },
+    { "name": "Community", "description": "Community icon sharing and likes" },
+    { "name": "API Keys", "description": "Manage user API keys" },
+    { "name": "Favorites", "description": "User icon favorites/collections" },
+    { "name": "Batch", "description": "Batch icon rendering (sprite/JSON)" },
     { "name": "Status", "description": "API health and version information" }
   ],
   "paths": {
@@ -71,47 +76,283 @@
             "in": "query",
             "description": "Optional explicit Iconify icon set prefix to force (e.g. `lucide`, `tabler`, `mdi`). Overrides automatic fallback for this request.",
             "required": false,
-            "schema": {
-              "type": "string",
-              "examples": ["lucide", "tabler", "mdi", "phosphor"]
-            }
+            "schema": {"type": "string", "examples": ["lucide", "tabler", "mdi", "phosphor"]}
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Output format. Defaults to SVG.",
+            "required": false,
+            "schema": {"type": "string", "enum": ["svg", "png", "webp"], "default": "svg"}
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "description": "Optional per-account API key for bypassing IP rate limits and accessing higher quotas.",
+            "required": false,
+            "schema": {"type": "string"}
           }
         ],
         "responses": {
           "200": {
-            "description": "SVG icon, styled with the requested color and size.",
+            "description": "SVG/PNG/WebP icon, styled with the requested color and size.",
             "headers": {
-              "Content-Type": {
-                "schema": { "type": "string", "example": "image/svg+xml; charset=utf-8" }
-              },
-              "Cache-Control": {
-                "schema": { "type": "string", "example": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000, immutable" }
-              },
-              "Access-Control-Allow-Origin": {
-                "schema": { "type": "string", "example": "*" }
-              },
-              "X-Sednicon-Source": {
-                "description": "Indicates which icon set ultimately served the request (e.g. `iconify:material-symbols`, `custom-brand`, `iconify:search`, `generic-fallback`).",
-                "schema": { "type": "string", "example": "iconify:material-symbols" }
-              }
+              "Content-Type": {"schema": {"type": "string", "example": "image/svg+xml; charset=utf-8"}},
+              "Cache-Control": {"schema": {"type": "string", "example": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000, immutable"}},
+              "X-Sednicon-Source": {"description": "Icon source: iconify:set, custom-brand, iconify:search, ai-generated, generic-fallback", "schema": {"type": "string"}},
+              "X-Sednicon-Cache": {"schema": {"type": "string", "enum": ["HIT", "MISS"]}},
+              "X-RateLimit-Limit": {"schema": {"type": "string"}},
+              "X-RateLimit-Window": {"schema": {"type": "string", "example": "60s"}}
             },
             "content": {
-              "image/svg+xml": {
-                "schema": { "type": "string", "format": "binary" }
+              "image/svg+xml": {"schema": {"type": "string", "format": "binary"}}
+            }
+          },
+          "429": {"description": "Rate limited"},
+          "204": {"description": "CORS preflight response (OPTIONS request)."}
+        }
+      }
+    },
+    "/api/generate": {
+      "post": {
+        "tags": ["AI Generate"],
+        "summary": "Generate a custom SVG icon using AI",
+        "description": "Generates an SVG icon using the selected AI provider. Auth required (Bearer JWT from Supabase). Supports 8 providers: Gemini, OpenAI, Anthropic, Groq, Mistral, Together AI, Nvidia, OpenRouter.",
+        "operationId": "generateIcon",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["prompt"],
+                "properties": {
+                  "prompt": {"type": "string", "maxLength": 500, "description": "Text description of the icon to generate"},
+                  "provider": {"type": "string", "enum": ["gemini", "openai", "anthropic", "groq", "mistral", "together", "nvidia", "openrouter"], "default": "gemini"},
+                  "model": {"type": "string", "description": "Specific model (default per provider)"},
+                  "apiKey": {"type": "string", "description": "User's own API key for the provider"},
+                  "saveKey": {"type": "boolean", "default": false, "description": "Save the provided key encrypted"},
+                  "size": {"type": "integer", "minimum": 1, "maximum": 2048, "default": 24},
+                  "color": {"type": "string", "default": "000000"},
+                  "style": {"type": "string", "enum": ["fill", "stroke"], "default": "fill"},
+                  "strokeWidth": {"type": "number", "default": 2},
+                  "corner": {"type": "string", "enum": ["round", "sharp"], "default": "round"}
+                }
+              }
+            }
+          }
+        },
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Generated icon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "string"},
+                    "svg": {"type": "string"},
+                    "url": {"type": "string", "description": "Content-addressed URL (hash-based)"},
+                    "legacyUrl": {"type": "string", "description": "ID-based URL for backwards compatibility"},
+                    "size": {"type": "integer"},
+                    "color": {"type": "string"},
+                    "provider": {"type": "string"},
+                    "model": {"type": "string"}
+                  }
+                }
               }
             }
           },
-          "204": {
-            "description": "CORS preflight response (OPTIONS request)."
+          "400": {"description": "Validation error"},
+          "401": {"description": "Not authenticated"}
+        }
+      }
+    },
+    "/api/sprite": {
+      "post": {
+        "tags": ["Batch"],
+        "summary": "Fetch multiple icons in a single request",
+        "description": "Accepts an array of icon names and returns them as an SVG sprite or JSON array. Maximum 50 icons per request.",
+        "operationId": "getSprite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["icons"],
+                "properties": {
+                  "icons": {"type": "array", "maxItems": 50, "items": {"type": "object", "properties": {
+                    "q": {"type": "string", "description": "Icon name (same as ?q= in /api/render)"},
+                    "color": {"type": "string"},
+                    "size": {"type": "integer"}
+                  }}},
+                  "format": {"type": "string", "enum": ["symbol", "json"], "default": "symbol"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SVG sprite or JSON array",
+            "content": {
+              "image/svg+xml": {"schema": {"type": "string"}},
+              "application/json": {"schema": {"type": "object", "properties": {"icons": {"type": "array"}}}}
+            }
+          },
+          "429": {"description": "Rate limited"}
+        }
+      }
+    },
+    "/api/community": {
+      "get": {
+        "tags": ["Community"],
+        "summary": "List published community icons",
+        "operationId": "listCommunityIcons",
+        "parameters": [
+          {"name": "page", "in": "query", "schema": {"type": "integer", "default": 0}},
+          {"name": "sort", "in": "query", "schema": {"type": "string", "enum": ["latest", "likes"], "default": "latest"}},
+          {"name": "provider", "in": "query", "schema": {"type": "string"}},
+          {"name": "q", "in": "query", "schema": {"type": "string"}, "description": "Search by prompt text"}
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated icon list with userLike flag",
+            "content": {"application/json": {"schema": {"type": "object", "properties": {
+              "icons": {"type": "array"},
+              "page": {"type": "integer"},
+              "hasMore": {"type": "boolean"}
+            }}}}
           }
         }
       },
-      "options": {
-        "tags": ["Icons"],
-        "summary": "CORS preflight for /api/render",
-        "operationId": "renderIconPreflight",
+      "post": {
+        "tags": ["Community"],
+        "summary": "Publish an icon to community OR like/unlike an icon",
+        "description": "Without ?action=like, this publishes an icon (sets hidden=false). With ?action=like, it likes/unlikes the icon (auth required).",
+        "operationId": "communityPost",
+        "parameters": [
+          {"name": "action", "in": "query", "schema": {"type": "string", "enum": ["like"]}}
+        ],
+        "requestBody": {
+          "content": {"application/json": {"schema": {"type": "object", "properties": {
+            "iconId": {"type": "string"}
+          }}}}
+        },
+        "security": [{"bearerAuth": []}],
         "responses": {
-          "204": { "description": "Preflight OK" }
+          "200": {"description": "Published or liked"},
+          "401": {"description": "Authentication required"}
+        }
+      },
+      "delete": {
+        "tags": ["Community"],
+        "summary": "Unlike an icon",
+        "operationId": "unlikeIcon",
+        "parameters": [
+          {"name": "action", "in": "query", "required": true, "schema": {"type": "string", "enum": ["like"]}}
+        ],
+        "requestBody": {
+          "content": {"application/json": {"schema": {"type": "object", "properties": {
+            "iconId": {"type": "string"}
+          }}}}
+        },
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "Unliked"}
+        }
+      }
+    },
+    "/api/favorites": {
+      "get": {
+        "tags": ["Favorites"],
+        "summary": "List user favorites",
+        "operationId": "listFavorites",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "User's favorite icons", "content": {"application/json": {"schema": {"type": "object", "properties": {
+            "favorites": {"type": "array", "items": {"type": "object", "properties": {
+              "icon_ref": {"type": "string"},
+              "color": {"type": "string"},
+              "size": {"type": "integer"},
+              "created_at": {"type": "string", "format": "date-time"}
+            }}}
+          }}}}}
+        }
+      },
+      "post": {
+        "tags": ["Favorites"],
+        "summary": "Add a favorite",
+        "operationId": "addFavorite",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "content": {"application/json": {"schema": {"type": "object", "required": ["iconRef"], "properties": {
+            "iconRef": {"type": "string", "description": "The icon name (q= value)"},
+            "color": {"type": "string"},
+            "size": {"type": "integer"}
+          }}}}
+        },
+        "responses": {
+          "200": {"description": "Favorite added"}
+        }
+      },
+      "delete": {
+        "tags": ["Favorites"],
+        "summary": "Remove a favorite",
+        "operationId": "removeFavorite",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "content": {"application/json": {"schema": {"type": "object", "required": ["iconRef"], "properties": {
+            "iconRef": {"type": "string"}
+          }}}}
+        },
+        "responses": {
+          "200": {"description": "Favorite removed"}
+        }
+      }
+    },
+    "/api/account-keys": {
+      "get": {
+        "tags": ["API Keys"],
+        "summary": "List account API keys",
+        "operationId": "listApiKeys",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "Active API keys"}
+        }
+      },
+      "post": {
+        "tags": ["API Keys"],
+        "summary": "Create a new API key",
+        "operationId": "createApiKey",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "description": "Optional key label for identification",
+          "content": {"application/json": {"schema": {"type": "object", "properties": {
+            "label": {"type": "string", "maxLength": 100}
+          }}}}
+        },
+        "responses": {
+          "200": {"description": "Raw key (shown once)", "content": {"application/json": {"schema": {"type": "object", "properties": {
+            "key": {"type": "string"},
+            "label": {"type": "string"}
+          }}}}}
+        }
+      },
+      "delete": {
+        "tags": ["API Keys"],
+        "summary": "Revoke an API key",
+        "operationId": "revokeApiKey",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "content": {"application/json": {"schema": {"type": "object", "required": ["id"], "properties": {
+            "id": {"type": "string"}
+          }}}}
+        },
+        "responses": {
+          "200": {"description": "Key revoked"}
         }
       }
     },
@@ -207,6 +448,19 @@
           },
           "region": { "type": "string" }
         }
+      }
+    }
+  },
+  "security": [
+    { "bearerAuth": [] }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Supabase JWT access token (obtained via Google OAuth sign-in)"
       }
     }
   }

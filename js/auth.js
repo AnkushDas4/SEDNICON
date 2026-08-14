@@ -4,6 +4,7 @@
  */
 
 const SUPABASE_URL = 'https://ojsbvbohxojffkugwmub.supabase.co';
+// Anon key is intentionally public (Supabase Row Level Security enforces access control)
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qc2J2Ym9oeG9qZmZrdWd3bXViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MDkxMjcsImV4cCI6MjA5NzA4NTEyN30.cwWSmtR55nM8dzkoWF3ORtwNQiqq2u14kG94V5KG318';
 
 // Lazy-load Supabase client from CDN

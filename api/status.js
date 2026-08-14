@@ -39,12 +39,12 @@ export default async function handler(request) {
     iconifyStatus = 'unreachable';
   }
 
-  // Quick Supabase check
+  // Quick Supabase check — use anon key, not service key
   try {
     const dbRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/icons?limit=1`, {
       headers: {
-        'apikey': process.env.SUPABASE_SERVICE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
+        'apikey': process.env.SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
       },
     });
     dbStatus = dbRes.ok ? 'operational' : 'degraded';

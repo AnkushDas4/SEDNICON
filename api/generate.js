@@ -9,6 +9,23 @@ export const config = { runtime: 'edge' };
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const ENCRYPTION_SECRET = process.env.ENCRYPTION_SECRET;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+// Allowed origin for CORS — restrict in production
+const ALLOWED_ORIGINS = [
+  'https://sednicon.sednium.com',
+  'http://localhost:3000',
+  'http://localhost:5173',
+];
+function getCorsOrigin(request) {
+  const origin = request.headers.get('origin');
+  if (origin && ALLOWED_ORIGINS.some(a => origin.startsWith(a))) return origin;
+  return ALLOWED_ORIGINS[0]; // fallback to production
+}
+
+// Max prompt length
+const MAX_PROMPT_LENGTH = 500;
+const MAX_SVG_LENGTH = 20000;
 
 // ─── SYSTEM PROMPT ───────────────────────────────────────────────────────────
 function buildSystemPrompt({ style, strokeWidth, corner }) {
@@ -95,10 +112,13 @@ const PROVIDERS = {
 
 // ─── PROVIDER CALL FUNCTIONS ─────────────────────────────────────────────────
 async function callGemini(apiKey, model, systemPrompt, userPrompt) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
     body: JSON.stringify({
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
@@ -171,9 +191,11 @@ async function callOpenAICompat(apiKey, model, systemPrompt, userPrompt, baseUrl
 }
 
 // ─── SVG SANITIZER ───────────────────────────────────────────────────────────
-const ALLOWED_TAGS = new Set(['svg','path','circle','rect','line','polygon','polyline','ellipse','g']);
-const FORBIDDEN_ATTRS = /^on|xlink:href|href|src/i;
-const FORBIDDEN_TAGS_RE = /<(script|style|foreignobject|image|text|animate|use)[^>]*>/gi;
+// Only allow safe SVG tags and attributes
+const ALLOWED_TAGS = new Set(['svg','path','circle','rect','line','polygon','polyline','ellipse','g','defs','use','linearGradient','radialGradient','stop','clipPath','mask']);
+const ALLOWED_ATTRS_PREFIXES = ['stroke', 'fill', 'viewBox', 'xmlns', 'width', 'height', 'd', 'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'points', 'pathLength', 'transform', 'clip-rule', 'fill-rule', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-opacity', 'fill-opacity', 'opacity', 'vector-effect', 'display', 'visibility', 'style'];
+const FORBIDDEN_ATTR_RE = /^(on\w+|href|xlink:href|src|formaction|action|manifest|ping|autofocus|form|formaction|formmethod|formnovalidate|formenctype)$/i;
+const DANGEROUS_URL_RE = /^(javascript|data|vbscript|file):/i;
 
 function sanitizeSVG(raw) {
   // Extract just the SVG element
@@ -182,20 +204,49 @@ function sanitizeSVG(raw) {
 
   let svg = svgMatch[0];
 
-  // Strip forbidden tags entirely
-  svg = svg.replace(FORBIDDEN_TAGS_RE, '');
+  // Strip all comments
+  svg = svg.replace(/<!--[\s\S]*?-->/g, '');
 
-  // Remove event handlers and dangerous attributes
-  svg = svg.replace(/\s+on\w+="[^"]*"/gi, '');
-  svg = svg.replace(/\s+xlink:href="[^"]*"/gi, '');
-  svg = svg.replace(/\s+href="[^"]*"/gi, '');
+  // Remove CDATA sections
+  svg = svg.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, '');
 
-  // Strip <script> and </script> blocks
-  svg = svg.replace(/<script[\s\S]*?<\/script>/gi, '');
+  // Strip DOCTYPE and other processing instructions
+  svg = svg.replace(/<!DOCTYPE[\s\S]*?>/gi, '');
+  svg = svg.replace(/<\?[\s\S]*?\?>/g, '');
+
+  // Aggressive script/style removal — handles nested/encoded variants
+  svg = svg.replace(/<script[\s\S]*?<\/script\s*>/gi, '');
+  svg = svg.replace(/<style[\s\S]*?<\/style\s*>/gi, '');
+  svg = svg.replace(/<iframe[\s\S]*?<\/iframe\s*>/gi, '');
+  svg = svg.replace(/<object[\s\S]*?<\/object\s*>/gi, '');
+  svg = svg.replace(/<embed[\s\S]*?>/gi, '');
+  svg = svg.replace(/<foreignObject[\s\S]*?<\/foreignObject\s*>/gi, '');
+  svg = svg.replace(/<foreignobject[\s\S]*?<\/foreignobject\s*>/gi, '');
+  svg = svg.replace(/<applet[\s\S]*?<\/applet\s*>/gi, '');
+  svg = svg.replace(/<link[\s\S]*?>/gi, '');
+  svg = svg.replace(/<meta[\s\S]*?>/gi, '');
+  svg = svg.replace(/<base[\s\S]*?>/gi, '');
+  svg = svg.replace(/<annotation[\s\S]*?<\/annotation\s*>/gi, '');
+  svg = svg.replace(/<template[\s\S]*?<\/template\s*>/gi, '');
+
+  // Remove event handler attributes — handle all quoting styles
+  svg = svg.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+
+  // Block dangerous URLs in href, xlink:href, and src attributes
+  svg = svg.replace(/(href|xlink:href|src)\s*=\s*["']([^"']*)["']/gi, (match, attr, val) => {
+    if (DANGEROUS_URL_RE.test(val.trim())) return '';
+    if (/^[\s#]/.test(val)) return match; // anchors and empty are fine
+    return ''; // strip external hrefs
+  });
+
+  // Remove style attributes containing expressions or javascript: URLs
+  svg = svg.replace(/style\s*=\s*["']([^"']*)["']/gi, (match, styleVal) => {
+    if (/expression\s*\(|url\s*\(\s*["']?\s*(javascript|data|vbscript):/i.test(styleVal)) return '';
+    return match;
+  });
 
   // Ensure viewBox is correct
   if (!svg.includes('viewBox="0 0 24 24"')) {
-    // Try to normalize common variations
     svg = svg.replace(/viewBox="[^"]*"/i, 'viewBox="0 0 24 24"');
     if (!svg.includes('viewBox')) {
       svg = svg.replace('<svg', '<svg viewBox="0 0 24 24"');
@@ -215,7 +266,7 @@ function sanitizeSVG(raw) {
 
   // Sanity checks
   if (svg.length < 50) throw new Error('SVG output too short to be valid');
-  if (svg.length > 20000) throw new Error('SVG output too large — likely malformed');
+  if (svg.length > MAX_SVG_LENGTH) throw new Error('SVG output too large — likely malformed');
   if (!svg.includes('currentColor') && !svg.includes('fill') && !svg.includes('stroke')) {
     throw new Error('SVG has no color attributes — likely invalid');
   }
@@ -282,9 +333,10 @@ async function verifyJWT(token) {
 // ─── MAIN HANDLER ─────────────────────────────────────────────────────────────
 export default async function handler(request) {
   const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': getCorsOrigin(request),
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Vary': 'Origin',
   };
 
   if (request.method === 'OPTIONS') {
@@ -325,6 +377,23 @@ export default async function handler(request) {
 
     if (!prompt?.trim()) {
       return new Response(JSON.stringify({ error: 'Prompt is required' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (prompt.trim().length > MAX_PROMPT_LENGTH) {
+      return new Response(JSON.stringify({ error: `Prompt exceeds ${MAX_PROMPT_LENGTH} character limit` }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate provider model input lengths
+    if (provider && provider.length > 30) {
+      return new Response(JSON.stringify({ error: 'Invalid provider' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (requestedModel && requestedModel.length > 100) {
+      return new Response(JSON.stringify({ error: 'Invalid model name' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -396,6 +465,11 @@ export default async function handler(request) {
     // ── Sanitize ──
     const svg = sanitizeSVG(rawOutput);
 
+    // ── Compute content hash for stable addressing (Task D) ──
+    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(svg));
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const contentHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
     // ── Store in Supabase ──
     const clampedSize = Math.min(2048, Math.max(1, parseInt(size) || 24));
     const cleanColor = /^[0-9a-fA-F]{3,8}$/.test(color) ? color : '000000';
@@ -404,6 +478,7 @@ export default async function handler(request) {
       user_id: user.id,
       prompt: prompt.trim().slice(0, 500),
       svg,
+      content_hash: contentHash,
       color: cleanColor,
       size: clampedSize,
       style,
@@ -415,7 +490,8 @@ export default async function handler(request) {
     return new Response(JSON.stringify({
       id: inserted.id,
       svg,
-      url: `https://sednicon.sednium.com/api/render?q=ai:${inserted.id}`,
+      url: `https://sednicon.sednium.com/api/render?q=ai:${contentHash}`,
+      legacyUrl: `https://sednicon.sednium.com/api/render?q=ai:${inserted.id}`,
       size: clampedSize,
       color: cleanColor,
       provider,

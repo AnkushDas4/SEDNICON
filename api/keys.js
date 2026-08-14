@@ -9,6 +9,16 @@ export const config = { runtime: 'edge' };
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
+const CORS_ORIGINS = [
+  'https://sednicon.sednium.com',
+  'http://localhost:3000',
+  'http://localhost:5173',
+];
+function getCorsOrigin(request) {
+  const origin = request.headers.get('origin');
+  if (origin && CORS_ORIGINS.some(o => origin.startsWith(o))) return origin;
+  return CORS_ORIGINS[0];
+}
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
@@ -39,7 +49,8 @@ async function supabaseQuery(path, method = 'GET', body = null) {
 }
 
 export default async function handler(request) {
-  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
+  const corsHeaders = { ...CORS, 'Access-Control-Allow-Origin': getCorsOrigin(request) };
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
 
   try {
     const auth = request.headers.get('Authorization');
@@ -52,12 +63,12 @@ export default async function handler(request) {
 
     if (request.method === 'GET') {
       const rows = await supabaseQuery(`/user_keys?user_id=eq.${user.id}&provider=eq.${provider}&select=provider`);
-      return new Response(JSON.stringify({ hasKey: rows?.length > 0 }), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ hasKey: rows?.length > 0 }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     if (request.method === 'DELETE') {
       await supabaseQuery(`/user_keys?user_id=eq.${user.id}&provider=eq.${provider}`, 'DELETE');
-      return new Response(JSON.stringify({ deleted: true }), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ deleted: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { ...CORS, 'Content-Type': 'application/json' } });

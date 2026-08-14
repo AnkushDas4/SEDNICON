@@ -136,6 +136,7 @@
 
 
 </style>
+  <link rel="stylesheet" href="/polish.css">
 </head>
 <body>
 
@@ -227,8 +228,8 @@ const snippets = {
 document.getElementById('page-content').innerHTML = `
   <div class="icon-layout">
     <div class="icon-preview-card">
-      <div class="icon-preview-area">
-        ${icon.svg}
+      <div class="icon-preview-area" id="icon-preview-area">
+      <!-- SVG rendered safely via script -->
       </div>
       <div class="icon-preview-actions">
         <button class="btn-action-full primary" id="btn-copy-svg">
@@ -295,6 +296,28 @@ document.getElementById('page-content').innerHTML = `
   </div>
 `;
 
+// ── Safely render SVG into preview area (prevent DOM XSS) ──
+(function renderIconSvg() {
+  const container = document.getElementById('icon-preview-area');
+  if (!container) return;
+  // Use DOMParser to safely parse the SVG string into a document fragment
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(icon.svg, 'image/svg+xml');
+  // Check for parse errors
+  if (doc.querySelector('parsererror')) {
+    container.textContent = 'Invalid SVG';
+    return;
+  }
+  const svgEl = doc.querySelector('svg');
+  if (!svgEl) {
+    container.textContent = 'Invalid SVG';
+    return;
+  }
+  // Remove any scripts or event handlers that survived server-side sanitization
+  svgEl.querySelectorAll('script, *[onclick], *[onload], *[onerror], *[onmouseover], *[onfocus], *[onchange], *[onsubmit], *[onreset], *[onkeydown], *[onkeyup], *[onkeypress]').forEach(el => el.remove());
+  container.appendChild(svgEl);
+})();
+
 // ── Snippet tabs ──
 document.querySelectorAll('.snippet-tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -329,27 +352,45 @@ document.getElementById('btn-copy-url').addEventListener('click', async () => {
   setTimeout(() => btn.innerHTML = '<span class="material-icons">link</span> Copy URL', 2000);
 });
 
-// ── Like ──
+// ── Like (via API endpoint — Task B) ──
 let likeCount = icon.likes ?? 0;
 document.getElementById('btn-like').addEventListener('click', async () => {
   if (!user) { signInWithGoogle(); return; }
   const btn = document.getElementById('btn-like');
+  const session = await getSession();
+  if (!session?.access_token) { signInWithGoogle(); return; }
+
   if (userLiked) {
-    await supabase.from('icon_likes').delete().eq('icon_id', iconId).eq('user_id', user.id);
-    likeCount = Math.max(0, likeCount - 1);
-    userLiked = false;
-    btn.classList.remove('liked');
-    btn.querySelector('.material-icons').textContent = 'favorite_border';
+    // Unlike: DELETE /api/community?action=like
+    const res = await fetch('/api/community?action=like', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ iconId }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      likeCount = data.likes ?? Math.max(0, likeCount - 1);
+      userLiked = false;
+      btn.classList.remove('liked');
+      btn.querySelector('.material-icons').textContent = 'favorite_border';
+      document.getElementById('like-count').textContent = likeCount;
+    }
   } else {
-    await supabase.from('icon_likes').insert({ icon_id: iconId, user_id: user.id });
-    likeCount++;
-    userLiked = true;
-    btn.classList.add('liked');
-    btn.querySelector('.material-icons').textContent = 'favorite';
+    // Like: POST /api/community?action=like
+    const res = await fetch('/api/community?action=like', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ iconId }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      likeCount = data.likes ?? (likeCount + 1);
+      userLiked = true;
+      btn.classList.add('liked');
+      btn.querySelector('.material-icons').textContent = 'favorite';
+      document.getElementById('like-count').textContent = likeCount;
+    }
   }
-  // Update like count in DB
-  await supabase.from('icons').update({ likes: likeCount }).eq('id', iconId);
-  document.getElementById('like-count').textContent = likeCount;
 });
 
 // ── Comment ──

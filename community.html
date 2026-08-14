@@ -180,6 +180,7 @@
 
 
 </style>
+  <link rel="stylesheet" href="/polish.css">
 </head>
 <body>
 
@@ -348,7 +349,8 @@ function renderGrid() {
 
   const color = iconColor();
   grid.innerHTML = allIcons.map(icon => {
-    const colored = (icon.svg || '').replace(/currentColor/g, color);
+    const safeSvg = sanitizeSvgOutput(icon.svg || '');
+    const colored = safeSvg.replace(/currentColor/g, color);
     const providerLabel = icon.provider
       ? icon.provider.charAt(0).toUpperCase() + icon.provider.slice(1)
       : '';
@@ -365,6 +367,19 @@ function renderGrid() {
         </div>
       </a>`;
   }).join('');
+}
+
+function sanitizeSvgOutput(svg) {
+  return svg
+    .replace(/<script[\s\S]*?<\/script\s*>/gi, '')
+    .replace(/<iframe[\s\S]*?<\/iframe\s*>/gi, '')
+    .replace(/<object[\s\S]*?<\/object\s*>/gi, '')
+    .replace(/<embed[\s\S]*?>/gi, '')
+    .replace(/<foreignObject[\s\S]*?<\/foreignObject\s*>/gi, '')
+    .replace(/<foreignobject[\s\S]*?<\/foreignobject\s*>/gi, '')
+    .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/(href|xlink:href)\s*=\s*["']javascript:/gi, 'href="')
+    .replace(/<!--[\s\S]*?-->/g, '');
 }
 
 function rerenderColors() {
