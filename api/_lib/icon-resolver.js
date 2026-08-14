@@ -64,15 +64,21 @@ export function sanitizeSvg(svgString) {
 // ── SVG TRANSFORMER ──────────────────────────────────────────────────────────
 export function svgTransformer(svgRaw, size, cleanColor) {
   let svg = svgRaw
-    .replace(/\s+width=\"[^\"]*\"/g, '')
-    .replace(/\s+height=\"[^\"]*\"/g, '');
-  svg = svg.replace(/^<svg/, `<svg width=\"${size}\" height=\"${size}\"`);
+    .replace(/\s+width="[^"]*"/g, '')
+    .replace(/\s+height="[^"]*"/g, '');
+  svg = svg.replace(/^<svg/, `<svg width="${size}" height="${size}"`);
   svg = svg.replace(/currentColor/gi, cleanColor);
-  svg = svg.replace(/fill=\"(?!none\b)[^\"]+\"/gi, `fill=\"${cleanColor}\"']);
-  svg = svg.replace(/stroke=\"?!none\b)[^\"]+\"/gi, `stroke=\"${cleanColor}\"`);
-  if (!/fill\=/.test(svg)) svg = svg.replace(/^<svg/, `<svg fill=\"${cleanColor}\"`);
+  
+  // FIXED: Removed the rogue `']` and added the correct closing backtick
+  svg = svg.replace(/fill="(?!none\b)[^"]+"/gi, `fill="${cleanColor}"`);
+  
+  // FIXED: Added the missing '(' before '?!none'
+  svg = svg.replace(/stroke="(?!none\b)[^"]+"/gi, `stroke="${cleanColor}"`);
+  
+  if (!/fill=/.test(svg)) svg = svg.replace(/^<svg/, `<svg fill="${cleanColor}"`);
   return svg;
 }
+
 
 // ── ICONIFY FETCHER ─────────────────────────────────────────────────────────
 async function fetchIconify(prefix, name) {
