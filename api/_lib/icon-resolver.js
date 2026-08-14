@@ -1,6 +1,5 @@
 /**
  * Sednicon — Shared Icon Resolution Pipeline
- * Refactored from api/render.js for reuse by render.js, sprite.js, and other endpoints.
  */
 
 // ─── 1. CUSTOM BRAND LIBRARY ────────────────────────────────────────────────
@@ -18,11 +17,10 @@ export const BRAND_SET = new Set([
   'tailwindcss','typescript','javascript','python','rust','golang','kotlin',
   'swift','flutter','firebase','supabase','mongodb','postgresql','mysql',
   'redis','graphql','openai','anthropic','huggingface','cloudflare',
-  'netlify','heroku','digitalocean','aws','gcp','azure','npm','github',
+  'netlify','heroku','digitalocean','aws','gcp','azure','npm',
   'gitlab','bitbucket','jira','trello','asana','linear',
 ]);
 
-// Fallback chain per query type
 export const FALLBACK_SETS = [
   'material-symbols', 'lucide', 'heroicons', 'tabler', 'phosphor',
   'mdi', 'fluent', 'carbon', 'ion', 'feather',
@@ -34,7 +32,7 @@ export const PARALLEL_PROBE_SETS = ['material-symbols', 'lucide', 'heroicons'];
 export const FALLBACK_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>';
 
 // ─── SVG SANITIZER ──────────────────────────────────────────────────────────
-const DANGEROUS_URL_RE = /^(javascript|data|vbscript):/i;
+const DANGEROUS_URL_RE = /^(javascript|data|vbscript|file):/i;
 
 export function sanitizeSvg(svgString) {
   if (!/<script|<iframe|<object|<embed|<foreignObject| on|javascript:|data:/i.test(svgString)) {
@@ -49,20 +47,19 @@ export function sanitizeSvg(svgString) {
   svg = svg.replace(/<applet[\s\S]*?<\/applet\s*>/gi, '');
   svg = svg.replace(/<link[\s\S]*?>/gi, '');
   svg = svg.replace(/<meta[\s\S]*?>/gi, '');
-  svg = svg.replace(/\s+on\w+\s*=\s*(?:\"[^\"]*\"|'[^']*'|[^\s>]+)/gi, '');
-  svg = svg.replace(/(href|xlink:href)\s*=\s*\"([^\"]*)\"/gi, (m, a, v) => {
+  svg = svg.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+  svg = svg.replace(/(href|xlink:href)\s*=\s*"([^"]*)"/gi, (m, a, v) => {
     if (DANGEROUS_URL_RE.test((v||'').trim())) return '';
     return m;
   });
-  svg = svg.replace(/style\s*=\s*\"([^\"]*)\"/gi, (m, s) => {
-    if (/expression\s*\(|url\s*\(\s*[\"']?\s*(javascript|data|vbscript)\:/i.test(s||'')) return '';
+  svg = svg.replace(/style\s*=\s*"([^"]*)"/gi, (m, s) => {
+    if (/expression\s*\(|url\s*\(\s*["']?\s*(javascript|data|vbscript):/i.test(s||'')) return '';
     return m;
   });
   return svg;
 }
 
 // ── SVG TRANSFORMER ──────────────────────────────────────────────────────────
-
 export function svgTransformer(svgRaw, size, cleanColor) {
   let svg = svgRaw
     .replace(/\s+width="[^"]*"/g, '')
@@ -81,8 +78,6 @@ async function fetchIconify(prefix, name) {
     const url = `https://api.iconify.design/${prefix}/${name}.svg`;
     const res = await fetch(url, { headers: { 'Accept': 'image/svg+xml' } });
     if (!res.ok) return null;
-    const ct = (res.headers.get('content-type')||'').toLowerCase();
-    if (!ct.includes('svg') && !ct.includes('xml') && !ct.includes('plain')) return null;
     const text = await res.text();
     return (text.startsWith('<') && text.includes('<svg')) ? text : null;
   } catch { return null; }
@@ -94,68 +89,51 @@ export function brandResolver(q) {
   return null;
 }
 
-// ── AI RESOLVER ─────────────────────────────────────────────────────────────
-export async function aiResolver(q) {
-  if (!q.startsWith('ai:')) return null;
-  const value = q.slice(3).trim();
-  if (!value) return null;
-
-  const SUPABASE_URL = (typeof globalThis !== 'undefined' && globalThis.process)
-    ? globalThis.process.env.SUPABASE_URL : undefined;
-  // Rely on global env for edge runtime — `process.env` is available in Vercel edge
-  const url = SUPABASE_URL;
-  if (!url) return null;
-
-  try {
-    // Check if value is a content hash (64-char hex = SHA-256) or UUID
-    const isHash = /^[a-f0-9]{64}$/.test(value);
-    const column = isHash ? 'content_hash' : 'id';
-    const apiKey = process.env.SUPABASE_ANON_KEY || '';
-    const res = await fetch(
-      `${url}/rest/v1/icons?${column}=eq.${encodeURIComponent(value)}&select=svg,hidden&limit=1`,
-      {
-        headers: {
-          'apikey': apiKey,
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      }
-    );
-    if (!res.ok) return null;
-    const rows = await res.json();
-    if (!rows?.[0]?.svg) return null;
-    return { svg: sanitizeSvg(rows[0].svg), source: 'ai-generated' };
-  } catch { return null; }
-}
-
 // ── ICONIFY RESOLVER ────────────────────────────────────────────────────────
 export async function iconifyResolver(q, setHint) {
   const cleanQ = (q||'').toLowerCase().trim();
+  
+  // Specific set requested
   if (cleanQ.includes(':')) {
     const [prefix, ...rest] = cleanQ.split(':');
     const name = rest.join(':');
     const svg = await fetchIconify(prefix, name);
     return svg ? { svg, source: `iconify:${prefix}` } : null;
   }
+  
   if (setHint) {
     const svg = await fetchIconify(setHint, cleanQ.replace(/_/g, '-'));
     if (svg) return { svg, source: `iconify:${setHint}` };
   }
+  
   if (BRAND_SET.has(cleanQ)) {
     const svg = await fetchIconify('simple-icons', cleanQ);
     if (svg) return { svg, source: 'iconify:simple-icons' };
   }
+  
   const hyphenized = cleanQ.replace(/_/g, '-');
+  
+  // Probe major sets in parallel
   const probes = await Promise.all(
     PARALLEL_PROBE_SETS.map(p => fetchIconify(p, hyphenized).then(s => s ? {svg:s, source:`iconify:${p}`} : null))
   );
   const hit = probes.find(r => r);
   if (hit) return hit;
-  for (const p of FALLBACK_SETS) {
-    if (PARALLEL_PROBE_SETS.includes(p)) continue;
-    const svg = await fetchIconify(p, hyphenized);
-    if (svg) return { svg, source: `iconify:${p}` };
+  
+  // Concurrently probe remaining fallbacks using Promise.any
+  const remainingSets = FALLBACK_SETS.filter(p => !PARALLEL_PROBE_SETS.includes(p));
+  try {
+    const fallbackHit = await Promise.any(
+      remainingSets.map(p => 
+        fetchIconify(p, hyphenized).then(s => s ? { svg: s, source: `iconify:${p}` } : Promise.reject())
+      )
+    );
+    if (fallbackHit) return fallbackHit;
+  } catch {
+    // All fallbacks rejected, proceed to search API
   }
-  // search fallback
+  
+  // Search fallback
   try {
     const sr = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(cleanQ)}&limit=1`);
     if (!sr.ok) return null;
@@ -166,16 +144,16 @@ export async function iconifyResolver(q, setHint) {
     const svg = await fetchIconify(sp, sn);
     if (svg) return { svg, source: 'iconify:search' };
   } catch { return null; }
+  
   return null;
 }
 
 // ── MAIN RESOLVER ───────────────────────────────────────────────────────────
 export async function resolveIcon(q, setHint) {
-  let result = null;
-  result = await aiResolver(q);
-  if (!result) result = brandResolver(q);
+  let result = brandResolver(q);
   if (!result) result = await iconifyResolver(q, setHint);
   if (!result) result = { svg: FALLBACK_SVG, source: 'generic-fallback' };
-  if (result.source !== 'ai-generated') result.svg = sanitizeSvg(result.svg);
+  
+  result.svg = sanitizeSvg(result.svg);
   return result;
 }
