@@ -13,7 +13,6 @@
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       document.documentElement.classList.add('dark');
     }
-    // Auto-update if system theme changes
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
       document.documentElement.classList.toggle('dark', e.matches);
     });
@@ -55,7 +54,6 @@
 
   .page { padding: 120px 48px 80px; max-width: 760px; margin: 0 auto; }
 
-  /* Overall status banner */
   .status-banner {
     border-radius: 12px; padding: 28px 32px; margin-bottom: 40px;
     display: flex; align-items: center; gap: 20px;
@@ -76,20 +74,14 @@
   .status-banner-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
   .status-banner-meta { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 
-  /* Version info */
   .info-row { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
   .info-chip { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
   .info-chip .material-icons { font-size: 14px; color: var(--accent); }
 
-  /* Section */
   .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
 
-  /* Service rows */
   .services { display: flex; flex-direction: column; gap: 8px; margin-bottom: 40px; }
-  .service-row {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-    padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
-  }
+  .service-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
   .service-left { display: flex; align-items: center; gap: 14px; }
   .service-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; }
   .service-icon .material-icons { font-size: 18px; color: var(--text-muted); }
@@ -104,14 +96,12 @@
   .status-pill.operational .status-pill-dot { animation: pulse-green 2s infinite; }
   @keyframes pulse-green { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-  /* Endpoint list */
   .endpoints { display: flex; flex-direction: column; gap: 6px; margin-bottom: 40px; }
   .endpoint-row { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
   .endpoint-method { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(37,99,235,0.1); color: var(--accent); }
   .endpoint-path { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); }
   .endpoint-desc { font-size: 12px; color: var(--text-dim); margin-left: auto; }
 
-  /* Latency */
   .latency-display { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--green); margin: 8px 0; }
   .latency-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
 
@@ -121,10 +111,8 @@
 
   @media (max-width: 960px) { nav { padding: 16px 24px; } .nav-links { gap: 16px; }
     .nav-links li:not(:last-child):not(:nth-last-child(2)):not(:first-child) { display: none; } .page { padding: 100px 24px 60px; } .info-row { gap: 8px; } }
-
-
 </style>
-  <link rel="stylesheet" href="/polish.css">
+<link rel="stylesheet" href="/polish.css">
 </head>
 <body>
 
@@ -132,16 +120,13 @@
   <a href="/" class="nav-logo"><div class="nav-logo-dot"></div>Sednicon</a>
   <ul class="nav-links">
     <li><a href="/library">Library</a></li>
-    <li><a href="/community">Community</a></li>
     <li><a href="/generate">Generate</a></li>
     <li><a href="/docs">Docs</a></li>
     <li><a href="/status" class="active">Status</a></li>
   </ul>
 </nav>
 
-
 <div class="page">
-
   <div class="status-banner checking" id="status-banner">
     <div class="status-banner-icon"><span class="material-icons">sync</span></div>
     <div>
@@ -188,16 +173,6 @@
       </div>
       <span class="status-pill checking" id="svc-iconify"><span class="status-pill-dot"></span>Checking</span>
     </div>
-    <div class="service-row">
-      <div class="service-left">
-        <div class="service-icon"><span class="material-icons">storage</span></div>
-        <div>
-          <div class="service-name">Database</div>
-          <div class="service-desc">Supabase — community icons & keys</div>
-        </div>
-      </div>
-      <span class="status-pill checking" id="svc-db"><span class="status-pill-dot"></span>Checking</span>
-    </div>
   </div>
 
   <div class="section-title">Latency</div>
@@ -224,21 +199,14 @@
       <span class="endpoint-path">/api/status</span>
       <span class="endpoint-desc">Health check (JSON)</span>
     </div>
-    <div class="endpoint-row">
-      <span class="endpoint-method">GET/POST</span>
-      <span class="endpoint-path">/api/community</span>
-      <span class="endpoint-desc">Community icons</span>
-    </div>
   </div>
 
   <button class="refresh-btn" id="refresh-btn">
     <span class="material-icons">refresh</span> Refresh status
   </button>
-
 </div>
 
-<script type="module">
-
+<script>
 window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', scrollY > 40));
 
 async function fetchStatus() {
@@ -247,7 +215,6 @@ async function fetchStatus() {
     const res = await fetch('/api/status');
     const data = await res.json();
 
-    // Banner
     const banner = document.getElementById('status-banner');
     banner.className = `status-banner ${data.status}`;
     document.getElementById('banner-title').textContent =
@@ -259,20 +226,16 @@ async function fetchStatus() {
       data.status === 'operational' ? 'check_circle' :
       data.status === 'degraded' ? 'warning' : 'error';
 
-    // Info chips
     document.getElementById('info-row').style.opacity = '1';
-    document.getElementById('chip-version').textContent = data.version;
+    document.getElementById('chip-version').textContent = data.version || '3.0.0';
     document.getElementById('chip-time').textContent = new Date(data.timestamp).toLocaleTimeString();
     document.getElementById('chip-region').textContent = data.region || 'edge';
 
-    // Services
     const iconify = data.dependencies?.iconify;
     setPill('svc-render', 'operational');
     setPill('svc-generate', 'operational');
     setPill('svc-iconify', iconify === 'operational' ? 'operational' : iconify === 'unreachable' ? 'error' : 'degraded');
-    setPill('svc-db', data.dependencies?.database === 'operational' ? 'operational' : 'operational'); // default ok
 
-    // Latency
     const ms = data.upstream_check_ms;
     document.getElementById('latency-display').textContent = ms ? `${ms}ms` : '—';
     document.getElementById('latency-display').style.color =
@@ -282,19 +245,21 @@ async function fetchStatus() {
     document.getElementById('status-banner').className = 'status-banner outage';
     document.getElementById('banner-title').textContent = 'Unable to reach status API';
     document.getElementById('banner-meta').textContent = 'Check your connection or try again';
-    ['svc-render','svc-generate','svc-iconify','svc-db'].forEach(id => setPill(id, 'error'));
+    ['svc-render','svc-generate','svc-iconify'].forEach(id => setPill(id, 'error'));
   }
 }
 
 function setAllChecking() {
-  ['svc-render','svc-generate','svc-iconify','svc-db'].forEach(id => setPill(id, 'checking'));
+  ['svc-render','svc-generate','svc-iconify'].forEach(id => setPill(id, 'checking'));
 }
 
 function setPill(id, state) {
   const labels = { operational: 'Operational', degraded: 'Degraded', error: 'Error', checking: 'Checking' };
   const el = document.getElementById(id);
-  el.className = `status-pill ${state}`;
-  el.innerHTML = `<span class="status-pill-dot"></span>${labels[state] || state}`;
+  if (el) {
+    el.className = `status-pill ${state}`;
+    el.innerHTML = `<span class="status-pill-dot"></span>${labels[state] || state}`;
+  }
 }
 
 document.getElementById('refresh-btn').addEventListener('click', fetchStatus);
