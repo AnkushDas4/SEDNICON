@@ -9,17 +9,16 @@ const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || '';
 async function redisFetch(command, ...args) {
   if (!REDIS_URL || !REDIS_TOKEN) return null;
   try {
-    // Build Upstash REST request — command + args joined as path segments
-    const path = [command, ...args.map(a => encodeURIComponent(String(a)))].join('/');
-    const url = `${REDIS_URL.replace(/\/$/, '')}/${path}`;
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+    const res = await fetch(REDIS_URL.replace(/\/$/, ''), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([command, ...args])
     });
     if (!res.ok) return null;
     const data = await res.json();
     return data.result;
   } catch {
-    return null; // fail open
+    return null;
   }
 }
 
