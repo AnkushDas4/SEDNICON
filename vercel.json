@@ -3,10 +3,6 @@
     { "source": "/library", "destination": "/library.html" },
     { "source": "/docs", "destination": "/docs.html" },
     { "source": "/generate", "destination": "/generate.html" },
-    { "source": "/status", "destination": "/status.html" },
-    { "source": "/profile", "destination": "/profile.html" },
-    { "source": "/community", "destination": "/community.html" },
-    { "source": "/icon/:id", "destination": "/icon.html" }
+    { "source": "/status", "destination": "/status.html" }
   ]
 }
-

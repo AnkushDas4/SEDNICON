@@ -22,9 +22,6 @@
   "tags": [
     { "name": "Icons", "description": "Render dynamic SVG icons" },
     { "name": "AI Generate", "description": "AI-powered SVG icon generation" },
-    { "name": "Community", "description": "Community icon sharing and likes" },
-    { "name": "API Keys", "description": "Manage user API keys" },
-    { "name": "Favorites", "description": "User icon favorites/collections" },
     { "name": "Batch", "description": "Batch icon rendering (sprite/JSON)" },
     { "name": "Status", "description": "API health and version information" }
   ],
@@ -33,7 +30,7 @@
       "get": {
         "tags": ["Icons"],
         "summary": "Render an icon as SVG",
-        "description": "Returns an SVG image for the requested icon name, with optional color and size customization. Always returns a valid SVG with HTTP 200 — if the requested icon name cannot be matched in any icon set, a generic placeholder icon is returned instead.",
+        "description": "Returns an SVG image for the requested icon name, with optional color, size, and animation customization. Always returns a valid SVG with HTTP 200 — if the requested icon name cannot be matched in any icon set, a generic placeholder icon is returned instead.",
         "operationId": "renderIcon",
         "parameters": [
           {
@@ -72,6 +69,17 @@
             }
           },
           {
+            "name": "anim",
+            "in": "query",
+            "description": "Optional animation style to apply to the icon.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["spin", "pulse", "bounce"],
+              "examples": ["spin"]
+            }
+          },
+          {
             "name": "set",
             "in": "query",
             "description": "Optional explicit Iconify icon set prefix to force (e.g. `lucide`, `tabler`, `mdi`). Overrides automatic fallback for this request.",
@@ -84,13 +92,6 @@
             "description": "Output format. Defaults to SVG.",
             "required": false,
             "schema": {"type": "string", "enum": ["svg", "png", "webp"], "default": "svg"}
-          },
-          {
-            "name": "key",
-            "in": "query",
-            "description": "Optional per-account API key for bypassing IP rate limits and accessing higher quotas.",
-            "required": false,
-            "schema": {"type": "string"}
           }
         ],
         "responses": {
@@ -117,7 +118,7 @@
       "post": {
         "tags": ["AI Generate"],
         "summary": "Generate a custom SVG icon using AI",
-        "description": "Generates an SVG icon using the selected AI provider. Auth required (Bearer JWT from Supabase). Supports 8 providers: Gemini, OpenAI, Anthropic, Groq, Mistral, Together AI, Nvidia, OpenRouter.",
+        "description": "Generates an SVG icon using the selected AI provider. Supports 8 providers: Gemini, OpenAI, Anthropic, Groq, Mistral, Together AI, Nvidia, OpenRouter.",
         "operationId": "generateIcon",
         "requestBody": {
           "required": true,
@@ -125,13 +126,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["prompt"],
+                "required": ["prompt", "apiKey"],
                 "properties": {
                   "prompt": {"type": "string", "maxLength": 500, "description": "Text description of the icon to generate"},
                   "provider": {"type": "string", "enum": ["gemini", "openai", "anthropic", "groq", "mistral", "together", "nvidia", "openrouter"], "default": "gemini"},
                   "model": {"type": "string", "description": "Specific model (default per provider)"},
                   "apiKey": {"type": "string", "description": "User's own API key for the provider"},
-                  "saveKey": {"type": "boolean", "default": false, "description": "Save the provided key encrypted"},
                   "size": {"type": "integer", "minimum": 1, "maximum": 2048, "default": 24},
                   "color": {"type": "string", "default": "000000"},
                   "style": {"type": "string", "enum": ["fill", "stroke"], "default": "fill"},
@@ -142,7 +142,6 @@
             }
           }
         },
-        "security": [{"bearerAuth": []}],
         "responses": {
           "200": {
             "description": "Generated icon",
@@ -151,10 +150,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {"type": "string"},
                     "svg": {"type": "string"},
-                    "url": {"type": "string", "description": "Content-addressed URL (hash-based)"},
-                    "legacyUrl": {"type": "string", "description": "ID-based URL for backwards compatibility"},
                     "size": {"type": "integer"},
                     "color": {"type": "string"},
                     "provider": {"type": "string"},
@@ -164,8 +160,7 @@
               }
             }
           },
-          "400": {"description": "Validation error"},
-          "401": {"description": "Not authenticated"}
+          "400": {"description": "Validation error"}
         }
       }
     },
@@ -206,156 +201,6 @@
         }
       }
     },
-    "/api/community": {
-      "get": {
-        "tags": ["Community"],
-        "summary": "List published community icons",
-        "operationId": "listCommunityIcons",
-        "parameters": [
-          {"name": "page", "in": "query", "schema": {"type": "integer", "default": 0}},
-          {"name": "sort", "in": "query", "schema": {"type": "string", "enum": ["latest", "likes"], "default": "latest"}},
-          {"name": "provider", "in": "query", "schema": {"type": "string"}},
-          {"name": "q", "in": "query", "schema": {"type": "string"}, "description": "Search by prompt text"}
-        ],
-        "responses": {
-          "200": {
-            "description": "Paginated icon list with userLike flag",
-            "content": {"application/json": {"schema": {"type": "object", "properties": {
-              "icons": {"type": "array"},
-              "page": {"type": "integer"},
-              "hasMore": {"type": "boolean"}
-            }}}}
-          }
-        }
-      },
-      "post": {
-        "tags": ["Community"],
-        "summary": "Publish an icon to community OR like/unlike an icon",
-        "description": "Without ?action=like, this publishes an icon (sets hidden=false). With ?action=like, it likes/unlikes the icon (auth required).",
-        "operationId": "communityPost",
-        "parameters": [
-          {"name": "action", "in": "query", "schema": {"type": "string", "enum": ["like"]}}
-        ],
-        "requestBody": {
-          "content": {"application/json": {"schema": {"type": "object", "properties": {
-            "iconId": {"type": "string"}
-          }}}}
-        },
-        "security": [{"bearerAuth": []}],
-        "responses": {
-          "200": {"description": "Published or liked"},
-          "401": {"description": "Authentication required"}
-        }
-      },
-      "delete": {
-        "tags": ["Community"],
-        "summary": "Unlike an icon",
-        "operationId": "unlikeIcon",
-        "parameters": [
-          {"name": "action", "in": "query", "required": true, "schema": {"type": "string", "enum": ["like"]}}
-        ],
-        "requestBody": {
-          "content": {"application/json": {"schema": {"type": "object", "properties": {
-            "iconId": {"type": "string"}
-          }}}}
-        },
-        "security": [{"bearerAuth": []}],
-        "responses": {
-          "200": {"description": "Unliked"}
-        }
-      }
-    },
-    "/api/favorites": {
-      "get": {
-        "tags": ["Favorites"],
-        "summary": "List user favorites",
-        "operationId": "listFavorites",
-        "security": [{"bearerAuth": []}],
-        "responses": {
-          "200": {"description": "User's favorite icons", "content": {"application/json": {"schema": {"type": "object", "properties": {
-            "favorites": {"type": "array", "items": {"type": "object", "properties": {
-              "icon_ref": {"type": "string"},
-              "color": {"type": "string"},
-              "size": {"type": "integer"},
-              "created_at": {"type": "string", "format": "date-time"}
-            }}}
-          }}}}}
-        }
-      },
-      "post": {
-        "tags": ["Favorites"],
-        "summary": "Add a favorite",
-        "operationId": "addFavorite",
-        "security": [{"bearerAuth": []}],
-        "requestBody": {
-          "content": {"application/json": {"schema": {"type": "object", "required": ["iconRef"], "properties": {
-            "iconRef": {"type": "string", "description": "The icon name (q= value)"},
-            "color": {"type": "string"},
-            "size": {"type": "integer"}
-          }}}}
-        },
-        "responses": {
-          "200": {"description": "Favorite added"}
-        }
-      },
-      "delete": {
-        "tags": ["Favorites"],
-        "summary": "Remove a favorite",
-        "operationId": "removeFavorite",
-        "security": [{"bearerAuth": []}],
-        "requestBody": {
-          "content": {"application/json": {"schema": {"type": "object", "required": ["iconRef"], "properties": {
-            "iconRef": {"type": "string"}
-          }}}}
-        },
-        "responses": {
-          "200": {"description": "Favorite removed"}
-        }
-      }
-    },
-    "/api/account-keys": {
-      "get": {
-        "tags": ["API Keys"],
-        "summary": "List account API keys",
-        "operationId": "listApiKeys",
-        "security": [{"bearerAuth": []}],
-        "responses": {
-          "200": {"description": "Active API keys"}
-        }
-      },
-      "post": {
-        "tags": ["API Keys"],
-        "summary": "Create a new API key",
-        "operationId": "createApiKey",
-        "security": [{"bearerAuth": []}],
-        "requestBody": {
-          "description": "Optional key label for identification",
-          "content": {"application/json": {"schema": {"type": "object", "properties": {
-            "label": {"type": "string", "maxLength": 100}
-          }}}}
-        },
-        "responses": {
-          "200": {"description": "Raw key (shown once)", "content": {"application/json": {"schema": {"type": "object", "properties": {
-            "key": {"type": "string"},
-            "label": {"type": "string"}
-          }}}}}
-        }
-      },
-      "delete": {
-        "tags": ["API Keys"],
-        "summary": "Revoke an API key",
-        "operationId": "revokeApiKey",
-        "security": [{"bearerAuth": []}],
-        "requestBody": {
-          "content": {"application/json": {"schema": {"type": "object", "required": ["id"], "properties": {
-            "id": {"type": "string"}
-          }}}}
-        },
-        "responses": {
-          "200": {"description": "Key revoked"}
-        }
-      }
-    },
     "/api/status": {
       "get": {
         "tags": ["Status"],
@@ -367,43 +212,41 @@
             "description": "Service is operational.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/StatusResponse" },
-                "example": {
-                  "status": "operational",
-                  "version": "3.0.0",
-                  "released": "2026-06-14",
-                  "timestamp": "2026-06-15T02:00:00.000Z",
-                  "dependencies": { "iconify": "operational" },
-                  "upstream_check_ms": 142,
-                  "endpoints": {
-                    "render": "/api/render",
-                    "status": "/api/status"
-                  },
-                  "region": "iad1"
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["operational", "degraded"]
+                    },
+                    "version": { "type": "string" },
+                    "released": { "type": "string", "format": "date" },
+                    "timestamp": { "type": "string", "format": "date-time" },
+                    "dependencies": {
+                      "type": "object",
+                      "properties": {
+                        "iconify": {
+                          "type": "string",
+                          "enum": ["operational", "degraded", "unreachable", "unknown"]
+                        }
+                      }
+                    },
+                    "upstream_check_ms": { "type": "integer" },
+                    "endpoints": {
+                      "type": "object",
+                      "properties": {
+                        "render": { "type": "string" },
+                        "status": { "type": "string" }
+                      }
+                    },
+                    "region": { "type": "string" }
+                  }
                 }
               }
             }
           },
           "503": {
-            "description": "Service is degraded — an upstream dependency (Iconify) is unreachable.",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/StatusResponse" },
-                "example": {
-                  "status": "degraded",
-                  "version": "3.0.0",
-                  "released": "2026-06-14",
-                  "timestamp": "2026-06-15T02:00:00.000Z",
-                  "dependencies": { "iconify": "unreachable" },
-                  "upstream_check_ms": 3001,
-                  "endpoints": {
-                    "render": "/api/render",
-                    "status": "/api/status"
-                  },
-                  "region": "iad1"
-                }
-              }
-            }
+            "description": "Service is degraded — an upstream dependency (Iconify) is unreachable."
           }
         }
       },
@@ -414,53 +257,6 @@
         "responses": {
           "204": { "description": "Preflight OK" }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "StatusResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": ["operational", "degraded"]
-          },
-          "version": { "type": "string" },
-          "released": { "type": "string", "format": "date" },
-          "timestamp": { "type": "string", "format": "date-time" },
-          "dependencies": {
-            "type": "object",
-            "properties": {
-              "iconify": {
-                "type": "string",
-                "enum": ["operational", "degraded", "unreachable", "unknown"]
-              }
-            }
-          },
-          "upstream_check_ms": { "type": "integer" },
-          "endpoints": {
-            "type": "object",
-            "properties": {
-              "render": { "type": "string" },
-              "status": { "type": "string" }
-            }
-          },
-          "region": { "type": "string" }
-        }
-      }
-    }
-  },
-  "security": [
-    { "bearerAuth": [] }
-  ],
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "description": "Supabase JWT access token (obtained via Google OAuth sign-in)"
       }
     }
   }
