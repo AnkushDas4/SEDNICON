@@ -1,6 +1,9 @@
 {
   "name": "sednicon",
   "version": "1.0.0",
+  "bin": {
+    "sednicon": "./bin/sednicon.js"
+  },
   "scripts": {
     "start": "vercel dev"
   },

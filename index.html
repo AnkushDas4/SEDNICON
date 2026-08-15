@@ -366,10 +366,18 @@
 
         <div class="output-box" id="output-box"></div>
 
-        <button class="copy-btn" id="copy-btn">
-          <span class="material-icons">content_copy</span>
-          Copy to Clipboard
-        </button>
+        <div style="display: flex; gap: 8px;">
+  <button class="copy-btn" id="copy-btn" style="flex: 2;">
+    <span class="material-icons">content_copy</span> Copy Code
+  </button>
+  <button class="copy-btn" id="download-svg-btn" style="flex: 1; padding: 11px 0;" aria-label="Download SVG">
+    <span class="material-icons" style="margin:0;">download</span> SVG
+  </button>
+  <button class="copy-btn" id="download-png-btn" style="flex: 1; padding: 11px 0;" aria-label="Download PNG">
+    <span class="material-icons" style="margin:0;">image</span> PNG
+  </button>
+</div>
+
       </div>
     </div>
   </div>
@@ -574,6 +582,57 @@ document.getElementById('copy-btn').addEventListener('click', () => {
       btn.childNodes[1].nodeValue = ' Copy to Clipboard';
     }, 2000);
   });
+});
+
+// Fetch the raw text of the currently displayed icon
+async function fetchCurrentSvg() {
+  const url = buildUrl();
+  const res = await fetch(url);
+  return await res.text();
+}
+
+// ── SVG DOWNLOAD ──
+document.getElementById('download-svg-btn').addEventListener('click', async () => {
+  const svgText = await fetchCurrentSvg();
+  const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `sednicon-${getQ()}.svg`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
+// ── PNG DOWNLOAD (Client-side Rasterization) ──
+document.getElementById('download-png-btn').addEventListener('click', async () => {
+  const svgText = await fetchCurrentSvg();
+  const size = getSize();
+  
+  // Set up an invisible canvas
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  
+  // Create an image from the SVG Blob
+  const img = new Image();
+  const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  
+  img.onload = () => {
+    // Draw the SVG onto the canvas, then export to PNG
+    ctx.drawImage(img, 0, 0, size, size);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(pngBlob => {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(pngBlob);
+      link.download = `sednicon-${getQ()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, 'image/png');
+  };
+  img.src = url;
 });
 
 document.getElementById('reset-generator').addEventListener('click', () => {

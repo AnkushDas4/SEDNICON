@@ -4,22 +4,22 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Documentation — Sednicon API Reference</title>
-<meta name="description" content="Full developer documentation for the Sednicon icon API: HTML, React, Vue, and CSS integration examples, plus the complete /api/render parameter reference."/>
-<meta name="keywords" content="Sednicon docs, icon API documentation, SVG icon API reference, render endpoint parameters"/>
+<meta name="description" content="Full developer documentation for the Sednicon icon API: HTML, React, Vue, CSS integration, CLI usage, and complete parameter reference."/>
+<meta name="keywords" content="Sednicon docs, icon API documentation, SVG icon API reference, render endpoint parameters, npx sednicon"/>
 <meta name="author" content="Sednium"/>
 <link rel="canonical" href="https://sednicon.sednium.com/docs"/>
 
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://sednicon.sednium.com/docs"/>
 <meta property="og:title" content="Documentation — Sednicon API"/>
-<meta property="og:description" content="Full developer documentation for the Sednicon icon API: HTML, React, Vue, and CSS integration examples, plus the complete API parameter reference."/>
+<meta property="og:description" content="Full developer documentation for the Sednicon icon API: HTML, React, Vue, CSS integration, CLI usage, and complete parameter reference."/>
 <meta property="og:image" content="https://sednicon.sednium.com/og-image.png"/>
 <meta property="og:site_name" content="Sednicon"/>
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:url" content="https://sednicon.sednium.com/docs"/>
 <meta name="twitter:title" content="Documentation — Sednicon API"/>
-<meta name="twitter:description" content="Full developer documentation for the Sednicon icon API: HTML, React, Vue, and CSS integration examples, plus the complete API parameter reference."/>
+<meta name="twitter:description" content="Full developer documentation for the Sednicon icon API: HTML, React, Vue, CSS integration, CLI usage, and complete parameter reference."/>
 <meta name="twitter:image" content="https://sednicon.sednium.com/og-image.png"/>
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
@@ -225,7 +225,6 @@
   .params-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; }
   .params-table th { text-align: left; padding: 10px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); }
   .params-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--text-muted); vertical-align: top; line-height: 1.5; }
-  .params-table tr:last-child td { border-bottom: none; }
   .params-table td:first-child { color: var(--accent3); font-weight: 600; font-family: 'JetBrains Mono', monospace;}
   .tag { display: inline-block; padding: 2px 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.05em; }
 
@@ -303,6 +302,7 @@
       <div class="docs-nav-item active" data-target="features-section"><span class="material-icons">star</span> Features</div>
       <div class="docs-nav-item" data-target="quickstart-section"><span class="material-icons">bolt</span> Quick Start</div>
       <div class="docs-nav-item" data-target="api-section"><span class="material-icons">tune</span> API Reference</div>
+      <div class="docs-nav-item" data-target="cli-section"><span class="material-icons">terminal</span> CLI</div>
       <div class="docs-nav-item" data-target="html-section"><span class="material-icons">html</span> HTML</div>
       <div class="docs-nav-item" data-target="css-section"><span class="material-icons">brush</span> CSS</div>
       <div class="docs-nav-item" data-target="react-section"><span class="material-icons">code</span> React</div>
@@ -388,6 +388,12 @@
               <td data-label="Type">Number</td>
               <td data-label="Description">Icon size in pixels (default: <code style="color:var(--text);font-size:11px">24</code>)</td>
             </tr>
+            <tr>
+              <td data-label="Parameter">anim</td>
+              <td data-label="Required"><span class="tag" style="background:var(--surface3); color:var(--text-dim);">No</span></td>
+              <td data-label="Type">String</td>
+              <td data-label="Description">Animation style (<code style="color:var(--text);font-size:11px">spin</code>, <code style="color:var(--text);font-size:11px">pulse</code>, <code style="color:var(--text);font-size:11px">bounce</code>)</td>
+            </tr>
           </tbody>
         </table>
 
@@ -406,10 +412,50 @@
             <div class="code-block"><pre style="padding:12px 16px; font-size:12px;">https://sednicon.sednium.com/api/render?q=rocket&amp;size=128</pre></div>
           </div>
           <div>
-            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:4px;">Full Example</div>
-            <div class="code-block"><pre style="padding:12px 16px; font-size:12px;">https://sednicon.sednium.com/api/render?q=rocket&amp;color=000000&amp;size=64</pre></div>
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:4px;">Animated Example</div>
+            <div class="code-block"><pre style="padding:12px 16px; font-size:12px;">https://sednicon.sednium.com/api/render?q=rocket&amp;color=000000&amp;size=64&amp;anim=spin</pre></div>
           </div>
         </div>
+      </div>
+
+      <div class="doc-section" id="cli-section">
+        <h3 class="doc-section-title"><span class="material-icons">terminal</span> CLI (npx)</h3>
+        <p class="doc-section-desc">Download icons directly to your project folder using our zero-install CLI.</p>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span class="code-lang">Terminal</span>
+            <button class="code-copy" onclick="copyCode(this)"><span class="material-icons">content_copy</span> Copy</button>
+          </div>
+          <pre>npx sednicon get rocket --color ff6600 --size 32</pre>
+        </div>
+        
+        <h4 style="font-size:14px; font-weight:600; margin:32px 0 8px; color:var(--text);">Options</h4>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Description</th>
+              <th>Default</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Option">--color</td>
+              <td data-label="Description">Icon color (hex without #)</td>
+              <td data-label="Default"><code style="color:var(--text);font-size:11px">000000</code></td>
+            </tr>
+            <tr>
+              <td data-label="Option">--size</td>
+              <td data-label="Description">Icon size in pixels</td>
+              <td data-label="Default"><code style="color:var(--text);font-size:11px">24</code></td>
+            </tr>
+            <tr>
+              <td data-label="Option">--out</td>
+              <td data-label="Description">Output directory path</td>
+              <td data-label="Default"><code style="color:var(--text);font-size:11px">./</code></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="doc-section" id="html-section">
@@ -584,7 +630,6 @@
   </div>
   <div class="footer-right">Built by <a href="https://sednium.com" target="_blank" rel="noopener" style="color:var(--accent3); text-decoration:none;">Sednium</a> · Powered by Vercel Edge · MIT License</div>
 </footer>
-
 <script>
 const cursor = document.getElementById('cursor');
 const ring = document.getElementById('cursorRing');

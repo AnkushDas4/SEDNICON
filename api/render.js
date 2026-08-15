@@ -1,6 +1,6 @@
 /**
  * Sednicon API - The Unified Icon Engine v5 (Serverless Edition)
- * Uses shared resolver (_lib/icon-resolver.js), Redis cache + rate limiter
+ * Uses shared resolver (_lib/icon-resolver.js), Local cache + rate limiter
  */
 
 export const config = { runtime: 'edge' };
@@ -11,7 +11,7 @@ import { checkRateLimit, cacheGet, cacheSet } from './_lib/redis.js';
 
 const RATE_LIMIT_MAX = 120;
 
-// In-memory fallback cache (used when Redis is unavailable)
+// In-memory fallback cache (used as primary now if redis.js is running pure JS)
 const memCache = new Map();
 const MEM_CACHE_MAX = 2000;
 const CACHE_TTL_MS = 3_600_000;
@@ -37,14 +37,16 @@ export default async function handler(request) {
   const sizeRaw = parseInt(searchParams.get('size') || '24', 10);
   const size    = Number.isFinite(sizeRaw) ? Math.min(2048, Math.max(1, sizeRaw)) : 24;
   const setHint = searchParams.get('set') || null;
+  const anim    = searchParams.get('anim') || null;
 
   // Sanitize color
   const cleanColor = /^[0-9a-fA-F]{3,8}$/.test(color)
     ? `#${color}` : /^[a-zA-Z]+$/.test(color) ? color : '#000000';
 
-  const cacheKey = `${q}:${cleanColor}:${size}:${setHint||''}`;
+  // Add anim to cache key so animated versions are cached separately
+  const cacheKey = `${q}:${cleanColor}:${size}:${setHint||''}:${anim||''}`;
 
-  // ── Check cache (Redis first, then memory fallback) ──
+  // ── Check cache ──
   let cachedFrom = 'none';
   let cached = await cacheGet(cacheKey);
   
@@ -93,8 +95,8 @@ export default async function handler(request) {
   // ── Resolve icon ──
   const { svg: svgRaw, source } = await resolveIcon(q, setHint);
 
-  // Apply style transforms
-  let output = svgTransformer(svgRaw, size, cleanColor);
+  // Apply style transforms (pass the new anim param)
+  let output = svgTransformer(svgRaw, size, cleanColor, anim);
 
   // Cache result
   await cacheSet(cacheKey, { svg: output, source });
