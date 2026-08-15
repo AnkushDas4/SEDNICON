@@ -163,13 +163,13 @@
   .cat-section-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-left: auto; }
 
   .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; }
-  .icon-item { aspect-ratio: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; transition: background 0.2s, border-color 0.2s, transform 0.2s; position: relative; overflow: hidden; text-decoration: none; }
+  .icon-item { aspect-ratio: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; transition: background 0.2s, border-color 0.2s, transform 0.2s; position: relative; overflow: hidden; text-decoration: none; cursor: pointer; }
   .icon-item::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, rgba(37,99,235,0.06) 0%, transparent 70%); opacity: 0; transition: opacity 0.3s; }
   .icon-item:hover { background: var(--bg); border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .icon-item:hover::before { opacity: 1; }
-  .icon-item img { width: var(--icon-display-size, 32px); height: var(--icon-display-size, 32px); transition: transform 0.2s, width 0.2s, height 0.2s; flex-shrink: 0; color: transparent; }
+  .icon-item img { width: var(--icon-display-size, 32px); height: var(--icon-display-size, 32px); transition: transform 0.2s, width 0.2s, height 0.2s; flex-shrink: 0; color: transparent; pointer-events: none; }
   .icon-item:hover img { transform: scale(1.15); }
-  .icon-name { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.04em; color: var(--text-dim); text-align: center; line-height: 1.3; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s; }
+  .icon-name { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.04em; color: var(--text-dim); text-align: center; line-height: 1.3; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.2s; pointer-events: none; }
   .icon-item:hover .icon-name { color: var(--text-muted); }
 
   .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); border: 1px solid var(--border-bright); border-radius: 8px; padding: 12px 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; color: var(--bg); display: flex; align-items: center; gap: 8px; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 200; white-space: nowrap; box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
@@ -185,7 +185,7 @@
   .back-top:hover .material-icons { color: #ffffff; }
   .back-top .material-icons { font-size: 20px; color: var(--text-muted); transition: color 0.2s; }
 
-  footer { border-top: 1px solid var(--border); padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; }
+  footer { border-top: 1px solid var(--border); padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 60px; /* buffer for cart panel */ }
   .footer-logo { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 15px; color: var(--text); text-decoration: none; }
   .footer-right { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); letter-spacing: 0.05em; }
 
@@ -230,7 +230,7 @@
   <div>
     <div class="page-header-eyebrow">Icon Library</div>
     <h1 class="page-title">Browse <em>every</em><br>icon.</h1>
-    <p class="page-header-meta">Click any icon to instantly load it in the API Generator</p>
+    <p class="page-header-meta">Select icons to export as a sprite sheet, or generate from scratch.</p>
   </div>
   <div class="page-header-count">
     <div class="count-num">200k+</div>
@@ -241,7 +241,7 @@
 <div class="controls-bar">
   <div class="search-wrap">
     <span class="material-icons">search</span>
-    <input type="text" id="search-input" placeholder="Search 200,000+ icons…" autocomplete="off"/>
+    <input type="text" id="search-input" placeholder="Search 200,000+ icons (Press '/' to focus)" autocomplete="off"/>
   </div>
   <div class="color-ctrl">
     <label>Color</label>
@@ -277,7 +277,7 @@
 <div class="library-content" id="library-content">
   <div class="pro-tip">
     <span class="material-icons">lightbulb</span>
-    <span><strong style="color:var(--text)">Pro tip:</strong> For directional arrows use <code style="color:var(--accent3);font-size:12px;font-family:monospace">arrow_back</code> or <code style="color:var(--accent3);font-size:12px;font-family:monospace">arrow_forward</code>. Click any icon to load it in the API Generator.</span>
+    <span><strong style="color:var(--text)">Pro tip:</strong> Press <code style="color:var(--accent3);font-size:12px;font-family:monospace">/</code> to focus search. Click any icon to add it to your batch exporter.</span>
   </div>
 </div>
 
@@ -289,6 +289,15 @@
 <button class="back-top" id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
   <span class="material-icons">arrow_upward</span>
 </button>
+
+<!-- Sprite Sheet Cart -->
+<div id="cart-panel" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; padding: 16px 24px; display: flex; align-items: center; gap: 20px; box-shadow: 0 12px 32px rgba(0,0,0,0.2); transition: bottom 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 100;">
+  <div style="font-weight: 700; color: var(--text);"><span id="cart-count">0</span> Icons Selected</div>
+  <button id="btn-download-sprite" style="background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+    <span class="material-icons" style="font-size: 16px;">file_download</span> Sprite Sheet
+  </button>
+  <button id="btn-clear-cart" style="background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; text-transform: uppercase; font-weight: 600;">Clear</button>
+</div>
 
 <footer>
   <a href="/" class="footer-logo">Sednicon</a>
@@ -319,6 +328,8 @@ window.addEventListener('scroll', () => backBtn.classList.toggle('visible', scro
 const BASE = 'https://sednicon.sednium.com/api/render';
 let iconSize = 32;
 let iconColor = '000000';
+
+const selectedIcons = new Set();
 
 const categories = [
   {
@@ -411,10 +422,10 @@ function buildGrid(icons, catId, delayBase = 0) {
     const fallbackSrc = `https://api.iconify.design/${provider}/${fetchName}.svg?color=%23${colorHex || '000000'}`;
 
     return `
-    <a href="index.html?icon=${name}" class="icon-item" data-name="${name}" style="animation-delay:${delayBase + i * 15}ms">
+    <div class="icon-item" data-name="${name}" style="animation-delay:${delayBase + i * 15}ms">
       <img src="${iconUrl(name)}" alt="${name}" loading="lazy" data-icon="${name}" onerror="this.onerror=null; this.src='${fallbackSrc}';"/>
       <div class="icon-name">${name}</div>
-    </a>
+    </div>
     `;
   }).join('');
 }
@@ -427,7 +438,7 @@ function renderAll(filter = '') {
   if (!filter) {
     html += `<div class="pro-tip">
       <span class="material-icons">lightbulb</span>
-      <span><strong style="color:var(--text)">Pro tip:</strong> For directional arrows use <code style="color:var(--accent3);font-size:12px;font-family:monospace">arrow_back</code> or <code style="color:var(--accent3);font-size:12px;font-family:monospace">arrow_forward</code>. Click any icon to load it in the API Generator.</span>
+      <span><strong style="color:var(--text)">Pro tip:</strong> Press <code style="color:var(--accent3);font-size:12px;font-family:monospace">/</code> to focus search. Click any icon to add it to your batch exporter.</span>
     </div>`;
   }
 
@@ -453,6 +464,14 @@ function renderAll(filter = '') {
     html = `<div class="icon-grid"><div class="no-results"><span class="material-icons">search_off</span>Searching 200,000+ icons for "${filter}"…</div></div>`;
   }
   content.innerHTML = html;
+  
+  // Re-apply cart highlights if any were selected
+  document.querySelectorAll('.icon-item').forEach(el => {
+    if (selectedIcons.has(el.dataset.name)) {
+      el.style.borderColor = 'var(--accent)';
+      el.style.background = 'rgba(37,99,235,0.06)';
+    }
+  });
 
   if (lf) searchIconify(lf, matchCount === 0);
 }
@@ -480,10 +499,10 @@ function searchIconify(query, replaceContent) {
         const [prefix, name] = id.split(':');
         const src = `https://api.iconify.design/${prefix}/${name}.svg?color=%23${colorHex}&width=${iconSize}&height=${iconSize}`;
         return `
-        <a href="index.html?icon=${name}" class="icon-item" data-name="${name}" data-iconify="${id}" style="animation-delay:${i * 10}ms">
+        <div class="icon-item" data-name="${name}" data-iconify="${id}" style="animation-delay:${i * 10}ms">
           <img src="${src}" alt="${name}" loading="lazy"/>
           <div class="icon-name">${name}</div>
-        </a>`;
+        </div>`;
       }).join('');
 
       const section = `
@@ -497,6 +516,15 @@ function searchIconify(query, replaceContent) {
 
       if (replaceContent) content.innerHTML = section;
       else content.insertAdjacentHTML('beforeend', section);
+      
+      // Re-apply cart highlights
+      document.querySelectorAll('.icon-item').forEach(el => {
+        if (selectedIcons.has(el.dataset.name)) {
+          el.style.borderColor = 'var(--accent)';
+          el.style.background = 'rgba(37,99,235,0.06)';
+        }
+      });
+      
     } catch { }
   }, 350);
 }
@@ -622,6 +650,93 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 }
 renderAll();
 renderCatBar();
+
+// ── POWER USER SHORTCUTS ──
+document.addEventListener('keydown', (e) => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    const searchInput = document.getElementById('search-input');
+    searchInput.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  if (e.key === 'Escape') {
+    document.activeElement.blur();
+  }
+});
+
+// ── BATCH SPRITE EXPORTER (CART) ──
+const cartPanel = document.getElementById('cart-panel');
+const cartCount = document.getElementById('cart-count');
+
+document.getElementById('library-content').addEventListener('click', (e) => {
+  const iconItem = e.target.closest('.icon-item');
+  if (iconItem) {
+    e.preventDefault(); 
+    const iconName = iconItem.dataset.name;
+    
+    if (selectedIcons.has(iconName)) {
+      selectedIcons.delete(iconName);
+      iconItem.style.borderColor = 'var(--border)';
+      iconItem.style.background = 'var(--surface)';
+    } else {
+      selectedIcons.add(iconName);
+      iconItem.style.borderColor = 'var(--accent)';
+      iconItem.style.background = 'rgba(37,99,235,0.06)';
+    }
+    
+    cartCount.textContent = selectedIcons.size;
+    cartPanel.style.bottom = selectedIcons.size > 0 ? '32px' : '-100px';
+  }
+});
+
+document.getElementById('btn-clear-cart').addEventListener('click', () => {
+  selectedIcons.clear();
+  cartPanel.style.bottom = '-100px';
+  document.querySelectorAll('.icon-item').forEach(el => {
+    el.style.borderColor = '';
+    el.style.background = '';
+  });
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+document.getElementById('btn-download-sprite').addEventListener('click', async () => {
+  if (selectedIcons.size === 0) return;
+  
+  const size = iconSize;
+  const color = getColor();
+  let symbols = '';
+  
+  for (const name of selectedIcons) {
+    try {
+      const res = await fetch(iconUrl(name));
+      const svgText = await res.text();
+      const inner = svgText.replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').trim();
+      symbols += `\n  <symbol id="${name}" viewBox="0 0 ${size} ${size}">\n    ${inner}\n  </symbol>`;
+    } catch (err) {
+      console.error('Failed to fetch icon:', name);
+    }
+  }
+  
+  const spriteSheet = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none;">${symbols}\n</svg>`;
+  
+  const blob = new Blob([spriteSheet], { type: 'image/svg+xml;charset=utf-8' });
+  const blobUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = 'sednicon-sprite.svg';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(blobUrl);
+  
+  showToast(`Downloaded sprite sheet with ${selectedIcons.size} icons!`);
+});
 </script>
 </body>
 </html>

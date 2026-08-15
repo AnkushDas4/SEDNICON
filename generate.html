@@ -245,7 +245,7 @@
   /* Code output */
   .code-output { border-top: 1px solid var(--border); padding: 20px; display: none; }
   .code-output.visible { display: block; }
-  .code-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+  .code-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
   .code-tab { padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); cursor: pointer; transition: all 0.2s; }
   .code-tab.active { background: var(--accent); color: white; }
   .code-pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); overflow-x: auto; white-space: pre; max-height: 200px; overflow-y: auto; }
@@ -502,7 +502,8 @@
             <div class="code-tab active" data-codetab="url">URL (Data URI)</div>
             <div class="code-tab" data-codetab="html">HTML</div>
             <div class="code-tab" data-codetab="react">React</div>
-            <div class="code-tab" data-codetab="css">CSS</div>
+            <div class="code-tab" data-codetab="flutter">Flutter</div>
+            <div class="code-tab" data-codetab="android">Android</div>
           </div>
           <pre class="code-pre" id="code-pre"></pre>
         </div>
@@ -621,6 +622,14 @@ function loadSavedKey(provider) {
   }
 }
 loadSavedKey(selectedProvider);
+
+// ── SHORTCUT: Ctrl+Enter to Generate ──
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('btn-generate').click();
+  }
+});
 
 // ── GENERATE ──
 document.getElementById('btn-generate').addEventListener('click', async () => {
@@ -756,14 +765,20 @@ document.getElementById('btn-copy-svg').addEventListener('click', async () => {
 
 function updateCodeOutput(data) {
   const size = data.size || 24;
+  const color = document.getElementById('gen-color-text').value;
   const encodedSvg = encodeURIComponent(currentSvg).replace(/'/g, '%27').replace(/"/g, '%22');
   const dataUri = `data:image/svg+xml,${encodedSvg}`;
   
+  // Basic path extractor for Android XML
+  const paths = [...currentSvg.matchAll(/<path[^>]*d="([^"]*)"/g)].map(m => m[1]);
+  const androidXml = `<vector xmlns:android="http://schemas.android.com/apk/res/android"\n    android:width="${size}dp"\n    android:height="${size}dp"\n    android:viewportWidth="24"\n    android:viewportHeight="24">\n${paths.map(d => `    <path android:fillColor="${color}" android:pathData="${d}" />`).join('\n')}\n</vector>`;
+
   const outputs = {
     url: dataUri,
     html: `<img src="${dataUri}" width="${size}" height="${size}" alt="icon" />`,
     react: `const Icon = (props) => (\n  ${currentSvg.replace('<svg', '<svg {...props}')}\n);`,
-    css: `.icon {\n  background-image: url('${dataUri}');\n  width: ${size}px;\n  height: ${size}px;\n}`,
+    flutter: `SvgPicture.string(\n  '''${currentSvg}''',\n  width: ${size},\n  height: ${size},\n)`,
+    android: androidXml,
   };
   document.getElementById('code-pre').textContent = outputs[codeTab];
 }
