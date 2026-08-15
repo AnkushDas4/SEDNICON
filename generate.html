@@ -540,16 +540,19 @@ let currentPrompt = '';
 let codeTab = 'url';
 const sessionHistory = [];
 
-// ── PROVIDER MODELS ──
+let timerInterval;
+let startTime;
+
+// ── UP-TO-DATE 2026 PROVIDER MODELS ──
 const PROVIDER_MODELS = {
-  gemini: ['gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-2.5-pro', 'gemini-3.1-flash-lite'],
-  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo'],
-  anthropic: ['claude-sonnet-4-6', 'claude-opus-4-6', 'claude-haiku-4-5'],
-  groq: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'],
-  mistral: ['mistral-large-latest', 'mistral-small-latest', 'open-mixtral-8x22b'],
-  nvidia: ['meta/llama-3.1-70b-instruct', 'mistralai/mistral-large-2-instruct', 'nvidia/llama-3.1-nemotron-70b-instruct'],
-  together: ['meta-llama/Llama-3-70b-chat-hf', 'mistralai/Mixtral-8x22B-Instruct-v0.1'],
-  openrouter: ['google/gemini-2.5-flash', 'anthropic/claude-sonnet-4-6', 'meta-llama/llama-3.3-70b-instruct:free'],
+  gemini: ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.1-pro-preview', 'gemini-3.5-flash-lite'],
+  openai: ['gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1-mini'],
+  anthropic: ['claude-opus-5', 'claude-opus-4.8', 'claude-sonnet-4.6', 'claude-haiku-4.5'],
+  groq: ['llama-3.3-70b-versatile', 'llama-3.3-8b-instant', 'mixtral-8x7b-32768'],
+  mistral: ['mistral-large-latest', 'mistral-small-latest', 'pixtral-12b-latest'],
+  nvidia: ['meta/llama-3.3-70b-instruct', 'mistralai/mistral-large-2-instruct', 'nvidia/llama-3.1-nemotron-70b-instruct'],
+  together: ['meta-llama/Llama-3.3-70b-chat-hf', 'mistralai/Mixtral-8x22B-Instruct-v0.1'],
+  openrouter: ['google/gemini-3.7-flash', 'anthropic/claude-opus-5', 'openai/gpt-5'],
 };
 
 function updateModelSelect(provider) {
@@ -642,7 +645,6 @@ document.getElementById('btn-generate').addEventListener('click', async () => {
 
   if (!apiKey) { alert('Please paste your API key for the selected provider.'); return; }
 
-  // Save to localstorage if checked
   if (saveKey) {
     localStorage.setItem(`sednicon_key_${selectedProvider}`, apiKey);
   } else {
@@ -663,7 +665,6 @@ document.getElementById('btn-generate').addEventListener('click', async () => {
 
   currentPrompt = prompt;
   setGenerating(true);
-  setStatus('Calling AI model...');
   
   const statusEl = document.getElementById('generation-status');
   statusEl.style.background = '';
@@ -689,6 +690,7 @@ document.getElementById('btn-generate').addEventListener('click', async () => {
 
   } catch (err) {
     setStatus(`Error: ${err.message}`);
+    clearInterval(timerInterval); // Stop timer on error
     document.getElementById('generation-status').classList.add('visible');
     document.getElementById('generation-status').style.background = 'rgba(239,68,68,0.06)';
     document.getElementById('generation-status').style.borderTop = '1px solid rgba(239,68,68,0.2)';
@@ -705,6 +707,18 @@ function setGenerating(loading) {
   btn.classList.toggle('loading', loading);
   btn.disabled = loading;
   document.getElementById('generation-status').classList.toggle('visible', loading);
+  
+  // LIVE TIMER
+  if (loading) {
+    startTime = Date.now();
+    setStatus('Calling AI model... 0.0s');
+    timerInterval = setInterval(() => {
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      setStatus(`Calling AI model... ${elapsed}s`);
+    }, 100);
+  } else {
+    clearInterval(timerInterval);
+  }
 }
 
 function setStatus(text) {
@@ -769,7 +783,6 @@ function updateCodeOutput(data) {
   const encodedSvg = encodeURIComponent(currentSvg).replace(/'/g, '%27').replace(/"/g, '%22');
   const dataUri = `data:image/svg+xml,${encodedSvg}`;
   
-  // Basic path extractor for Android XML
   const paths = [...currentSvg.matchAll(/<path[^>]*d="([^"]*)"/g)].map(m => m[1]);
   const androidXml = `<vector xmlns:android="http://schemas.android.com/apk/res/android"\n    android:width="${size}dp"\n    android:height="${size}dp"\n    android:viewportWidth="24"\n    android:viewportHeight="24">\n${paths.map(d => `    <path android:fillColor="${color}" android:pathData="${d}" />`).join('\n')}\n</vector>`;
 
@@ -815,6 +828,9 @@ function addToHistory(svg) {
   });
   grid.insertBefore(item, grid.firstChild);
 }
+
+// ── INIT ──
+updateModelSelect('gemini');
 </script>
 
 </body>
