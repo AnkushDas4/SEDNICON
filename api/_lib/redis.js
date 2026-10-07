@@ -1,6 +1,6 @@
 /**
  * Sednicon — In-Memory Edge Cache & Rate Limiter
- * Replaces Upstash Redis for a 100% dependency-free architecture.
+ * 100% dependency-free edge-compatible cache and sliding-window rate limiter.
  */
 
 // In-memory cache for rendered SVGs
@@ -13,12 +13,13 @@ const rateLimits = new Map();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX = 120;
 
-export async function checkRateLimit(ip) {
+export async function checkRateLimit(ip, weight = 1) {
+  const inc = Math.max(1, Number(weight) || 1);
   const now = Date.now();
   const record = rateLimits.get(ip);
 
   if (!record || (now - record.startTime > RATE_LIMIT_WINDOW_MS)) {
-    rateLimits.set(ip, { count: 1, startTime: now });
+    rateLimits.set(ip, { count: inc, startTime: now });
     
     // Periodically clean up stale rate limits to prevent memory leaks
     if (rateLimits.size > 5000) {
@@ -28,10 +29,10 @@ export async function checkRateLimit(ip) {
         }
       }
     }
-    return true;
+    return inc <= RATE_LIMIT_MAX;
   }
 
-  record.count++;
+  record.count += inc;
   return record.count <= RATE_LIMIT_MAX;
 }
 
@@ -47,8 +48,15 @@ export async function cacheGet(key) {
 export async function cacheSet(key, value) {
   renderCache.set(key, { data: value, timestamp: Date.now() });
   
-  // Keep memory footprint small
+  // Keep memory footprint bounded
   if (renderCache.size > MAX_CACHE_ITEMS) {
-    renderCache.delete(renderCache.keys().next().value);
+    const oldestKey = renderCache.keys().next().value;
+    if (oldestKey) renderCache.delete(oldestKey);
   }
+}
+
+// Reset function for testing and state reset
+export function resetState() {
+  renderCache.clear();
+  rateLimits.clear();
 }

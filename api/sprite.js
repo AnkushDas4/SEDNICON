@@ -1,5 +1,5 @@
 /**
- * Sednicon API — Batch / Sprite Endpoint (Task E)
+ * Sednicon API — Batch / Sprite Endpoint
  * POST /api/sprite
  * Fetch multiple icons in a single request, returned as a sprite sheet or JSON array.
  */
@@ -14,12 +14,16 @@ const MAX_BATCH_ICONS = 50;
 
 export default async function handler(request) {
   if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders(request, { 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Max-Age': '86400' }) });
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders(request, { 'Access-Control-Max-Age': '86400' }),
+    });
   }
 
   if (request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405, headers: { ...corsHeaders(request), 'Content-Type': 'application/json' },
+      status: 405,
+      headers: { ...corsHeaders(request), 'Content-Type': 'application/json' },
     });
   }
 
@@ -29,7 +33,8 @@ export default async function handler(request) {
     body = await request.json();
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
-      status: 400, headers: { ...corsHeaders(request), 'Content-Type': 'application/json' },
+      status: 400,
+      headers: { ...corsHeaders(request), 'Content-Type': 'application/json' },
     });
   }
 
@@ -38,20 +43,24 @@ export default async function handler(request) {
 
   if (!Array.isArray(icons) || icons.length === 0) {
     return new Response(JSON.stringify({ error: 'icons array is required' }), {
-      status: 400, headers: { ...corsHeaders(request), 'Content-Type': 'application/json' },
+      status: 400,
+      headers: { ...corsHeaders(request), 'Content-Type': 'application/json' },
     });
   }
   if (icons.length > MAX_BATCH_ICONS) {
     return new Response(JSON.stringify({ error: `Maximum ${MAX_BATCH_ICONS} icons per batch` }), {
-      status: 400, headers: { ...corsHeaders(request), 'Content-Type': 'application/json' },
+      status: 400,
+      headers: { ...corsHeaders(request), 'Content-Type': 'application/json' },
     });
   }
 
-  // Rate limit: weight by batch size
-  const allowed = await checkRateLimit(`${clientIp}:batch:${icons.length}`);
+  // Rate limit weighted accurately by the number of requested batch icons
+  const batchWeight = Math.max(1, Math.min(MAX_BATCH_ICONS, icons.length));
+  const allowed = await checkRateLimit(clientIp, batchWeight);
   if (!allowed) {
     return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
-      status: 429, headers: { ...corsHeaders(request), 'Content-Type': 'application/json', 'Retry-After': '60' },
+      status: 429,
+      headers: { ...corsHeaders(request), 'Content-Type': 'application/json', 'Retry-After': '60' },
     });
   }
 
@@ -60,9 +69,12 @@ export default async function handler(request) {
     icons.map(async (item) => {
       if (!item.q) return { q: item.q, error: 'Missing q parameter', source: 'error' };
       const q = String(item.q || '').toLowerCase().trim();
-      const color = item.color || 'black';
-      const size = Math.min(2048, Math.max(1, parseInt(item.size) || 24));
-      const cleanColor = /^[0-9a-fA-F]{3,8}$/.test(color) ? `#${color}` : color;
+      const rawColor = String(item.color || 'black').trim();
+      const hexPart = rawColor.replace(/^#/, '');
+      const cleanColor = /^[0-9a-fA-F]{3,8}$/.test(hexPart)
+        ? `#${hexPart}`
+        : /^[a-zA-Z]+$/.test(rawColor) ? rawColor : '#000000';
+      const size = Math.min(2048, Math.max(1, parseInt(item.size, 10) || 24));
 
       try {
         const { svg: svgRaw, source } = await resolveIcon(q, item.set || null);
@@ -80,23 +92,22 @@ export default async function handler(request) {
     });
   }
 
-  // Build SVG sprite (symbol format)
+  // Build SVG sprite with semantic symbol IDs
   const symbols = results.map((r, i) => {
     if (!r.svg) return '';
     // Extract inner content from SVG and wrap in <symbol>
     const inner = r.svg.replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').trim();
-    return `<symbol id="icon-${i}" viewBox="0 0 ${r.size || 24} ${r.size || 24}">${inner}</symbol>`;
+    const safeId = String(r.q || `icon-${i}`).replace(/[^a-zA-Z0-9_-]/g, '-');
+    return `<symbol id="${safeId}" viewBox="0 0 ${r.size || 24} ${r.size || 24}">${inner}</symbol>`;
   }).join('\n');
 
   const sprite = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display:none">\n${symbols}\n</svg>`;
 
   return new Response(sprite, {
-    headers: { ...corsHeaders(request), 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
+    headers: {
+      ...corsHeaders(request),
+      'Content-Type': 'image/svg+xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+    },
   });
-}
-
-async function resolveSVG(q, setHint) {
-  // Repeated from render.js - could be extracted, but minimal duplication for now
-  const { resolveIcon } = await import('./_lib/icon-resolver.js');
-  return resolveIcon(q, setHint);
 }

@@ -1,6 +1,6 @@
 /**
  * Sednicon API - The Unified Icon Engine v5 (Serverless Edition)
- * Uses shared resolver (_lib/icon-resolver.js), Local cache + rate limiter
+ * Uses shared resolver (_lib/icon-resolver.js), Edge cache + rate limiter
  */
 
 export const config = { runtime: 'edge' };
@@ -10,11 +10,7 @@ import { corsHeaders } from './_lib/cors.js';
 import { checkRateLimit, cacheGet, cacheSet } from './_lib/redis.js';
 
 const RATE_LIMIT_MAX = 120;
-
-// In-memory fallback cache (used as primary now if redis.js is running pure JS)
-const memCache = new Map();
-const MEM_CACHE_MAX = 2000;
-const CACHE_TTL_MS = 3_600_000;
+const ALLOWED_ANIMS = new Set(['spin', 'pulse', 'bounce']);
 
 export default async function handler(request) {
   if (request.method === 'OPTIONS') {
@@ -33,35 +29,24 @@ export default async function handler(request) {
   // Parse params
   const { searchParams } = new URL(request.url);
   const q       = (searchParams.get('q') || 'circle').toLowerCase().trim();
-  const color   = searchParams.get('color') || 'black';
+  const color   = (searchParams.get('color') || 'black').trim();
   const sizeRaw = parseInt(searchParams.get('size') || '24', 10);
   const size    = Number.isFinite(sizeRaw) ? Math.min(2048, Math.max(1, sizeRaw)) : 24;
   const setHint = searchParams.get('set') || null;
-  const anim    = searchParams.get('anim') || null;
+  const animRaw = searchParams.get('anim');
+  const anim    = animRaw && ALLOWED_ANIMS.has(animRaw) ? animRaw : null;
 
-  // Sanitize color
-  const cleanColor = /^[0-9a-fA-F]{3,8}$/.test(color)
-    ? `#${color}` : /^[a-zA-Z]+$/.test(color) ? color : '#000000';
+  // Sanitize color: support hex with or without leading '#', as well as named colors
+  const hexPart = color.replace(/^#/, '');
+  const cleanColor = /^[0-9a-fA-F]{3,8}$/.test(hexPart)
+    ? `#${hexPart}`
+    : /^[a-zA-Z]+$/.test(color) ? color : '#000000';
 
-  // Add anim to cache key so animated versions are cached separately
-  const cacheKey = `${q}:${cleanColor}:${size}:${setHint||''}:${anim||''}`;
+  // Cache key
+  const cacheKey = `${q}:${cleanColor}:${size}:${setHint || ''}:${anim || ''}`;
 
-  // ── Check cache ──
-  let cachedFrom = 'none';
-  let cached = await cacheGet(cacheKey);
-  
-  if (!cached) {
-    const mem = memCache.get(cacheKey);
-    if (mem && Date.now() - mem.timestamp < CACHE_TTL_MS) {
-      cached = mem;
-      cachedFrom = 'memory';
-    } else if (mem) {
-      memCache.delete(cacheKey);
-    }
-  } else {
-    cachedFrom = 'redis';
-  }
-
+  // ── Check edge cache ──
+  const cached = await cacheGet(cacheKey);
   if (cached) {
     return new Response(cached.svg, {
       headers: corsHeaders(request, {
@@ -76,7 +61,7 @@ export default async function handler(request) {
   }
 
   // ── Rate limit (Per-IP) ──
-  const allowed = await checkRateLimit(clientIp);
+  const allowed = await checkRateLimit(clientIp, 1);
   if (!allowed) {
     return new Response(
       '<svg viewBox="0 0 24 24" fill="currentColor"><text x="12" y="16" text-anchor="middle" font-size="10" fill="#ef4444">429</text></svg>',
@@ -95,17 +80,11 @@ export default async function handler(request) {
   // ── Resolve icon ──
   const { svg: svgRaw, source } = await resolveIcon(q, setHint);
 
-  // Apply style transforms (pass the new anim param)
-  let output = svgTransformer(svgRaw, size, cleanColor, anim);
+  // Apply style transforms
+  const output = svgTransformer(svgRaw, size, cleanColor, anim);
 
-  // Cache result
+  // Cache result in edge cache
   await cacheSet(cacheKey, { svg: output, source });
-  memCache.set(cacheKey, { svg: output, source, timestamp: Date.now() });
-  
-  if (memCache.size > MEM_CACHE_MAX) {
-    const iter = memCache.keys();
-    for (let i = 0; i < memCache.size - MEM_CACHE_MAX; i++) memCache.delete(iter.next().value);
-  }
 
   return new Response(output, {
     headers: corsHeaders(request, {
