@@ -6,7 +6,7 @@ const https = require('https');
 
 const args = process.argv.slice(2);
 
-if (args.length === 0 || args[0] === 'help') {
+function printHelp() {
   console.log(`
 🚀 Sednicon CLI
 
@@ -20,15 +20,20 @@ Options:
 
 Example:
   npx sednicon get rocket --color ff6600 --size 32
+  npx sednicon get lucide:rocket --color 2563eb
   `);
+}
+
+if (args.length === 0 || args[0] === 'help' || args[0] === '--help' || args[0] === '-h') {
+  printHelp();
   process.exit(0);
 }
 
 const command = args[0];
 
 if (command === 'get') {
-  const iconName = args[1];
-  if (!iconName || iconName.startsWith('--')) {
+  const rawIconName = args[1];
+  if (!rawIconName || rawIconName.startsWith('--')) {
     console.error('❌ Please specify an icon name. Example: npx sednicon get rocket');
     process.exit(1);
   }
@@ -37,17 +42,26 @@ if (command === 'get') {
   let size = 24;
   let outDir = process.cwd();
 
-  // Parse basic arguments
+  // Parse arguments
   for (let i = 2; i < args.length; i++) {
-    if (args[i] === '--color' && args[i+1]) color = args[++i].replace('#', '');
-    if (args[i] === '--size' && args[i+1]) size = parseInt(args[++i], 10);
-    if (args[i] === '--out' && args[i+1]) outDir = args[++i];
+    if (args[i] === '--color' && args[i + 1]) {
+      color = args[++i].replace('#', '');
+    }
+    if (args[i] === '--size' && args[i + 1]) {
+      const parsedSize = parseInt(args[++i], 10);
+      if (!isNaN(parsedSize) && parsedSize > 0) size = parsedSize;
+    }
+    if (args[i] === '--out' && args[i + 1]) {
+      outDir = args[++i];
+    }
   }
 
-  const url = `https://sednicon.sednium.com/api/render?q=${encodeURIComponent(iconName)}&color=${color}&size=${size}`;
-  const destPath = path.join(outDir, `${iconName}.svg`);
+  // Sanitize file name for cross-platform OS compatibility (replace colons and path traversal)
+  const safeBaseName = path.basename(rawIconName).replace(/:/g, '-').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const destPath = path.join(outDir, `${safeBaseName}.svg`);
+  const url = `https://sednicon.sednium.com/api/render?q=${encodeURIComponent(rawIconName)}&color=${encodeURIComponent(color)}&size=${size}`;
 
-  console.log(`✨ Fetching ${iconName}...`);
+  console.log(`✨ Fetching ${rawIconName}...`);
 
   https.get(url, (res) => {
     if (res.statusCode !== 200) {
@@ -58,12 +72,20 @@ if (command === 'get') {
     let data = '';
     res.on('data', chunk => data += chunk);
     res.on('end', () => {
-      if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-      fs.writeFileSync(destPath, data);
-      console.log(`✅ Saved successfully to ${destPath}`);
+      try {
+        if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+        fs.writeFileSync(destPath, data);
+        console.log(`✅ Saved successfully to ${destPath}`);
+      } catch (err) {
+        console.error(`❌ Failed to write file: ${err.message}`);
+        process.exit(1);
+      }
     });
   }).on('error', (err) => {
     console.error(`❌ Network error: ${err.message}`);
     process.exit(1);
   });
+} else {
+  console.error(`❌ Unknown command: "${command}". Run "npx sednicon help" to see usage.`);
+  process.exit(1);
 }
