@@ -5,6 +5,22 @@
 
 export const config = { runtime: 'edge' };
 
+const SUPPORTED_PROVIDERS = new Set([
+  'gemini', 'openai', 'anthropic', 'groq', 'mistral', 'together', 'nvidia', 'openrouter'
+]);
+
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
 export default async function handler(req) {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -13,19 +29,37 @@ export default async function handler(req) {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      }
+      },
     });
   }
 
   if (req.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
+    return jsonResponse({ error: 'Method Not Allowed' }, 405);
   }
   
   try {
     const body = await req.json();
-    const { prompt, provider, model, apiKey, size = 24, color = '000000', style = 'fill', strokeWidth = 2, corner = 'round' } = body;
+    const {
+      prompt,
+      provider = 'gemini',
+      model,
+      apiKey,
+      size = 24,
+      color = '000000',
+      style = 'fill',
+      strokeWidth = 2,
+      corner = 'round',
+    } = body;
 
-    if (!apiKey) return new Response(JSON.stringify({ error: 'API Key is required.' }), { status: 400 });
+    if (!apiKey) {
+      return jsonResponse({ error: 'API Key is required.' }, 400);
+    }
+
+    if (!SUPPORTED_PROVIDERS.has(provider)) {
+      return jsonResponse({ error: `Unsupported AI provider "${provider}".` }, 400);
+    }
+
+    const cleanColor = String(color || '000000').replace(/^#/, '');
 
     const systemPrompt = `You are an expert vector graphics designer. Generate a single, clean, highly minimal SVG icon.
 Strict Rules:
@@ -39,15 +73,15 @@ Do not wrap the output in any HTML.`;
     let fetchUrl = '';
     let headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
+      'Authorization': `Bearer ${apiKey}`,
     };
     let payload = {
       model: model,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt }
+        { role: 'user', content: prompt },
       ],
-      temperature: 0.6
+      temperature: 0.6,
     };
 
     // Provider Routing
@@ -56,21 +90,21 @@ Do not wrap the output in any HTML.`;
       headers = { 'Content-Type': 'application/json' };
       payload = {
         contents: [{ parts: [{ text: systemPrompt + '\n\n' + prompt }] }],
-        generationConfig: { temperature: 0.6 }
+        generationConfig: { temperature: 0.6 },
       };
     } else if (provider === 'anthropic') {
       fetchUrl = 'https://api.anthropic.com/v1/messages';
       headers = {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
       };
       payload = {
         model: model,
         max_tokens: 1500,
         system: systemPrompt,
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.6
+        temperature: 0.6,
       };
     } else {
       // Standard OpenAI Format (OpenAI, Groq, Mistral, Together, OpenRouter, Nvidia)
@@ -86,22 +120,27 @@ Do not wrap the output in any HTML.`;
     const res = await fetch(fetchUrl, {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     const data = await res.json();
     if (!res.ok || data.error) {
-      throw new Error(data.error?.message || data.error || `Upstream API error: ${res.status}`);
+      const errMsg = typeof data.error === 'object'
+        ? (data.error?.message || JSON.stringify(data.error))
+        : (data.error || `Upstream API error: ${res.status}`);
+      throw new Error(errMsg);
     }
 
     let svgRaw = '';
     if (provider === 'gemini') {
-      svgRaw = data.candidates[0].content.parts[0].text;
+      svgRaw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     } else if (provider === 'anthropic') {
-      svgRaw = data.content[0].text;
+      svgRaw = data.content?.[0]?.text || '';
     } else {
-      svgRaw = data.choices[0].message.content;
+      svgRaw = data.choices?.[0]?.message?.content || '';
     }
+
+    if (!svgRaw) throw new Error('AI provider returned empty response.');
 
     // ─── SVG AUTO-REPAIR & SANITIZATION ───
     
@@ -116,37 +155,26 @@ Do not wrap the output in any HTML.`;
     // 3. Strip hardcoded width/height to let CSS sizing work
     svgRaw = svgRaw.replace(/\s+width="[^"]*"/g, '').replace(/\s+height="[^"]*"/g, '');
 
-    // 4. Inject viewBox if missing (The glitch fix)
+    // 4. Inject viewBox if missing
     if (!svgRaw.includes('viewBox')) {
-        svgRaw = svgRaw.replace('<svg', '<svg viewBox="0 0 24 24"');
+      svgRaw = svgRaw.replace('<svg', '<svg viewBox="0 0 24 24"');
     }
 
-    // 5. Force standard fill/stroke colors
-    svgRaw = svgRaw.replace(/currentColor/gi, `#${color}`);
+    // 5. Force standard fill/stroke colors without double ##
+    svgRaw = svgRaw.replace(/currentColor/gi, `#${cleanColor}`);
     
     // Default size fallback for frontend preview
     svgRaw = svgRaw.replace('<svg', `<svg width="${size}" height="${size}"`);
 
-    return new Response(JSON.stringify({
+    return jsonResponse({
       svg: svgRaw,
       size,
-      color,
+      color: cleanColor,
       provider,
-      model
-    }), {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+      model,
     });
     
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { 
-      status: 500, 
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      } 
-    });
+    return jsonResponse({ error: error.message }, 500);
   }
 }
