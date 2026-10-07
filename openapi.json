@@ -10,7 +10,7 @@
     },
     "license": {
       "name": "MIT",
-      "url": "https://github.com/AnkushDas4/IconFlow/blob/main/LICENSE"
+      "url": "https://github.com/AnkushDas4/SEDNICON/blob/main/README.md"
     }
   },
   "servers": [
@@ -89,14 +89,14 @@
           {
             "name": "format",
             "in": "query",
-            "description": "Output format. Defaults to SVG.",
+            "description": "Output format. Currently serves high-fidelity SVG (image/svg+xml).",
             "required": false,
-            "schema": {"type": "string", "enum": ["svg", "png", "webp"], "default": "svg"}
+            "schema": {"type": "string", "enum": ["svg"], "default": "svg"}
           }
         ],
         "responses": {
           "200": {
-            "description": "SVG/PNG/WebP icon, styled with the requested color and size.",
+            "description": "SVG icon, styled with the requested color and size.",
             "headers": {
               "Content-Type": {"schema": {"type": "string", "example": "image/svg+xml; charset=utf-8"}},
               "Cache-Control": {"schema": {"type": "string", "example": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000, immutable"}},

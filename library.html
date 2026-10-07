@@ -325,7 +325,9 @@ animCursor();
 const backBtn = document.getElementById('back-top');
 window.addEventListener('scroll', () => backBtn.classList.toggle('visible', scrollY > 400));
 
-const BASE = 'https://sednicon.sednium.com/api/render';
+const BASE = (typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http'))
+  ? `${window.location.origin}/api/render`
+  : 'https://sednicon.sednium.com/api/render';
 let iconSize = 32;
 let iconColor = '000000';
 
