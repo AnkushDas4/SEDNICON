@@ -57,20 +57,30 @@ export const FALLBACK_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path 
 
 // ─── SVG SANITIZER ──────────────────────────────────────────────────────────
 export function sanitizeSvg(svgString) {
-  if (!/<script|<iframe|<object|<embed|<foreignObject| on|javascript:|data:/i.test(svgString)) {
-    return svgString;
-  }
+  if (!svgString || typeof svgString !== 'string') return '';
+
   let svg = svgString;
-  svg = svg.replace(/<script[\s\S]*?<\/script\s*>/gi, '');
-  svg = svg.replace(/<iframe[\s\S]*?<\/iframe\s*>/gi, '');
-  svg = svg.replace(/<object[\s\S]*?<\/object\s*>/gi, '');
-  svg = svg.replace(/<embed[\s\S]*?>/gi, '');
-  svg = svg.replace(/<foreignObject[\s\S]*?<\/foreignObject\s*>/gi, '');
-  svg = svg.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
-  svg = svg.replace(/(href|xlink:href)\s*=\s*"([^"]*)"/gi, (m, a, v) => {
-    if (/^(javascript|data|vbscript|file):/i.test((v || '').trim())) return '';
-    return m;
+
+  // 1. Strip dangerous tags and their content repeatedly to handle nested/unbalanced wrappers
+  let prev;
+  const dangerousBlocks = /<(script|iframe|object|embed|foreignObject)\b[\s\S]*?(?:<\/\1>|$)/gi;
+  const dangerousTags = /<\/?(?:script|iframe|object|embed|foreignObject)\b[^>]*>/gi;
+  do {
+    prev = svg;
+    svg = svg.replace(dangerousBlocks, '');
+    svg = svg.replace(dangerousTags, '');
+  } while (svg !== prev);
+
+  // 2. Strip inline event handlers (onload, onclick, onerror, etc.) preceded by space, newline, or slash
+  svg = svg.replace(/[\s/]on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+
+  // 3. Strip dangerous link href and xlink:href schemas with double, single, or no quotes
+  svg = svg.replace(/(?:href|xlink:href)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi, (match, dVal, sVal, uVal) => {
+    const val = (dVal ?? sVal ?? uVal ?? '').trim();
+    if (/^(?:javascript|data|vbscript|file):/i.test(val)) return '';
+    return match;
   });
+
   return svg;
 }
 
@@ -79,11 +89,11 @@ export function svgTransformer(svgRaw, size, cleanColor, anim) {
   let svg = svgRaw
     .replace(/\s+width="[^"]*"/g, '')
     .replace(/\s+height="[^"]*"/g, '');
-  svg = svg.replace(/^<svg/, `<svg width="${size}" height="${size}"`);
+  svg = svg.replace(/<svg\b/, `<svg width="${size}" height="${size}"`);
   svg = svg.replace(/currentColor/gi, cleanColor);
   svg = svg.replace(/fill="(?!none\b)[^"]+"/gi, `fill="${cleanColor}"`);
   svg = svg.replace(/stroke="(?!none\b)[^"]+"/gi, `stroke="${cleanColor}"`);
-  if (!/fill=/.test(svg)) svg = svg.replace(/^<svg/, `<svg fill="${cleanColor}"`);
+  if (!/fill=/.test(svg)) svg = svg.replace(/<svg\b/, `<svg fill="${cleanColor}"`);
 
   // --- Add Magic Animations ---
   if (anim) {
@@ -91,11 +101,11 @@ export function svgTransformer(svgRaw, size, cleanColor, anim) {
     const uid = Math.random().toString(36).substring(2, 8); // isolate styles to prevent CSS clashes
     
     if (anim === 'spin') {
-      animStyle = `@keyframes spin-${uid} { 100% { transform: rotate(360deg); } } .sednicon-anim { transform-origin: center; animation: spin-${uid} 2s linear infinite; }`;
+      animStyle = `@keyframes spin-${uid} { 100% { transform: rotate(360deg); } } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: spin-${uid} 2s linear infinite; }`;
     } else if (anim === 'pulse') {
-      animStyle = `@keyframes pulse-${uid} { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.85); opacity: 0.7; } } .sednicon-anim { transform-origin: center; animation: pulse-${uid} 1.5s ease-in-out infinite; }`;
+      animStyle = `@keyframes pulse-${uid} { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.85); opacity: 0.7; } } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: pulse-${uid} 1.5s ease-in-out infinite; }`;
     } else if (anim === 'bounce') {
-      animStyle = `@keyframes bounce-${uid} { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20%); } } .sednicon-anim { animation: bounce-${uid} 1s cubic-bezier(0.28,0.84,0.42,1) infinite; }`;
+      animStyle = `@keyframes bounce-${uid} { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20%); } } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: bounce-${uid} 1s cubic-bezier(0.28,0.84,0.42,1) infinite; }`;
     }
 
     if (animStyle) {
@@ -123,7 +133,8 @@ async function fetchIconify(prefix, name) {
       });
       clearTimeout(timeout);
 
-      if (!res.ok) continue; // Try next mirror if 404 or 5xx
+      if (res.status === 404) return null; // Icon does not exist in this set; don't hammer other mirrors
+      if (!res.ok) continue; // Try next mirror if 5xx
       const text = await res.text();
       if (text.startsWith('<') && text.includes('<svg')) {
         return text;
