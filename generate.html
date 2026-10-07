@@ -227,7 +227,10 @@
   .preview-svg-wrap { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; }
   #svg-preview-container { display: flex; align-items: center; justify-content: center; }
   #svg-preview-container svg { width: 96px; height: 96px; }
-  .preview-empty { position: relative; z-index: 1; text-align: center; }
+  .preview-empty {
+    position: relative; z-index: 1; text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
   .preview-empty .material-icons { font-size: 48px; color: var(--text-dim); margin-bottom: 12px; display: block; }
   .preview-empty p { color: var(--text-dim); font-size: 13px; }
   .preview-meta { position: relative; z-index: 1; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.08em; }
@@ -264,10 +267,14 @@
   @media (max-width: 960px) {
     nav { padding: 16px 24px; }
     .nav-links { gap: 16px; }
-    .nav-links li:not(:last-child):not(:nth-last-child(2)):not(:first-child) { display: none; }
     .generate-layout { grid-template-columns: 1fr; padding: 20px 24px 60px; gap: 24px; }
     .preview-panel { position: static; }
-    .provider-grid { grid-template-columns: repeat(3, 1fr); }
+    .provider-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .provider-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav-links { gap: 12px; }
+    .nav-links a { font-size: 11px; }
   }
 </style>
 <link rel="stylesheet" href="/polish.css">
@@ -417,7 +424,9 @@
               <span class="provider-name">Nvidia</span>
             </button>
             <button class="provider-btn" data-provider="together">
-              <div class="provider-logo" style="font-size:22px; line-height:1;">🤝</div>
+              <div class="provider-logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="color:var(--text)"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.24L18.6 8 12 11.68 5.4 8 12 4.24zM4.8 9.04L11 12.5v7.26l-6.2-3.44V9.04zm8.4 7.26V12.5l6.2-3.46v7.26l-6.2 3.5z"/></svg>
+              </div>
               <span class="provider-name">Together</span>
             </button>
             <button class="provider-btn" data-provider="openrouter">
@@ -543,16 +552,16 @@ const sessionHistory = [];
 let timerInterval;
 let startTime;
 
-// ── UP-TO-DATE 2026 PROVIDER MODELS ──
+// ── PROVIDER MODELS ──
 const PROVIDER_MODELS = {
-  gemini: ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.1-pro-preview', 'gemini-3.5-flash-lite'],
-  openai: ['gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1-mini'],
-  anthropic: ['claude-opus-5', 'claude-opus-4.8', 'claude-sonnet-4.6', 'claude-haiku-4.5'],
-  groq: ['llama-3.3-70b-versatile', 'llama-3.3-8b-instant', 'mixtral-8x7b-32768'],
-  mistral: ['mistral-large-latest', 'mistral-small-latest', 'pixtral-12b-latest'],
-  nvidia: ['meta/llama-3.3-70b-instruct', 'mistralai/mistral-large-2-instruct', 'nvidia/llama-3.1-nemotron-70b-instruct'],
+  gemini: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro'],
+  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'],
+  anthropic: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
+  groq: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'],
+  mistral: ['mistral-large-latest', 'mistral-small-latest', 'codestral-latest'],
+  nvidia: ['meta/llama-3.3-70b-instruct', 'mistralai/mistral-large-2-instruct'],
   together: ['meta-llama/Llama-3.3-70b-chat-hf', 'mistralai/Mixtral-8x22B-Instruct-v0.1'],
-  openrouter: ['google/gemini-3.7-flash', 'anthropic/claude-opus-5', 'openai/gpt-5'],
+  openrouter: ['google/gemini-2.5-flash', 'anthropic/claude-3.5-sonnet', 'openai/gpt-4o'],
 };
 
 function updateModelSelect(provider) {
@@ -588,13 +597,51 @@ document.querySelectorAll('.style-btn[data-corner]').forEach(btn => {
   });
 });
 
-// ── COLOR SYNC ──
+// ── LIVE PREVIEW & COLOR SYNC ──
+function updateLivePreview() {
+  if (!currentSvg) return;
+  const color = document.getElementById('gen-color-text').value || '#000000';
+  const size = parseInt(document.getElementById('gen-size').value, 10) || 24;
+
+  let updatedSvg = currentSvg
+    .replace(/fill="(?!none\b)[^"]+"/gi, `fill="${color}"`)
+    .replace(/stroke="(?!none\b)[^"]+"/gi, `stroke="${color}"`);
+  
+  if (!updatedSvg.includes('xmlns=')) {
+    updatedSvg = updatedSvg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+  }
+
+  currentSvg = updatedSvg;
+  document.getElementById('svg-preview-container').innerHTML = currentSvg;
+  document.getElementById('preview-meta').textContent = `${size}×${size} · SVG · ${selectedProvider}`;
+  updateCodeOutput({ size });
+}
+
 document.getElementById('gen-color-picker').addEventListener('input', e => {
   document.getElementById('gen-color-text').value = e.target.value;
+  updateLivePreview();
 });
 document.getElementById('gen-color-text').addEventListener('input', e => {
   const v = e.target.value;
-  if (/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById('gen-color-picker').value = v;
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+    document.getElementById('gen-color-picker').value = v;
+    updateLivePreview();
+  }
+});
+document.getElementById('gen-size').addEventListener('change', () => {
+  updateLivePreview();
+});
+
+// ── THEME DEFAULT COLOR SYNC ──
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  document.getElementById('gen-color-picker').value = '#ffffff';
+  document.getElementById('gen-color-text').value = '#ffffff';
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  const themeColor = e.matches ? '#ffffff' : '#000000';
+  document.getElementById('gen-color-picker').value = themeColor;
+  document.getElementById('gen-color-text').value = themeColor;
+  updateLivePreview();
 });
 
 // ── CHAR COUNT ──
@@ -739,8 +786,15 @@ function showResult(data) {
   document.getElementById('preview-result').style.display = 'flex';
   document.getElementById('generation-status').classList.remove('visible');
   document.getElementById('code-output').classList.add('visible');
-  document.getElementById('svg-preview-container').innerHTML = data.svg;
-  document.getElementById('preview-meta').textContent = `${data.size}×${data.size} · SVG · ${data.provider}`;
+
+  let cleanSvg = data.svg || '';
+  if (!cleanSvg.includes('xmlns=')) {
+    cleanSvg = cleanSvg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+  }
+  currentSvg = cleanSvg;
+
+  document.getElementById('svg-preview-container').innerHTML = currentSvg;
+  document.getElementById('preview-meta').textContent = `${data.size || 24}×${data.size || 24} · SVG · ${data.provider}`;
   ['btn-copy-svg','btn-copy-datauri','btn-download-svg'].forEach(id => {
     document.getElementById(id).style.display = 'flex';
   });
@@ -777,14 +831,19 @@ document.getElementById('btn-copy-svg').addEventListener('click', async () => {
   flashSuccess('btn-copy-svg', 'Copied!');
 });
 
-function updateCodeOutput(data) {
-  const size = data.size || 24;
-  const color = document.getElementById('gen-color-text').value;
+function updateCodeOutput(data = {}) {
+  if (!currentSvg) return;
+  const size = data.size || parseInt(document.getElementById('gen-size').value, 10) || 24;
+  const color = document.getElementById('gen-color-text').value || '#000000';
   const encodedSvg = encodeURIComponent(currentSvg).replace(/'/g, '%27').replace(/"/g, '%22');
   const dataUri = `data:image/svg+xml,${encodedSvg}`;
   
   const paths = [...currentSvg.matchAll(/<path[^>]*d="([^"]*)"/g)].map(m => m[1]);
-  const androidXml = `<vector xmlns:android="http://schemas.android.com/apk/res/android"\n    android:width="${size}dp"\n    android:height="${size}dp"\n    android:viewportWidth="24"\n    android:viewportHeight="24">\n${paths.map(d => `    <path android:fillColor="${color}" android:pathData="${d}" />`).join('\n')}\n</vector>`;
+  const pathData = paths.length > 0
+    ? paths.map(d => `    <path android:fillColor="${color}" android:pathData="${d}" />`).join('\n')
+    : `    <!-- Note: SVG contains geometric primitives. In Android Studio, use Vector Asset Import for full multi-shape conversion. -->\n    <path android:fillColor="${color}" android:pathData="M12 2L2 22h20L12 2z" />`;
+
+  const androidXml = `<vector xmlns:android="http://schemas.android.com/apk/res/android"\n    android:width="${size}dp"\n    android:height="${size}dp"\n    android:viewportWidth="24"\n    android:viewportHeight="24">\n${pathData}\n</vector>`;
 
   const outputs = {
     url: dataUri,
@@ -793,7 +852,7 @@ function updateCodeOutput(data) {
     flutter: `SvgPicture.string(\n  '''${currentSvg}''',\n  width: ${size},\n  height: ${size},\n)`,
     android: androidXml,
   };
-  document.getElementById('code-pre').textContent = outputs[codeTab];
+  document.getElementById('code-pre').textContent = outputs[codeTab] || outputs.url;
 }
 
 document.querySelectorAll('.code-tab').forEach(tab => {
@@ -821,10 +880,11 @@ function addToHistory(svg) {
   const item = document.createElement('div');
   item.className = 'history-item';
   item.innerHTML = svg;
+  item.title = 'Click to load icon';
   item.addEventListener('click', () => {
-    document.getElementById('svg-preview-container').innerHTML = svg;
     currentSvg = svg;
-    updateCodeOutput({ size: document.getElementById('gen-size').value });
+    document.getElementById('svg-preview-container').innerHTML = svg;
+    updateLivePreview();
   });
   grid.insertBefore(item, grid.firstChild);
 }

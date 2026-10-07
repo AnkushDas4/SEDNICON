@@ -160,7 +160,12 @@ Do not wrap the output in any HTML.`;
       svgRaw = svgRaw.replace('<svg', '<svg viewBox="0 0 24 24"');
     }
 
-    // 5. Force standard fill/stroke colors without double ##
+    // 5. Inject xmlns if missing
+    if (!svgRaw.includes('xmlns=')) {
+      svgRaw = svgRaw.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+
+    // 6. Force standard fill/stroke colors without double ##
     svgRaw = svgRaw.replace(/currentColor/gi, `#${cleanColor}`);
     
     // Default size fallback for frontend preview
