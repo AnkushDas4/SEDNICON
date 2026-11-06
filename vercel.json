@@ -1,8 +1,8 @@
 {
+  "buildCommand": "vite build",
+  "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/library", "destination": "/library.html" },
-    { "source": "/docs", "destination": "/docs.html" },
-    { "source": "/generate", "destination": "/generate.html" },
-    { "source": "/status", "destination": "/status.html" }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

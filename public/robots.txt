@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sednicon.sednium.com/sitemap.xml
