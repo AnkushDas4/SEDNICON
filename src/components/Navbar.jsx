@@ -32,9 +32,9 @@ export default function Navbar({ onOpenCart }) {
             <span className="font-sans text-base font-bold tracking-tight">Sednicon</span>
           </Link>
 
-          <span className="hidden rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-mono text-[11px] font-medium text-blue-600 dark:text-blue-400 sm:inline-flex items-center gap-1.5">
+          <span className="hidden rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 font-mono text-[11px] font-medium text-blue-600 dark:text-blue-400 sm:inline-flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            v3.0 Edge
+            v3.5.0 Edge
           </span>
         </div>
 

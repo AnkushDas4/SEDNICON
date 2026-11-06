@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getRenderUrl } from '../utils/api';
 import CodeBlock from '../components/CodeBlock';
+import CustomSelect from '../components/CustomSelect';
 import { useToast } from '../components/Toast';
 
 const PRESET_ICONS = ['github', 'vercel', 'sparkles', 'terminal', 'rocket', 'heart', 'settings'];
 const SIZES = [16, 24, 32, 48, 64];
 const ANIMATIONS = [
-  { id: 'none', label: 'None' },
-  { id: 'spin', label: 'Spin' },
-  { id: 'pulse', label: 'Pulse' },
-  { id: 'bounce', label: 'Bounce' },
+  { id: 'none', label: 'No Animation' },
+  { id: 'spin', label: 'Spin (360° Rotate)' },
+  { id: 'pulse', label: 'Pulse (Breathing Scale)' },
+  { id: 'bounce', label: 'Bounce (Vertical Hop)' },
 ];
 
 const PRESET_COLORS = [
@@ -22,6 +23,24 @@ const PRESET_COLORS = [
   { label: 'Amber', value: '#f59e0b' },
 ];
 
+const ICON_SETS = [
+  'Material Symbols',
+  'Simple Icons',
+  'Lucide Icons',
+  'Phosphor',
+  'Tabler',
+  'Feather',
+  'Font Awesome',
+  'Remix Icon',
+  'Carbon Design',
+  'Fluent UI',
+  'Octicons',
+  'Heroicons',
+  'Bootstrap Icons',
+  'Ant Design',
+  'Boxicons',
+];
+
 export default function Home() {
   const { addToast } = useToast();
 
@@ -31,6 +50,7 @@ export default function Home() {
   const [size, setSize] = useState(48);
   const [anim, setAnim] = useState('none');
   const [exportTab, setExportTab] = useState('url');
+  const [svgContent, setSvgContent] = useState('');
   const [loadTime, setLoadTime] = useState(null);
   const [imageError, setImageError] = useState(false);
 
@@ -41,17 +61,38 @@ export default function Home() {
     anim: anim !== 'none' ? anim : null,
   });
 
+  // Fetch SVG text to render inline with overflow:visible so keyframe animations (spin, bounce) never clip
   useEffect(() => {
     setImageError(false);
     const start = performance.now();
-    const img = new Image();
-    img.src = activeUrl;
-    img.onload = () => {
-      setLoadTime(Math.round(performance.now() - start));
-    };
-    img.onerror = () => {
-      setImageError(true);
-      setLoadTime(null);
+    let isCurrent = true;
+
+    fetch(activeUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error('Icon not found');
+        return res.text();
+      })
+      .then((text) => {
+        if (!isCurrent) return;
+        if (text.startsWith('<svg') || text.includes('<svg')) {
+          // Ensure root SVG allows visible overflow for animations
+          const preparedSvg = text.replace(/<svg\b([^>]*)>/, '<svg$1 style="overflow:visible;">');
+          setSvgContent(preparedSvg);
+          setLoadTime(Math.round(performance.now() - start));
+        } else {
+          throw new Error('Invalid SVG payload');
+        }
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setImageError(true);
+          setSvgContent('');
+          setLoadTime(null);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
     };
   }, [activeUrl]);
 
@@ -81,21 +122,20 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* ── HERO SECTION ── */}
-      <section className="relative overflow-hidden border-b border-zinc-200 py-20 transition-colors dark:border-zinc-800 lg:py-28">
+      <section className="relative overflow-hidden border-b border-zinc-200 py-20 transition-colors dark:border-zinc-800 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            {/* Value pill */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 font-mono text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-              <span>One URL. Every Icon. Zero Setup.</span>
-            </div>
-
-            <h1 className="mt-6 font-sans text-4xl font-extrabold tracking-tight text-zinc-950 sm:text-6xl dark:text-zinc-50">
+            <h1 className="font-sans text-4xl font-extrabold tracking-tight text-zinc-950 sm:text-6xl dark:text-zinc-50">
               Instant Vector Icons <br />
               <span className="text-blue-600 dark:text-blue-500">via Edge HTTP.</span>
             </h1>
 
-            <p className="mt-6 text-base text-zinc-600 sm:text-lg dark:text-zinc-400">
+            {/* Repositioned & Refined Tagline */}
+            <p className="mt-4 text-xs sm:text-sm font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+              One URL &bull; Every Icon &bull; Zero Setup
+            </p>
+
+            <p className="mt-3 text-base text-zinc-600 sm:text-lg dark:text-zinc-400">
               Stream clean, recolorable SVGs straight into your HTML, JSX, markdown, or CSS.
               No multi-megabyte bundle dependencies, no icon font bloat, sub-50ms edge caching.
             </p>
@@ -174,22 +214,25 @@ export default function Home() {
                         className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3.5 py-2 font-mono text-sm text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-600"
                       />
                     </div>
-                    {/* Presets */}
+                    {/* Presets with Click Highlight */}
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
-                      {PRESET_ICONS.map((p) => (
-                        <button
-                          key={p}
-                          type="button"
-                          onClick={() => setQuery(p)}
-                          className={`rounded px-2 py-0.5 font-mono text-xs transition ${
-                            query === p
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      ))}
+                      {PRESET_ICONS.map((p) => {
+                        const isSelected = query === p;
+                        return (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setQuery(p)}
+                            className={`rounded-md px-2.5 py-1 font-mono text-xs transition active:scale-95 ${
+                              isSelected
+                                ? 'bg-blue-600 text-white font-bold shadow-sm ring-1 ring-blue-500'
+                                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -215,7 +258,7 @@ export default function Home() {
                       />
                     </div>
                     {/* Color Swatches */}
-                    <div className="mt-2 flex items-center gap-1.5">
+                    <div className="mt-2.5 flex items-center gap-2">
                       {PRESET_COLORS.map((c) => (
                         <button
                           key={c.value}
@@ -223,15 +266,15 @@ export default function Home() {
                           onClick={() => setColor(c.value)}
                           title={c.label}
                           style={{ backgroundColor: c.value }}
-                          className={`h-5 w-5 rounded-full border border-zinc-300 transition-transform active:scale-95 dark:border-zinc-700 ${
-                            color === c.value ? 'scale-110 ring-2 ring-blue-500' : ''
+                          className={`h-6 w-6 rounded-full border border-zinc-300 transition-transform active:scale-90 dark:border-zinc-700 ${
+                            color === c.value ? 'scale-110 ring-2 ring-blue-500 shadow' : 'hover:scale-105'
                           }`}
                         />
                       ))}
                     </div>
                   </div>
 
-                  {/* Size & Animation */}
+                  {/* Size Buttons & Animation Custom Dropdown */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
@@ -243,9 +286,9 @@ export default function Home() {
                             key={s}
                             type="button"
                             onClick={() => setSize(s)}
-                            className={`flex-1 rounded py-1 font-mono text-xs font-medium transition ${
+                            className={`flex-1 rounded py-1.5 font-mono text-xs font-medium transition active:scale-95 ${
                               size === s
-                                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950'
+                                ? 'bg-blue-600 text-white font-bold shadow-sm ring-1 ring-blue-500'
                                 : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
                             }`}
                           >
@@ -260,17 +303,11 @@ export default function Home() {
                         Animation
                       </label>
                       <div className="mt-2">
-                        <select
+                        <CustomSelect
                           value={anim}
-                          onChange={(e) => setAnim(e.target.value)}
-                          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-xs text-zinc-800 focus:border-blue-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
-                        >
-                          {ANIMATIONS.map((a) => (
-                            <option key={a.id} value={a.id}>
-                              {a.label}
-                            </option>
-                          ))}
-                        </select>
+                          onChange={(val) => setAnim(val)}
+                          options={ANIMATIONS}
+                        />
                       </div>
                     </div>
                   </div>
@@ -279,15 +316,15 @@ export default function Home() {
 
               {/* Stage & Code Output Column */}
               <div className="flex flex-col justify-between p-6 lg:col-span-7">
-                {/* Visual Stage */}
-                <div className="relative flex min-h-[220px] flex-col items-center justify-center rounded-lg border border-zinc-200 bg-checker p-8 dark:border-zinc-800">
+                {/* Visual Stage - No cutting, clean stage with generous breathing room */}
+                <div className="relative flex min-h-[240px] flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50/70 p-10 dark:border-zinc-800 dark:bg-zinc-950/70 overflow-visible">
                   {/* Telemetry pill */}
-                  <div className="absolute left-3 top-3 flex items-center gap-2 rounded border border-zinc-200 bg-white/90 px-2 py-0.5 font-mono text-[11px] text-zinc-600 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-400">
+                  <div className="absolute left-3 top-3 flex items-center gap-2 rounded-md border border-zinc-200 bg-white/90 px-2.5 py-1 font-mono text-[11px] text-zinc-600 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-400">
                     <span>{size}&times;{size}px</span>
                     {loadTime !== null && (
                       <>
                         <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
-                        <span className="text-emerald-600 dark:text-emerald-400">{loadTime}ms</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{loadTime}ms</span>
                       </>
                     )}
                   </div>
@@ -297,36 +334,40 @@ export default function Home() {
                       <span className="text-xs text-zinc-400">Icon query not found</span>
                       <span className="font-mono text-xs text-zinc-500">"{query}"</span>
                     </div>
-                  ) : (
-                    <img
-                      src={activeUrl}
-                      alt={query}
-                      width={size}
-                      height={size}
-                      className="transition-all duration-150"
-                      style={{ width: `${size}px`, height: `${size}px` }}
+                  ) : svgContent ? (
+                    <div
+                      className="flex items-center justify-center transition-transform duration-200"
+                      style={{ overflow: 'visible', padding: '16px' }}
+                      dangerouslySetInnerHTML={{ __html: svgContent }}
                     />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center">
+                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                    </div>
                   )}
                 </div>
 
-                {/* Code Export Tabs */}
+                {/* Code Export Tabs with Click Highlight */}
                 <div className="mt-6">
                   <div className="flex items-center justify-between border-b border-zinc-200 pb-2 dark:border-zinc-800">
-                    <div className="flex gap-2">
-                      {['url', 'html', 'react', 'vue', 'css'].map((tab) => (
-                        <button
-                          key={tab}
-                          type="button"
-                          onClick={() => setExportTab(tab)}
-                          className={`rounded px-2.5 py-1 text-xs font-semibold uppercase tracking-wider transition ${
-                            exportTab === tab
-                              ? 'bg-blue-600 text-white'
-                              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
-                          }`}
-                        >
-                          {tab}
-                        </button>
-                      ))}
+                    <div className="flex gap-1.5">
+                      {['url', 'html', 'react', 'vue', 'css'].map((tab) => {
+                        const isTabActive = exportTab === tab;
+                        return (
+                          <button
+                            key={tab}
+                            type="button"
+                            onClick={() => setExportTab(tab)}
+                            className={`rounded-md px-3 py-1 text-xs font-semibold uppercase tracking-wider transition active:scale-95 ${
+                              isTabActive
+                                ? 'bg-blue-600 text-white font-bold shadow-sm'
+                                : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
+                            }`}
+                          >
+                            {tab}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -418,28 +459,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── TICKER TRACK ── */}
-      <section className="overflow-hidden border-t border-zinc-200 bg-white py-8 dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+      {/* ── CONTINUOUS MOVING TICKER BANNER ── */}
+      <section className="relative overflow-hidden border-t border-zinc-200 bg-white py-10 dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-5">
+          <p className="text-center text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
             Unified Access To Over 150 Icon Sets
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 font-mono text-xs text-zinc-500 dark:text-zinc-400">
-            <span>Material Symbols</span>
-            <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
-            <span>Simple Icons</span>
-            <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
-            <span>Lucide</span>
-            <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
-            <span>Phosphor</span>
-            <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
-            <span>Tabler</span>
-            <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
-            <span>Feather</span>
-            <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
-            <span>Font Awesome</span>
-            <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
-            <span>Remix Icon</span>
+        </div>
+
+        {/* Gradient edge masks */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent dark:from-zinc-950 z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent dark:from-zinc-950 z-10" />
+
+        {/* Continuous sliding track */}
+        <div className="flex overflow-hidden">
+          <div className="animate-marquee-continuous flex items-center gap-6 py-2">
+            {[...ICON_SETS, ...ICON_SETS].map((setName, idx) => (
+              <div
+                key={`${setName}-${idx}`}
+                className="flex items-center gap-2 rounded-lg border border-zinc-200/80 bg-zinc-50/80 px-4 py-2 font-mono text-xs font-medium text-zinc-700 shadow-sm transition hover:border-blue-500 hover:text-blue-600 dark:border-zinc-800 dark:bg-zinc-900/80 dark:text-zinc-300 dark:hover:border-blue-400 dark:hover:text-blue-400 whitespace-nowrap"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                <span>{setName}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>

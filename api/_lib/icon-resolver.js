@@ -101,11 +101,11 @@ export function svgTransformer(svgRaw, size, cleanColor, anim) {
     const uid = Math.random().toString(36).substring(2, 8); // isolate styles to prevent CSS clashes
     
     if (anim === 'spin') {
-      animStyle = `@keyframes spin-${uid} { 100% { transform: rotate(360deg); } } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: spin-${uid} 2s linear infinite; }`;
+      animStyle = `@keyframes spin-${uid} { 100% { transform: rotate(360deg); } } svg { overflow: visible !important; } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: spin-${uid} 2s linear infinite; }`;
     } else if (anim === 'pulse') {
-      animStyle = `@keyframes pulse-${uid} { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.85); opacity: 0.7; } } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: pulse-${uid} 1.5s ease-in-out infinite; }`;
+      animStyle = `@keyframes pulse-${uid} { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.85); opacity: 0.7; } } svg { overflow: visible !important; } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: pulse-${uid} 1.5s ease-in-out infinite; }`;
     } else if (anim === 'bounce') {
-      animStyle = `@keyframes bounce-${uid} { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20%); } } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: bounce-${uid} 1s cubic-bezier(0.28,0.84,0.42,1) infinite; }`;
+      animStyle = `@keyframes bounce-${uid} { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20%); } } svg { overflow: visible !important; } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: bounce-${uid} 1s cubic-bezier(0.28,0.84,0.42,1) infinite; }`;
     }
 
     if (animStyle) {

@@ -231,18 +231,19 @@ export const CATEGORIES = [
 
 export const ALL_CURATED_ICONS = CATEGORIES.flatMap((c) => c.icons);
 
-// AI Provider Configurations & Model Catalogs
+// Expanded AI Provider Models (2025/2026 Editions)
 export const PROVIDER_MODELS = {
-  gemini: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-pro'],
-  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'],
-  anthropic: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
-  groq: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'],
-  mistral: ['mistral-large-latest', 'mistral-small-latest', 'codestral-latest'],
-  nvidia: ['meta/llama-3.3-70b-instruct', 'mistralai/mistral-large-2-instruct'],
-  together: ['meta-llama/Llama-3.3-70b-chat-hf', 'mistralai/Mixtral-8x22B-Instruct-v0.1'],
-  openrouter: ['google/gemini-2.5-flash', 'anthropic/claude-3.5-sonnet', 'openai/gpt-4o'],
+  gemini: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'],
+  openai: ['gpt-4o', 'gpt-4o-mini', 'o1', 'o3-mini', 'gpt-4-turbo'],
+  anthropic: ['claude-3-7-sonnet-20250219', 'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
+  groq: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'deepseek-r1-distill-llama-70b', 'mixtral-8x7b-32768'],
+  mistral: ['mistral-large-latest', 'mistral-small-latest', 'codestral-latest', 'pixtral-12b-2409'],
+  nvidia: ['meta/llama-3.3-70b-instruct', 'mistralai/mistral-large-2-instruct', 'deepseek-ai/deepseek-r1'],
+  together: ['meta-llama/Llama-3.3-70b-chat-hf', 'Qwen/Qwen2.5-72B-Instruct-Turbo', 'mistralai/Mixtral-8x22B-Instruct-v0.1'],
+  openrouter: ['google/gemini-2.5-flash', 'anthropic/claude-3.5-sonnet', 'openai/gpt-4o', 'deepseek/deepseek-r1'],
 };
 
+// AI Providers List
 export const PROVIDERS_LIST = [
   { id: 'gemini', name: 'Gemini' },
   { id: 'openai', name: 'OpenAI' },
@@ -253,3 +254,84 @@ export const PROVIDERS_LIST = [
   { id: 'together', name: 'Together' },
   { id: 'openrouter', name: 'OpenRouter' },
 ];
+
+// Variations generator for any icon across multiple styles and icon sets
+export function getIconVariations(iconName, color = '2563eb', size = 32) {
+  const cleanColor = encodeURIComponent(color.replace(/^#/, ''));
+  const cleanName = iconName.toLowerCase().replace(/_/g, '-');
+  const isBrand = CATEGORIES.find((c) => c.id === 'brands')?.icons.includes(iconName);
+
+  if (isBrand) {
+    return [
+      {
+        id: 'simple-icons',
+        label: 'Simple Icons (Official)',
+        url: `https://api.iconify.design/simple-icons/${iconName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+        renderUrl: getRenderUrl({ q: iconName, color, size, set: 'simple-icons' }),
+      },
+      {
+        id: 'cib',
+        label: 'CoreUI Brands',
+        url: `https://api.iconify.design/cib/${cleanName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+        renderUrl: getRenderUrl({ q: `cib:${cleanName}`, color, size }),
+      },
+      {
+        id: 'fa-brands',
+        label: 'Font Awesome Brands',
+        url: `https://api.iconify.design/fa6-brands/${cleanName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+        renderUrl: getRenderUrl({ q: `fa6-brands:${cleanName}`, color, size }),
+      },
+      {
+        id: 'tabler-brand',
+        label: 'Tabler Brand',
+        url: `https://api.iconify.design/tabler/brand-${cleanName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+        renderUrl: getRenderUrl({ q: `tabler:brand-${cleanName}`, color, size }),
+      },
+    ];
+  }
+
+  return [
+    {
+      id: 'material-outlined',
+      label: 'Material Symbols (Outlined)',
+      url: `https://api.iconify.design/material-symbols/${cleanName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+      renderUrl: getRenderUrl({ q: cleanName, color, size }),
+    },
+    {
+      id: 'material-rounded',
+      label: 'Material Symbols (Rounded)',
+      url: `https://api.iconify.design/material-symbols/${cleanName}-rounded.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+      renderUrl: getRenderUrl({ q: `${cleanName}-rounded`, color, size }),
+    },
+    {
+      id: 'material-sharp',
+      label: 'Material Symbols (Sharp)',
+      url: `https://api.iconify.design/material-symbols/${cleanName}-sharp.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+      renderUrl: getRenderUrl({ q: `${cleanName}-sharp`, color, size }),
+    },
+    {
+      id: 'lucide',
+      label: 'Lucide Clean Line',
+      url: `https://api.iconify.design/lucide/${cleanName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+      renderUrl: getRenderUrl({ q: `lucide:${cleanName}`, color, size }),
+    },
+    {
+      id: 'tabler',
+      label: 'Tabler Linear',
+      url: `https://api.iconify.design/tabler/${cleanName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+      renderUrl: getRenderUrl({ q: `tabler:${cleanName}`, color, size }),
+    },
+    {
+      id: 'phosphor',
+      label: 'Phosphor Regular',
+      url: `https://api.iconify.design/ph/${cleanName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+      renderUrl: getRenderUrl({ q: `ph:${cleanName}`, color, size }),
+    },
+    {
+      id: 'heroicons',
+      label: 'Heroicons 24 Solid',
+      url: `https://api.iconify.design/heroicons/${cleanName}-20-solid.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+      renderUrl: getRenderUrl({ q: `heroicons:${cleanName}-20-solid`, color, size }),
+    },
+  ];
+}

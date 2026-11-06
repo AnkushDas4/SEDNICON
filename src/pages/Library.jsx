@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { CATEGORIES, getRenderUrl } from '../utils/api';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../components/Toast';
+import IconDetailModal from '../components/IconDetailModal';
 
 const SIZES = [16, 24, 32, 48, 64];
 const SWATCHES = ['#2563eb', '#09090b', '#ffffff', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6'];
@@ -18,7 +19,10 @@ export default function Library() {
   const [selectedCat, setSelectedCat] = useState('all');
   const [iconSize, setIconSize] = useState(32);
   const [color, setColor] = useState('#2563eb');
-  const [displayLimit, setDisplayLimit] = useState(96);
+  const [displayLimit, setDisplayLimit] = useState(120);
+
+  // Modal inspection state
+  const [inspectIcon, setInspectIcon] = useState(null);
 
   // Iconify search results state
   const [iconifyResults, setIconifyResults] = useState([]);
@@ -81,7 +85,7 @@ export default function Library() {
     let isCurrent = true;
     setIconifySearching(true);
 
-    fetch(`https://api.iconify.design/search?query=${encodeURIComponent(debouncedQuery)}&limit=36`)
+    fetch(`https://api.iconify.design/search?query=${encodeURIComponent(debouncedQuery)}&limit=48`)
       .then((res) => res.json())
       .then((data) => {
         if (!isCurrent) return;
@@ -110,20 +114,31 @@ export default function Library() {
     setSelectedCat('all');
     setIconSize(32);
     setColor('#2563eb');
-    setDisplayLimit(96);
+    setDisplayLimit(120);
   };
+
+  const cleanColorHex = color.replace(/^#/, '');
 
   return (
     <div className="py-10 sm:py-12">
+      {/* Icon Inspection Modal */}
+      {inspectIcon && (
+        <IconDetailModal
+          iconName={inspectIcon}
+          initialColor={color}
+          onClose={() => setInspectIcon(null)}
+        />
+      )}
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="font-sans text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl dark:text-zinc-50">
-              Icon Catalog
+              Icon Catalog & Variations
             </h1>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              Search 200,000+ vector icons across Simple Icons, Material Symbols, and Iconify.
+              Browse 200,000+ icons. Click any card to inspect multiple set variations (Outline, Rounded, Sharp).
             </p>
           </div>
 
@@ -132,7 +147,7 @@ export default function Library() {
             <kbd className="rounded border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-zinc-700 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300">
               /
             </kbd>
-            <span className="hidden sm:inline">to search &bull; Click card to add to batch sprite</span>
+            <span className="hidden sm:inline">to search &bull; Click to view variations & code</span>
           </div>
         </div>
 
@@ -174,9 +189,9 @@ export default function Library() {
                     key={s}
                     type="button"
                     onClick={() => setIconSize(s)}
-                    className={`rounded px-2.5 py-1 font-mono text-xs font-medium transition ${
+                    className={`rounded px-2.5 py-1 font-mono text-xs font-medium transition active:scale-95 ${
                       iconSize === s
-                        ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950'
+                        ? 'bg-blue-600 text-white font-bold shadow-sm'
                         : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
                     }`}
                   >
@@ -201,7 +216,7 @@ export default function Library() {
                     type="button"
                     onClick={() => setColor(swatch)}
                     style={{ backgroundColor: swatch }}
-                    className={`h-4 w-4 rounded-full border border-zinc-300 transition-transform dark:border-zinc-700 ${
+                    className={`h-4 w-4 rounded-full border border-zinc-300 transition-transform active:scale-95 dark:border-zinc-700 ${
                       color === swatch ? 'scale-110 ring-2 ring-blue-500' : ''
                     }`}
                   />
@@ -212,35 +227,35 @@ export default function Library() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                className="rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 active:scale-95 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800"
               >
                 Reset
               </button>
             </div>
           </div>
 
-          {/* Category Tabs */}
-          <div className="mt-4 flex items-center gap-1 overflow-x-auto border-t border-zinc-100 pt-3 scrollbar-none dark:border-zinc-800/80">
+          {/* Clean Wrapped Category Pills (No Ugly Scrollbar!) */}
+          <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-zinc-100 pt-3 dark:border-zinc-800/80">
             <button
               type="button"
               onClick={() => setSelectedCat('all')}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition ${
+              className={`rounded-lg px-3 py-1 text-xs font-medium transition active:scale-95 ${
                 selectedCat === 'all'
-                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950'
-                  : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                  ? 'bg-blue-600 text-white font-bold shadow-sm'
+                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
               }`}
             >
-              All
+              All Categories
             </button>
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCat(cat.id)}
-                className={`whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium transition ${
+                className={`rounded-lg px-3 py-1 text-xs font-medium transition active:scale-95 ${
                   selectedCat === cat.id
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950'
-                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                    ? 'bg-blue-600 text-white font-bold shadow-sm'
+                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
                 }`}
               >
                 {cat.name}
@@ -258,7 +273,7 @@ export default function Library() {
               </svg>
               <h3 className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">No icons found</h3>
               <p className="mt-1 text-xs text-zinc-500">
-                No matching icons for "{debouncedQuery}". Try a different keyword or generate it with AI!
+                No matching icons for "{debouncedQuery}". Try another keyword or create one with the AI generator!
               </p>
             </div>
           )}
@@ -280,34 +295,44 @@ export default function Library() {
                 <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
                   {iconsToShow.map((name) => {
                     const selected = isInCart(name);
-                    const renderUrl = getRenderUrl({
-                      q: name,
-                      color: color.replace('#', ''),
-                      size: iconSize,
-                      set: cat.id === 'brands' ? 'simple-icons' : null,
-                    });
-                    const fallbackUrl = cat.id === 'brands'
-                      ? `https://api.iconify.design/simple-icons/${name}.svg?color=%23${color.replace('#', '')}`
-                      : `https://api.iconify.design/material-symbols/${name.replace(/_/g, '-')}.svg?color=%23${color.replace('#', '')}`;
+                    const isBrand = cat.id === 'brands';
+                    // Fast reliable direct multi-CDN source for client previews
+                    const fastPreviewSrc = isBrand
+                      ? `https://api.iconify.design/simple-icons/${name}.svg?color=%23${cleanColorHex}&width=${iconSize}&height=${iconSize}`
+                      : `https://api.iconify.design/material-symbols/${name.replace(/_/g, '-')}.svg?color=%23${cleanColorHex}&width=${iconSize}&height=${iconSize}`;
 
                     return (
                       <div
                         key={name}
-                        onClick={() => toggleInCart(name)}
-                        className={`group relative flex flex-col items-center justify-center rounded-lg border p-3 transition-all duration-150 cursor-pointer ${
+                        onClick={() => setInspectIcon(name)}
+                        className={`group relative flex flex-col items-center justify-center rounded-xl border p-3.5 transition-all duration-150 cursor-pointer active:scale-95 ${
                           selected
                             ? 'border-blue-600 bg-blue-50/50 shadow-sm ring-1 ring-blue-600 dark:border-blue-500 dark:bg-blue-950/40 dark:ring-blue-500'
-                            : 'border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700'
+                            : 'border-zinc-200 bg-white hover:border-blue-400 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700'
                         }`}
                       >
-                        {/* Selected indicator */}
-                        {selected && (
-                          <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white">
-                            <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        {/* Cart toggle pill */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleInCart(name);
+                          }}
+                          title={selected ? 'Remove from batch sprite' : 'Add to batch sprite'}
+                          className={`absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-md text-xs transition ${
+                            selected
+                              ? 'bg-blue-600 text-white'
+                              : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800'
+                          }`}
+                        >
+                          {selected ? (
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                              <polyline points="20 6 9 17 4 12" />
                             </svg>
-                          </span>
-                        )}
+                          ) : (
+                            <span className="text-sm font-bold leading-none">+</span>
+                          )}
+                        </button>
 
                         {/* Copy URL Hover Button */}
                         <button
@@ -323,19 +348,15 @@ export default function Library() {
 
                         {/* Icon Image */}
                         <div
-                          className="flex items-center justify-center"
+                          className="flex items-center justify-center pointer-events-none"
                           style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
                         >
                           <img
-                            src={renderUrl}
+                            src={fastPreviewSrc}
                             alt={name}
                             loading="lazy"
                             width={iconSize}
                             height={iconSize}
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src = fallbackUrl;
-                            }}
                           />
                         </div>
 
@@ -372,28 +393,41 @@ export default function Library() {
                 {iconifyResults.map((id) => {
                   const [prefix, iconName] = id.split(':');
                   const selected = isInCart(iconName);
-                  const iconifyUrl = `https://api.iconify.design/${prefix}/${iconName}.svg?color=%23${color.replace('#', '')}&width=${iconSize}&height=${iconSize}`;
+                  const iconifyUrl = `https://api.iconify.design/${prefix}/${iconName}.svg?color=%23${cleanColorHex}&width=${iconSize}&height=${iconSize}`;
 
                   return (
                     <div
                       key={id}
-                      onClick={() => toggleInCart(iconName)}
-                      className={`group relative flex flex-col items-center justify-center rounded-lg border p-3 transition cursor-pointer ${
+                      onClick={() => setInspectIcon(iconName)}
+                      className={`group relative flex flex-col items-center justify-center rounded-xl border p-3.5 transition active:scale-95 cursor-pointer ${
                         selected
                           ? 'border-blue-600 bg-blue-50/50 shadow-sm ring-1 ring-blue-600 dark:border-blue-500 dark:bg-blue-950/40'
-                          : 'border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700'
+                          : 'border-zinc-200 bg-white hover:border-blue-400 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700'
                       }`}
                     >
-                      {selected && (
-                        <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-white">
-                          <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleInCart(iconName);
+                        }}
+                        className={`absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-md text-xs transition ${
+                          selected
+                            ? 'bg-blue-600 text-white'
+                            : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800'
+                        }`}
+                      >
+                        {selected ? (
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                            <polyline points="20 6 9 17 4 12" />
                           </svg>
-                        </span>
-                      )}
+                        ) : (
+                          <span className="text-sm font-bold leading-none">+</span>
+                        )}
+                      </button>
 
                       <div
-                        className="flex items-center justify-center"
+                        className="flex items-center justify-center pointer-events-none"
                         style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
                       >
                         <img

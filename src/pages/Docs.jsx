@@ -276,7 +276,7 @@ export default function Docs() {
               <CodeBlock
                 code={`{
   "status": "operational",
-  "version": "3.0.0",
+  "version": "3.5.0",
   "region": "edge",
   "dependencies": {
     "iconify": "operational"

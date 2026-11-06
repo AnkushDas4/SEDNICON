@@ -9,6 +9,8 @@ import {
   svgToAndroidXml,
 } from '../utils/api';
 import CodeBlock from '../components/CodeBlock';
+import CustomSelect from '../components/CustomSelect';
+import ProviderLogo from '../components/ProviderLogos';
 import { useToast } from '../components/Toast';
 
 export default function Generate() {
@@ -25,6 +27,8 @@ export default function Generate() {
   // AI Provider State
   const [provider, setProvider] = useState('gemini');
   const [model, setModel] = useState(PROVIDER_MODELS.gemini[0]);
+  const [isCustomModel, setIsCustomModel] = useState(false);
+  const [customModelName, setCustomModelName] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [saveKeyLocally, setSaveKeyLocally] = useState(false);
@@ -54,6 +58,7 @@ export default function Generate() {
     // Update default model for provider
     if (PROVIDER_MODELS[provider]?.length) {
       setModel(PROVIDER_MODELS[provider][0]);
+      setIsCustomModel(false);
     }
   }, [provider]);
 
@@ -87,6 +92,8 @@ export default function Generate() {
     }
   };
 
+  const effectiveModel = isCustomModel && customModelName.trim() ? customModelName.trim() : model;
+
   const handleGenerate = async () => {
     const cleanPrompt = prompt.trim();
     if (!cleanPrompt) {
@@ -106,7 +113,7 @@ export default function Generate() {
     }
 
     setGenerating(true);
-    setStatusMessage(`Prompting ${model}...`);
+    setStatusMessage(`Prompting ${effectiveModel}...`);
     setElapsedTime(0);
 
     const startTime = Date.now();
@@ -119,7 +126,7 @@ export default function Generate() {
       const payload = {
         prompt: cleanPrompt,
         provider,
-        model,
+        model: effectiveModel,
         size,
         color: color.replace(/^#/, ''),
         style: renderStyle,
@@ -144,7 +151,7 @@ export default function Generate() {
       setCurrentSvg(data.svg);
       setCurrentMeta({
         provider,
-        model,
+        model: effectiveModel,
         time: totalTime,
         prompt: cleanPrompt,
       });
@@ -156,7 +163,7 @@ export default function Generate() {
           svg: data.svg,
           prompt: cleanPrompt,
           provider,
-          model,
+          model: effectiveModel,
           color,
           size,
         },
@@ -204,6 +211,10 @@ export default function Generate() {
         return currentSvg;
     }
   };
+
+  // Model options for selected provider + Custom option
+  const providerModels = (PROVIDER_MODELS[provider] || []).map((m) => ({ value: m, label: m }));
+  const modelOptions = [...providerModels, { value: '__custom__', label: '✏️ Custom Model Name...' }];
 
   return (
     <div className="py-10 sm:py-12">
@@ -257,17 +268,22 @@ export default function Generate() {
                 {/* Size */}
                 <div>
                   <label className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
-                    Dimension (px)
+                    Dimension
                   </label>
-                  <select
-                    value={size}
-                    onChange={(e) => handleSizeChange(e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-xs text-zinc-800 focus:border-blue-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
-                  >
-                    {[16, 24, 32, 48, 64, 128].map((s) => (
-                      <option key={s} value={s}>{s}px</option>
-                    ))}
-                  </select>
+                  <div className="mt-1.5">
+                    <CustomSelect
+                      value={size}
+                      onChange={(v) => handleSizeChange(v)}
+                      options={[
+                        { value: 16, label: '16px (Micro)' },
+                        { value: 24, label: '24px (Standard)' },
+                        { value: 32, label: '32px (Medium)' },
+                        { value: 48, label: '48px (Large)' },
+                        { value: 64, label: '64px (Extra)' },
+                        { value: 128, label: '128px (Hero)' },
+                      ]}
+                    />
+                  </div>
                 </div>
 
                 {/* Stroke Width */}
@@ -275,17 +291,19 @@ export default function Generate() {
                   <label className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
                     Stroke Width
                   </label>
-                  <select
-                    value={strokeWidth}
-                    onChange={(e) => setStrokeWidth(parseFloat(e.target.value))}
-                    className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-xs text-zinc-800 focus:border-blue-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
-                  >
-                    <option value={1}>1 — Thin</option>
-                    <option value={1.5}>1.5</option>
-                    <option value={2}>2 — Regular</option>
-                    <option value={2.5}>2.5</option>
-                    <option value={3}>3 — Bold</option>
-                  </select>
+                  <div className="mt-1.5">
+                    <CustomSelect
+                      value={strokeWidth}
+                      onChange={(v) => setStrokeWidth(parseFloat(v))}
+                      options={[
+                        { value: 1, label: '1 — Thin hairline' },
+                        { value: 1.5, label: '1.5 — Light' },
+                        { value: 2, label: '2 — Regular' },
+                        { value: 2.5, label: '2.5 — Medium' },
+                        { value: 3, label: '3 — Bold' },
+                      ]}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -319,20 +337,23 @@ export default function Generate() {
                     Render Style
                   </label>
                   <div className="mt-1.5 flex rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-800 dark:bg-zinc-950">
-                    {['fill', 'stroke'].map((st) => (
-                      <button
-                        key={st}
-                        type="button"
-                        onClick={() => setRenderStyle(st)}
-                        className={`flex-1 rounded py-1 text-xs font-medium capitalize transition ${
-                          renderStyle === st
-                            ? 'bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-zinc-100'
-                            : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
-                        }`}
-                      >
-                        {st}
-                      </button>
-                    ))}
+                    {['fill', 'stroke'].map((st) => {
+                      const isActive = renderStyle === st;
+                      return (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => setRenderStyle(st)}
+                          className={`flex-1 rounded py-1 text-xs font-medium capitalize transition active:scale-95 ${
+                            isActive
+                              ? 'bg-blue-600 text-white font-bold shadow-sm'
+                              : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
+                          }`}
+                        >
+                          {st}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -341,63 +362,89 @@ export default function Generate() {
                     Corner Style
                   </label>
                   <div className="mt-1.5 flex rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-800 dark:bg-zinc-950">
-                    {['round', 'sharp'].map((cs) => (
-                      <button
-                        key={cs}
-                        type="button"
-                        onClick={() => setCornerStyle(cs)}
-                        className={`flex-1 rounded py-1 text-xs font-medium capitalize transition ${
-                          cornerStyle === cs
-                            ? 'bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-zinc-100'
-                            : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
-                        }`}
-                      >
-                        {cs}
-                      </button>
-                    ))}
+                    {['round', 'sharp'].map((cs) => {
+                      const isActive = cornerStyle === cs;
+                      return (
+                        <button
+                          key={cs}
+                          type="button"
+                          onClick={() => setCornerStyle(cs)}
+                          className={`flex-1 rounded py-1 text-xs font-medium capitalize transition active:scale-95 ${
+                            isActive
+                              ? 'bg-blue-600 text-white font-bold shadow-sm'
+                              : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
+                          }`}
+                        >
+                          {cs}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Provider & BYOK Card */}
+            {/* Provider & BYOK Card with Authentic Logos */}
             <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
               <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                 AI Provider Selection
               </h2>
 
-              {/* Provider Grid */}
+              {/* Provider Grid with Authentic Logos */}
               <div className="mt-3 grid grid-cols-4 gap-2">
-                {PROVIDERS_LIST.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setProvider(p.id)}
-                    className={`flex flex-col items-center justify-center rounded-lg border p-2.5 text-xs font-medium transition ${
-                      provider === p.id
-                        ? 'border-blue-600 bg-blue-50/50 text-blue-700 shadow-sm ring-1 ring-blue-600 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-300'
-                        : 'border-zinc-200 bg-zinc-50/50 text-zinc-700 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-300 dark:hover:border-zinc-700'
-                    }`}
-                  >
-                    <span>{p.name}</span>
-                  </button>
-                ))}
+                {PROVIDERS_LIST.map((p) => {
+                  const isSelected = provider === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setProvider(p.id)}
+                      className={`flex flex-col items-center justify-center rounded-xl border p-3 text-xs font-medium transition active:scale-95 ${
+                        isSelected
+                          ? 'border-blue-600 bg-blue-50/60 text-blue-700 shadow-sm ring-1 ring-blue-600 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-300'
+                          : 'border-zinc-200 bg-zinc-50/50 text-zinc-700 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-300 dark:hover:border-zinc-700'
+                      }`}
+                    >
+                      <div className="flex h-6 w-6 items-center justify-center">
+                        <ProviderLogo provider={p.id} />
+                      </div>
+                      <span className="mt-1.5 font-semibold">{p.name}</span>
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Model Dropdown */}
+              {/* Model Dropdown + Custom Model Option */}
               <div className="mt-4">
                 <label className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
                   Model
                 </label>
-                <select
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 font-mono text-xs text-zinc-800 focus:border-blue-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
-                >
-                  {(PROVIDER_MODELS[provider] || []).map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
+                <div className="mt-1.5">
+                  <CustomSelect
+                    value={isCustomModel ? '__custom__' : model}
+                    onChange={(v) => {
+                      if (v === '__custom__') {
+                        setIsCustomModel(true);
+                      } else {
+                        setIsCustomModel(false);
+                        setModel(v);
+                      }
+                    }}
+                    options={modelOptions}
+                  />
+                </div>
+
+                {isCustomModel && (
+                  <div className="mt-2 animate-in fade-in duration-150">
+                    <input
+                      type="text"
+                      value={customModelName}
+                      onChange={(e) => setCustomModelName(e.target.value)}
+                      placeholder="Type custom model name (e.g. gpt-4o-2025-05-15)..."
+                      className="w-full rounded-lg border border-blue-500 bg-zinc-50 px-3 py-1.5 font-mono text-xs text-zinc-900 focus:outline-none dark:bg-zinc-950 dark:text-zinc-100"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* API Key */}
@@ -411,56 +458,83 @@ export default function Generate() {
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     placeholder={`Enter your ${provider} secret key...`}
-                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 py-1.5 pl-3 pr-10 font-mono text-xs text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 py-2 pl-3 pr-14 font-mono text-xs text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
                   />
                   <button
                     type="button"
                     onClick={() => setShowKey(!showKey)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 font-mono text-[11px] font-semibold text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
                   >
-                    {showKey ? 'Hide' : 'Show'}
+                    {showKey ? 'HIDE' : 'SHOW'}
                   </button>
                 </div>
 
-                <div className="mt-2.5 flex items-center justify-between text-[11px]">
-                  <label className="flex items-center gap-1.5 cursor-pointer text-zinc-600 dark:text-zinc-400">
-                    <input
-                      type="checkbox"
-                      checked={saveKeyLocally}
-                      onChange={(e) => setSaveKeyLocally(e.target.checked)}
-                      className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-700"
+                {/* Refined Toggle Switch for Remember Key */}
+                <div className="mt-3.5 flex items-center justify-between rounded-lg border border-zinc-200/80 bg-zinc-50/70 p-2.5 dark:border-zinc-800/80 dark:bg-zinc-950/70">
+                  <div className="flex items-center gap-2">
+                    <svg className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                        Browser-Encrypted Key Storage
+                      </span>
+                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                        Saved in client localStorage only &bull; Never leaves your device
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={saveKeyLocally}
+                    onClick={() => setSaveKeyLocally(!saveKeyLocally)}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      saveKeyLocally ? 'bg-blue-600' : 'bg-zinc-300 dark:bg-zinc-700'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        saveKeyLocally ? 'translate-x-4' : 'translate-x-0'
+                      }`}
                     />
-                    <span>Remember key in browser localStorage</span>
-                  </label>
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Action Trigger Button */}
-            <button
-              type="button"
-              disabled={generating}
-              onClick={handleGenerate}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 active:scale-[0.98] disabled:opacity-50"
-            >
-              {generating ? (
-                <>
-                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  <span>Generating ({elapsedTime}s)...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                  </svg>
-                  <span>Generate Vector Icon</span>
-                  <kbd className="ml-1 rounded bg-blue-700/60 px-1.5 py-0.5 font-mono text-[10px]">⌘↵</kbd>
-                </>
-              )}
-            </button>
+            {/* Clean Single Action Trigger Button (No Nested Buttons!) */}
+            <div className="space-y-2">
+              <button
+                type="button"
+                disabled={generating}
+                onClick={handleGenerate}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 active:scale-[0.98] disabled:opacity-50"
+              >
+                {generating ? (
+                  <>
+                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    <span>Generating Vector Icon ({elapsedTime}s)...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                    </svg>
+                    <span>Generate Vector Icon</span>
+                  </>
+                )}
+              </button>
+
+              <p className="text-center font-mono text-[11px] text-zinc-400 dark:text-zinc-500">
+                Shortcut: <span className="text-zinc-600 dark:text-zinc-300">⌘↵</span> or <span className="text-zinc-600 dark:text-zinc-300">Ctrl+Enter</span> to generate
+              </p>
+            </div>
           </div>
 
           {/* ── RIGHT PANEL: PREVIEW & CODE ── */}
@@ -480,20 +554,23 @@ export default function Generate() {
                 </div>
 
                 {currentSvg && (
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={handleDownloadSvg}
-                      className="rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100 active:scale-95 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
-                    >
-                      Download SVG
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDownloadSvg}
+                    className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 active:scale-95 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
+                  >
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    <span>Download SVG</span>
+                  </button>
                 )}
               </div>
 
               {/* Visual Display Stage */}
-              <div className="relative mt-4 flex min-h-[260px] items-center justify-center rounded-lg border border-zinc-200 bg-checker p-6 dark:border-zinc-800">
+              <div className="relative mt-4 flex min-h-[260px] items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50/70 p-8 dark:border-zinc-800 dark:bg-zinc-950/70">
                 {currentSvg ? (
                   <div
                     dangerouslySetInnerHTML={{ __html: currentSvg }}
@@ -505,12 +582,12 @@ export default function Generate() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <p className="mt-2 text-xs font-medium">Your generated icon will appear here</p>
-                    <p className="mt-0.5 text-[11px]">Type a prompt and press Generate</p>
+                    <p className="mt-0.5 text-[11px]">Type a prompt and press Generate Icon</p>
                   </div>
                 )}
               </div>
 
-              {/* Multi-Format Export Tabs */}
+              {/* Multi-Format Export Tabs with Click Highlight */}
               {currentSvg && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between border-b border-zinc-200 pb-2 dark:border-zinc-800">
@@ -521,20 +598,23 @@ export default function Generate() {
                         { id: 'url', label: 'Data URI' },
                         { id: 'flutter', label: 'Flutter' },
                         { id: 'android', label: 'Android' },
-                      ].map((tab) => (
-                        <button
-                          key={tab.id}
-                          type="button"
-                          onClick={() => setExportTab(tab.id)}
-                          className={`rounded px-2.5 py-1 text-xs font-semibold tracking-wider transition ${
-                            exportTab === tab.id
-                              ? 'bg-blue-600 text-white'
-                              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
-                          }`}
-                        >
-                          {tab.label}
-                        </button>
-                      ))}
+                      ].map((tab) => {
+                        const isTabActive = exportTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => setExportTab(tab.id)}
+                            className={`rounded-md px-3 py-1 text-xs font-semibold tracking-wider transition active:scale-95 ${
+                              isTabActive
+                                ? 'bg-blue-600 text-white font-bold shadow-sm'
+                                : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
+                            }`}
+                          >
+                            {tab.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -548,7 +628,7 @@ export default function Generate() {
               )}
             </div>
 
-            {/* Session History Strip */}
+            {/* Session History Strip with Click Highlights */}
             <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
               <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                 Session Generations ({sessionHistory.length})
@@ -573,7 +653,7 @@ export default function Generate() {
                         setPrompt(item.prompt);
                         addToast(`Loaded "${item.prompt.slice(0, 20)}..." into workbench`, 'info');
                       }}
-                      className="group flex flex-col items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 p-2 transition hover:border-blue-500 hover:bg-blue-50/20 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-blue-500"
+                      className="group flex flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 transition hover:border-blue-500 hover:bg-blue-50/20 active:scale-95 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-blue-500"
                     >
                       <div
                         dangerouslySetInnerHTML={{ __html: item.svg }}

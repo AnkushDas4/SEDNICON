@@ -72,18 +72,18 @@
   background-position: 0 0, 8px 8px;
 }
 
-/* Ticker marquee animation */
-@keyframes ticker {
-  0% { transform: translateX(0); }
+/* Continuous infinite marquee */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
 }
 
-.animate-ticker {
+.animate-marquee-continuous {
   display: flex;
   width: max-content;
-  animation: ticker 28s linear infinite;
+  animation: marquee 30s linear infinite;
 }
 
-.animate-ticker:hover {
+.animate-marquee-continuous:hover {
   animation-play-state: paused;
 }

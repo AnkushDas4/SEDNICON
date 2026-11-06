@@ -194,7 +194,7 @@ export default function Status() {
             <div className="px-3">
               <span className="text-[11px] text-zinc-500">Engine Version</span>
               <div className="mt-1 font-mono text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                {data?.version || 'v3.0.0'}
+                {data?.version || 'v3.5.0'}
               </div>
             </div>
             <div className="px-3">

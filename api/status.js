@@ -5,8 +5,8 @@
 
 export const config = { runtime: 'edge' };
 
-const VERSION = '3.0.0';
-const RELEASED = '2026-06-14';
+const VERSION = '3.5.0';
+const RELEASED = '2026-11-06';
 
 export default async function handler(request) {
   if (request.method === 'OPTIONS') {
