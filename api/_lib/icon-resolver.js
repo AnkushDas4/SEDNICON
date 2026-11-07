@@ -55,34 +55,8 @@ export const PARALLEL_PROBE_SETS = ['material-symbols', 'lucide', 'heroicons'];
 
 export const FALLBACK_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>';
 
-// ─── SVG SANITIZER ──────────────────────────────────────────────────────────
-export function sanitizeSvg(svgString) {
-  if (!svgString || typeof svgString !== 'string') return '';
-
-  let svg = svgString;
-
-  // 1. Strip dangerous tags and their content repeatedly to handle nested/unbalanced wrappers
-  let prev;
-  const dangerousBlocks = /<(script|iframe|object|embed|foreignObject)\b[\s\S]*?(?:<\/\1>|$)/gi;
-  const dangerousTags = /<\/?(?:script|iframe|object|embed|foreignObject)\b[^>]*>/gi;
-  do {
-    prev = svg;
-    svg = svg.replace(dangerousBlocks, '');
-    svg = svg.replace(dangerousTags, '');
-  } while (svg !== prev);
-
-  // 2. Strip inline event handlers (onload, onclick, onerror, etc.) preceded by space, newline, or slash
-  svg = svg.replace(/[\s/]on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
-
-  // 3. Strip dangerous link href and xlink:href schemas with double, single, or no quotes
-  svg = svg.replace(/(?:href|xlink:href)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi, (match, dVal, sVal, uVal) => {
-    const val = (dVal ?? sVal ?? uVal ?? '').trim();
-    if (/^(?:javascript|data|vbscript|file):/i.test(val)) return '';
-    return match;
-  });
-
-  return svg;
-}
+import { sanitizeSvg, validateSvg } from './svg-sanitizer.js';
+export { sanitizeSvg, validateSvg };
 
 // ─── SVG TRANSFORMER (Now with Animations) ──────────────────────────────────
 export function svgTransformer(svgRaw, size, cleanColor, anim) {
