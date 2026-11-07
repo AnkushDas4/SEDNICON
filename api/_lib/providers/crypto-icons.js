@@ -7,6 +7,25 @@ import { registerProvider } from './registry.js';
 
 const CRYPTO_VERSION = '0.18.1';
 
+const CRYPTO_TICKER_MAP = {
+  bitcoin: 'btc',
+  ethereum: 'eth',
+  solana: 'sol',
+  dogecoin: 'doge',
+  cardano: 'ada',
+  tether: 'usdt',
+  ripple: 'xrp',
+  litecoin: 'ltc',
+  polkadot: 'dot',
+  avalanche: 'avax',
+  chainlink: 'link',
+  uniswap: 'uni',
+  monero: 'xmr',
+  binance: 'bnb',
+  stellar: 'xlm',
+  cosmos: 'atom',
+};
+
 export const cryptoIconsProvider = {
   id: 'crypto-icons',
   name: 'Cryptocurrency Icons',
@@ -20,7 +39,10 @@ export const cryptoIconsProvider = {
   async resolve(collection, iconName, options = {}) {
     const validStyles = new Set(['color', 'black', 'white', 'icon']);
     const style = validStyles.has(options.style) ? options.style : 'color';
-    const cleanName = iconName.toLowerCase().trim();
+    let cleanName = iconName.toLowerCase().trim();
+    if (CRYPTO_TICKER_MAP[cleanName]) {
+      cleanName = CRYPTO_TICKER_MAP[cleanName];
+    }
 
     const url = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@${CRYPTO_VERSION}/svg/${style}/${cleanName}.svg`;
 

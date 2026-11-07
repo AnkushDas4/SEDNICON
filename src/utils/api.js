@@ -9,9 +9,9 @@ export function getApiBaseUrl() {
   return 'https://sednicon.sednium.com';
 }
 
-export function getRenderUrl({ q = 'circle', color = 'black', size = 24, anim = null, set = null }) {
+export function getRenderUrl({ q = 'circle', color = 'black', size = 24, anim = null, set = null, style = null }) {
   const base = getApiBaseUrl();
-  const cleanQ = encodeURIComponent(String(q || 'circle').trim());
+  const cleanQ = encodeURIComponent(String(q || 'circle').trim().toLowerCase());
   const cleanColor = encodeURIComponent(String(color || 'black').replace(/^#/, ''));
   const cleanSize = Math.min(2048, Math.max(1, parseInt(size, 10) || 24));
 
@@ -21,6 +21,9 @@ export function getRenderUrl({ q = 'circle', color = 'black', size = 24, anim = 
   }
   if (set) {
     url += `&set=${encodeURIComponent(set)}`;
+  }
+  if (style) {
+    url += `&style=${encodeURIComponent(style)}`;
   }
   return url;
 }

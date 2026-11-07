@@ -51,8 +51,8 @@ export function getOrchestratorCandidates(collection) {
     return [jsdelivr, getProvider('unpkg-npm'), getProvider('iconify-json'), getProvider('iconify-api')].filter(Boolean);
   }
 
-  // 3. Universal collections (Tier 3 JSON package & API mirrors)
-  return [getProvider('iconify-json'), getProvider('iconify-api'), getProvider('jsdelivr-npm'), getProvider('unpkg-npm')].filter(Boolean);
+  // 3. Universal collections (Tier 3 API mirrors primary, JSON package fallback)
+  return [getProvider('iconify-api'), getProvider('iconify-json'), getProvider('jsdelivr-npm'), getProvider('unpkg-npm')].filter(Boolean);
 }
 
 /**

@@ -49,6 +49,8 @@ export const BRAND_SET = new Set([
   'redis','graphql','openai','anthropic','huggingface','cloudflare',
   'netlify','heroku','digitalocean','aws','gcp','azure','npm',
   'gitlab','bitbucket','jira','trello','asana','linear',
+  'bitcoin','btc','ethereum','eth','solana','sol','dogecoin','cardano',
+  'tether','usdt','ripple','xrp','binance','bnb','coinbase',
 ]);
 
 export const FALLBACK_SETS = [
@@ -116,7 +118,7 @@ export async function resolveIcon(q, setHint, options = {}) {
 
   // 5. Tech / brand icons
   if (BRAND_SET.has(cleanQ)) {
-    for (const brandCol of ['simple-icons', 'devicon', 'svgl']) {
+    for (const brandCol of ['simple-icons', 'crypto', 'devicon', 'svgl']) {
       const orchestrated = await resolveWithOrchestration(brandCol, cleanQ, options);
       if (orchestrated) {
         return {
@@ -128,11 +130,29 @@ export async function resolveIcon(q, setHint, options = {}) {
     }
   }
 
-  // 6. Multi-set probing in parallel across primary sets
-  const probes = await Promise.all(
-    PARALLEL_PROBE_SETS.map((p) => resolveWithOrchestration(p, cleanQ, options))
-  );
-  const hit = probes.find((r) => r && r.svg);
+  // 6. Multi-set probing in parallel across primary sets (resolves as soon as any set succeeds)
+  const hit = await new Promise((resolve) => {
+    let pending = PARALLEL_PROBE_SETS.length;
+    let found = false;
+
+    for (const p of PARALLEL_PROBE_SETS) {
+      resolveWithOrchestration(p, cleanQ, options)
+        .then((res) => {
+          if (res && res.svg && !found) {
+            found = true;
+            resolve(res);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          pending--;
+          if (pending === 0 && !found) {
+            resolve(null);
+          }
+        });
+    }
+  });
+
   if (hit) {
     return {
       svg: sanitizeSvg(hit.svg),

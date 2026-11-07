@@ -82,17 +82,31 @@ export default async function handler(request) {
   // ── Resolve icon across multi-provider infrastructure ──
   const { svg: svgRaw, source, provider = 'iconify' } = await resolveIcon(q, setHint, { style });
 
+  const isFallback = source === 'generic-fallback';
+
   // Apply style transforms & animations
   const preserveOriginal = style === 'original' || style === 'color';
   const output = svgTransformer(svgRaw, size, cleanColor, anim, { style, preserveOriginal });
 
-  // Cache result in edge cache
-  await cacheSet(cacheKey, { svg: output, source, provider });
+  // Cache result in edge cache (only if NOT generic fallback; short 10s for fallbacks)
+  if (!isFallback) {
+    await cacheSet(cacheKey, { svg: output, source, provider });
+  } else {
+    await cacheSet(cacheKey, { svg: output, source, provider }, 10);
+  }
+
+  // Response headers:
+  // If fallback, NEVER let Vercel CDN or browser cache it as immutable!
+  const cacheControl = isFallback
+    ? 'no-cache, no-store, max-age=0, must-revalidate'
+    : 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000, immutable';
 
   return new Response(output, {
     headers: corsHeaders(request, {
       'Content-Type': 'image/svg+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000, immutable',
+      'Cache-Control': cacheControl,
+      'CDN-Cache-Control': isFallback ? 'no-store' : 'public, max-age=604800',
+      'Vercel-CDN-Cache-Control': isFallback ? 'no-store' : 'public, max-age=604800',
       'X-Sednicon-Source': source,
       'X-Sednicon-Cache': 'MISS',
       'X-Sednicon-Provider': provider,
