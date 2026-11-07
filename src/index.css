@@ -87,3 +87,26 @@
 .animate-marquee-continuous:hover {
   animation-play-state: paused;
 }
+
+/* Ambient subtle float for hero icon backdrop */
+@keyframes heroBackdropFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(-2.5deg) scale(1.05);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-2.2deg) scale(1.05);
+  }
+}
+
+.animate-hero-backdrop {
+  animation: heroBackdropFloat 24s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-backdrop {
+    animation: none !important;
+    transform: rotate(-2.5deg) scale(1.05) !important;
+  }
+}

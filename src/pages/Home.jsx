@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getRenderUrl } from '../utils/api';
 import CodeBlock from '../components/CodeBlock';
 import CustomSelect from '../components/CustomSelect';
+import HeroIconBackdrop from '../components/HeroIconBackdrop';
 import { useToast } from '../components/Toast';
 
 const PRESET_ICONS = ['github', 'vercel', 'sparkles', 'terminal', 'rocket', 'heart', 'settings'];
@@ -123,7 +124,8 @@ export default function Home() {
     <div className="flex flex-col">
       {/* ── HERO SECTION ── */}
       <section className="relative overflow-hidden border-b border-zinc-200 py-20 transition-colors dark:border-zinc-800 lg:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <HeroIconBackdrop />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="font-sans text-4xl font-extrabold tracking-tight text-zinc-950 sm:text-6xl dark:text-zinc-50">
               Instant Vector Icons <br />
