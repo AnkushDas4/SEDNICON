@@ -20,7 +20,7 @@ const BACKDROP_ROWS = [
   },
   // Row 1 - Upper-middle
   {
-    offsetClass: 'translate-x-12 sm:translate-x-16',
+    offsetClass: 'translate-x-6 sm:translate-x-14',
     icons: [
       { name: 'rust', size: 40 },
       { name: 'code', size: 46 },
@@ -35,7 +35,7 @@ const BACKDROP_ROWS = [
   },
   // Row 2 - Upper flank (around headline)
   {
-    offsetClass: '-translate-x-8 sm:-translate-x-12',
+    offsetClass: '-translate-x-4 sm:-translate-x-10',
     icons: [
       { name: 'typescript', size: 42 },
       { name: 'git', size: 38 },
@@ -50,7 +50,7 @@ const BACKDROP_ROWS = [
   },
   // Row 3 - Lower flank (around CTA)
   {
-    offsetClass: 'translate-x-16 sm:translate-x-20',
+    offsetClass: 'translate-x-8 sm:translate-x-16',
     icons: [
       { name: 'golang', size: 44 },
       { name: 'github', size: 48 },
@@ -65,7 +65,7 @@ const BACKDROP_ROWS = [
   },
   // Row 4 - Lower-middle
   {
-    offsetClass: '-translate-x-6 sm:-translate-x-10',
+    offsetClass: '-translate-x-4 sm:-translate-x-8',
     icons: [
       { name: 'javascript', size: 40 },
       { name: 'linux', size: 46 },
@@ -80,7 +80,7 @@ const BACKDROP_ROWS = [
   },
   // Row 5 - Lower boundary
   {
-    offsetClass: 'translate-x-8 sm:translate-x-14',
+    offsetClass: 'translate-x-4 sm:translate-x-12',
     icons: [
       { name: 'swift', size: 42 },
       { name: 'nodejs', size: 46 },
@@ -99,20 +99,20 @@ function HeroIconBackdropComponent() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute -inset-x-16 -inset-y-12 select-none overflow-hidden -z-10"
+      className="pointer-events-none absolute -inset-x-12 -inset-y-10 select-none overflow-hidden -z-10"
       style={{
         maskImage:
-          'radial-gradient(ellipse 75% 65% at 50% 48%, transparent 18%, rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.85) 75%, black 100%)',
+          'radial-gradient(ellipse 65% 50% at 50% 46%, transparent 12%, rgba(0,0,0,0.35) 36%, black 72%)',
         WebkitMaskImage:
-          'radial-gradient(ellipse 75% 65% at 50% 48%, transparent 18%, rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.85) 75%, black 100%)',
+          'radial-gradient(ellipse 65% 50% at 50% 46%, transparent 12%, rgba(0,0,0,0.35) 36%, black 72%)',
       }}
     >
       {/* Tilted & floating atmospheric mosaic layer */}
-      <div className="animate-hero-backdrop flex w-[120%] -left-[10%] relative flex-col justify-between h-full py-4 gap-6 sm:gap-8 lg:gap-10">
+      <div className="animate-hero-backdrop flex w-[120%] -left-[10%] relative flex-col justify-between h-full py-2 sm:py-4 gap-4 sm:gap-7 lg:gap-9">
         {BACKDROP_ROWS.map((row, rowIdx) => (
           <div
             key={rowIdx}
-            className={`flex items-center justify-around gap-8 sm:gap-14 lg:gap-20 transition-transform duration-700 ${row.offsetClass}`}
+            className={`flex items-center justify-around gap-5 sm:gap-10 lg:gap-16 transition-transform duration-700 ${row.offsetClass}`}
           >
             {row.icons.map((icon, iconIdx) => {
               const url = getRenderUrl({
@@ -137,7 +137,7 @@ function HeroIconBackdropComponent() {
                     onError={(e) => {
                       e.currentTarget.style.opacity = '0';
                     }}
-                    className="h-full w-full object-contain invert dark:invert-0 opacity-[0.045] dark:opacity-[0.075] transition-opacity duration-300"
+                    className="h-full w-full object-contain invert dark:invert-0 opacity-[0.09] dark:opacity-[0.14] transition-opacity duration-300"
                   />
                 </div>
               );
