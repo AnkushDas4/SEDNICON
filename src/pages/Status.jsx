@@ -142,25 +142,43 @@ export default function Status() {
             Components & Dependencies
           </h2>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 id: 'render',
                 name: 'Render API',
-                desc: 'Edge SVG resolver & transformer',
+                desc: 'Edge multi-provider SVG resolver & transformer',
+                status: 'operational',
+              },
+              {
+                id: 'jsdelivr',
+                name: 'jsDelivr npm CDN',
+                desc: 'Direct package SVG resolution (Lucide, Tabler, etc.)',
+                status: data?.dependencies?.jsdelivr_npm || 'operational',
+              },
+              {
+                id: 'iconify_json',
+                name: 'Universal Iconify JSON',
+                desc: 'Offline package extractor for 150+ icon collections',
+                status: 'operational',
+              },
+              {
+                id: 'specialized',
+                name: 'Specialized Sources',
+                desc: 'Devicon, SVGL (brand logos) & Crypto tokens',
+                status: 'operational',
+              },
+              {
+                id: 'cache',
+                name: 'L1/L2 Edge Cache',
+                desc: data?.cache?.l2Status === 'connected' ? 'Distributed Upstash L2 + L1 LRU' : 'In-memory bounded L1 LRU active',
                 status: 'operational',
               },
               {
                 id: 'generate',
                 name: 'Generate API',
-                desc: 'BYOK Multi-LLM vector compiler',
+                desc: 'BYOK Multi-LLM vector compiler (8 providers)',
                 status: 'operational',
-              },
-              {
-                id: 'iconify',
-                name: 'Iconify Upstream',
-                desc: '200k+ global icon catalog CDN',
-                status: data?.dependencies?.iconify || 'operational',
               },
             ].map((svc) => (
               <div
@@ -226,6 +244,7 @@ export default function Status() {
               { method: 'GET', path: '/api/sprite', desc: 'Batch SVG symbol sprite compiler' },
               { method: 'POST', path: '/api/generate', desc: 'BYOK AI Vector synthesis' },
               { method: 'GET', path: '/api/status', desc: 'Health check and telemetry JSON' },
+              { method: 'GET', path: '/api/health/providers', desc: 'Provider circuit breaker & latency telemetry' },
             ].map((ep) => (
               <div key={ep.path} className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">

@@ -7,6 +7,7 @@ const SECTIONS = [
   { id: 'sprite-api', label: 'GET /api/sprite' },
   { id: 'generate-api', label: 'POST /api/generate' },
   { id: 'status-api', label: 'GET /api/status' },
+  { id: 'providers-health', label: 'GET /api/health/providers' },
   { id: 'cli', label: 'CLI Tooling (npx)' },
   { id: 'caching', label: 'Edge Caching & Performance' },
 ];
@@ -163,10 +164,16 @@ export default function Docs() {
                       <td className="p-3 font-sans">Built-in SVG keyframe animation: <code>spin</code>, <code>pulse</code>, or <code>bounce</code>.</td>
                     </tr>
                     <tr>
+                      <td className="p-3 text-zinc-950 dark:text-zinc-100">style</td>
+                      <td className="p-3 text-blue-600">string</td>
+                      <td className="p-3">—</td>
+                      <td className="p-3 font-sans">Style variant: <code>outline</code>, <code>filled</code>, <code>solid</code>, <code>regular</code>, <code>duotone</code>, <code>color</code>, <code>black</code>, <code>original</code>, <code>plain</code>, <code>light</code>, <code>dark</code>.</td>
+                    </tr>
+                    <tr>
                       <td className="p-3 text-zinc-950 dark:text-zinc-100">set</td>
                       <td className="p-3 text-blue-600">string</td>
                       <td className="p-3">auto</td>
-                      <td className="p-3 font-sans">Override icon library (e.g. <code>simple-icons</code>, <code>material-symbols</code>).</td>
+                      <td className="p-3 font-sans">Override icon library (e.g. <code>lucide</code>, <code>tabler</code>, <code>devicon</code>, <code>svgl</code>, <code>crypto</code>).</td>
                     </tr>
                   </tbody>
                 </table>
@@ -174,14 +181,13 @@ export default function Docs() {
 
               <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                  Multi-Tier Resolution Hierarchy
+                  Resilient Multi-Provider Resolution Architecture
                 </h4>
-                <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-zinc-600 dark:text-zinc-400">
-                  <li><strong>Explicit prefix:</strong> If query contains <code>prefix:name</code>, routes directly to that set in Iconify.</li>
-                  <li><strong>Curated cache:</strong> Checks high-frequency internal map for instant hits.</li>
-                  <li><strong>Brand match:</strong> Checked against Simple Icons (2,500+ tech and brand marks).</li>
-                  <li><strong>UI symbol:</strong> Checked against Google Material Symbols.</li>
-                  <li><strong>Universal catalog:</strong> Queries the global 200,000+ Iconify index.</li>
+                <ol className="mt-2 list-decimal space-y-1.5 pl-4 text-xs text-zinc-600 dark:text-zinc-400">
+                  <li><strong>Tier 1 (Edge Cache):</strong> High-speed L1 in-memory LRU cache + non-blocking distributed L2 Upstash Redis.</li>
+                  <li><strong>Tier 2 (Direct npm CDNs):</strong> Instant resolution from pinned packages (Lucide, Simple Icons, Tabler, Heroicons, Phosphor, Bootstrap, Feather, Octicons).</li>
+                  <li><strong>Tier 3 (Universal Extractors & Mirrors):</strong> unpkg fallback mirror, Universal Iconify JSON package extractor (100% offline-capable), and 3-host Iconify API failover cluster.</li>
+                  <li><strong>Tier 4 (Specialized Repos):</strong> Devicon (tech stacks), SVGL (modern branded vectors with dark/light modes), and Cryptocurrency Icons.</li>
                 </ol>
               </div>
             </section>
@@ -279,10 +285,59 @@ export default function Docs() {
   "version": "3.5.0",
   "region": "edge",
   "dependencies": {
-    "iconify": "operational"
+    "jsdelivr_npm": "operational",
+    "iconify-json": "operational"
+  },
+  "cache": {
+    "l1Items": 42,
+    "l2Status": "connected"
   },
   "upstream_check_ms": 38,
-  "timestamp": 1740000000000
+  "timestamp": "2026-11-08T00:27:00.000Z"
+}`}
+                language="json"
+              />
+            </section>
+
+            {/* 5.1 GET /api/health/providers */}
+            <section id="providers-health" className="space-y-4 border-t border-zinc-200 pt-10 dark:border-zinc-800">
+              <div className="flex items-center gap-2">
+                <span className="rounded bg-emerald-100 px-2 py-0.5 font-mono text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                  GET
+                </span>
+                <h2 className="font-mono text-lg font-bold text-zinc-950 dark:text-zinc-50">
+                  /api/health/providers
+                </h2>
+              </div>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Live provider telemetry exposing circuit breaker states, rolling latency averages, and success rates without exposing sensitive credentials.
+              </p>
+              <CodeBlock
+                code={`{
+  "status": "operational",
+  "timestamp": "2026-11-08T00:27:00.000Z",
+  "providers": [
+    {
+      "id": "jsdelivr-npm",
+      "health": "operational",
+      "circuitState": "CLOSED",
+      "avgLatencyMs": 35.2,
+      "successRate": 1.0,
+      "totalRequests": 184
+    },
+    {
+      "id": "iconify-json",
+      "health": "operational",
+      "circuitState": "CLOSED",
+      "avgLatencyMs": 48.0,
+      "successRate": 1.0,
+      "totalRequests": 92
+    }
+  ],
+  "cache": {
+    "l1Items": 42,
+    "l2Status": "connected"
+  }
 }`}
                 language="json"
               />

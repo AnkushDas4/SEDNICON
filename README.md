@@ -1,127 +1,123 @@
-# 🎨 Sednicon - Headless Design API
+# 🎨 Sednicon - Multi-Provider Headless Icon Infrastructure
 
 ![Sednicon](https://img.shields.io/badge/Status-Operational-success?style=flat-square)
 ![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-black?style=flat-square&logo=vercel)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
+![Version](https://img.shields.io/badge/Version-v3.5.0-blue?style=flat-square)
 
-**A headless design API for icons that just work.**
+**A resilient, multi-provider icon resolution engine that eliminates single-upstream dependencies.**
 
-Sednicon serves dynamic SVG icons directly over a URL — no packages, no build step, no bundler configuration. It unifies the icon sets developers already reach for (Material Design, FontAwesome, and more) with custom brand logos behind a single, predictable endpoint, and pairs that with a fully private, browser-based AI icon generator for the one-off cases a library can't cover.
-
-The premise is simple: an icon should be as easy to drop into a project as an image is. Name it, style it, paste the URL.
+Sednicon streams vector SVG icons directly over a clean URL — zero runtime packages, zero build-step overhead, and zero single-point-of-failure vulnerabilities. It coordinates multiple independent upstream sources (direct npm CDNs, GitHub repos, specialized catalog APIs, and Universal Iconify JSON package extractors) behind intelligent tier routing, hedged concurrent requests, circuit breakers, and edge caching.
 
 ```
-https://sednicon.sednium.com/api/render?q=rocket&color=ff6600&size=32&anim=spin
+https://sednicon.sednium.com/api/render?q=lucide:rocket&color=2563eb&size=32&anim=pulse
 ```
-
-That's the whole API surface. Everything else in this document is detail.
 
 ---
 
-## Why Sednicon
+## ⚡ Multi-Provider Architecture
 
-Every frontend project eventually accumulates the same tax: an icon package installed for three glyphs, a `node_modules` folder bloated with SVGs you'll never render, and a build pipeline that now needs to know about yet another asset type. Sednicon exists to remove that tax entirely.
+Sednicon coordinates 10 decoupled logical layers:
 
-Because it's a URL, it works anywhere a URL works — raw HTML, React, Vue, Webflow, Framer, WordPress — without a single `npm install`. Because it runs on the edge with zero database dependencies, it resolves in under 50ms worldwide. And because customization lives in query parameters, changing an icon's color, size, or animation is a one-line edit, not a re-import.
+1. **Request Normalization & Validation**: Query sanitation, synonym aliasing (`gear` → `settings`), and style parameter mapping.
+2. **L1 In-Memory LRU Cache**: High-speed bounded edge cache with fine-grained TTL.
+3. **L2 Redis Cache**: Non-blocking Upstash REST / Redis integration with automatic fallback to L1 if unreachable.
+4. **Provider Orchestration**: Request coalescing (in-flight deduplication) and hedged concurrent upstream requests.
+5. **Primary Provider Resolution**: Direct npm CDNs (jsDelivr) for instant SVG resolution.
+6. **Secondary Provider Resolution**: unpkg fallback mirror and Universal Iconify JSON package parser.
+7. **Specialized Providers**: Devicon (tech stacks), SVGL (modern logos), and Cryptocurrency Icons.
+8. **SVG Validation & Sanitization**: Multi-pass security pipeline rejecting scripts, event handlers, XXE injections, and unquoted vectors while preserving gradients, clipPaths, and masks.
+9. **SVG Transformation**: Responsive sizing, animations (`spin`, `pulse`, `bounce`), stroke customization, and automatic multi-color logo preservation.
+10. **Cache Persistence & Streamed Response**: Immediate edge streaming with `X-Sednicon-Provider` and `X-Sednicon-Cache` diagnostic headers.
 
-## Features
+---
 
-- **Universal Compatibility** — drops into raw HTML, React, Vue, Webflow, Framer, and WordPress with no framework-specific tooling.
-- **On-the-Fly Customization** — color (hex or named), size, and animation (`spin`, `pulse`, `bounce`) are all controlled via URL parameters.
-- **Advanced Developer Exports** — export any icon to SVG, PNG, Data URI, React JSX, Flutter (`SvgPicture`), or Android Vector Drawable (XML).
-- **Edge-Ready & Serverless** — built for Vercel Edge Functions, with a pure in-memory cache and no database dependency.
-- **100% Private AI Generation** — bring your own API key (OpenAI, Gemini, Anthropic, Mistral, Groq, Nvidia, and others). Keys live in your browser's `localStorage` and are never sent to or stored on a server.
-- **Smart Fallbacks & Resiliency** — high-fidelity brand SVGs are backed by the multi-CDN Iconify network, with automatic failover and semantic search when an exact match isn't found.
-- **Batch Exporting** — select multiple icons in the Library and download a custom SVG sprite sheet in one pass.
+## 📦 Supported Providers & Collections
 
-## Usage
+| Provider ID | Provider Name | Tier | Supported Collections | Style Variants |
+|---|---|---|---|---|
+| `jsdelivr-npm` | jsDelivr npm CDN | Tier 2 | `lucide`, `simple-icons`, `tabler`, `heroicons`, `phosphor`, `bootstrap-icons`, `feather`, `octicons` | `outline`, `filled`, `solid`, `regular`, `duotone` |
+| `unpkg-npm` | unpkg npm CDN | Tier 3 | `lucide`, `simple-icons`, `tabler`, `heroicons`, `phosphor`, `bootstrap-icons`, `feather`, `octicons` | `outline`, `filled`, `solid`, `regular`, `duotone` |
+| `iconify-json` | Universal Iconify JSON | Tier 3 | 150+ Iconify sets (`material-symbols`, `mdi`, `fluent`, `carbon`, `ri`, etc.) | Fully reconstructed from offline collection JSON packages |
+| `iconify-api` | Iconify API Cluster | Tier 3 | All public Iconify sets via 3-mirror failover (`iconify.design`, `simplesvg.com`, `unisvg.com`) | All upstream styles |
+| `devicon` | Devicon | Tier 4 | `devicon` developer & programming language icons | `original`, `plain` |
+| `svgl` | SVGL | Tier 4 | `svgl` curated company & product brand logos | `light`, `dark` |
+| `crypto-icons` | Cryptocurrency Icons | Tier 4 | `crypto`, `cryptocurrency` token symbols | `color`, `black`, `white`, `icon` |
 
-No heavy npm packages required. Use the URL directly, or reach for the zero-install CLI.
+---
 
-### The Terminal CLI (npx)
+## 🛡️ Upstream Resilience & Circuit Breakers
 
-Download icons straight into your project folder:
+Each upstream provider is guarded by an independent 3-state circuit breaker (`CLOSED`, `OPEN`, `HALF_OPEN`):
+- **Hedged Requests**: Primary provider is started first. If it does not resolve within 350ms, the secondary provider is started concurrently, returning the fastest valid SVG.
+- **Circuit Breaker**: After 5 consecutive upstream failures or timeouts, the circuit transitions to `OPEN` for a 30-second cooldown period, preventing request amplification.
+- **Request Coalescing**: Simultaneous requests for the same uncached icon share a single in-flight upstream promise.
+- **Failover Chain**: If all external CDNs fail, Sednicon gracefully returns a clean fallback SVG placeholder.
+
+---
+
+## 🔌 API Endpoints
+
+### 1. `GET /api/render`
+Render dynamic vector icons as SVG.
 
 ```bash
-npx sednicon get rocket --color ff6600 --size 32
+curl "https://sednicon.sednium.com/api/render?q=devicon:python&style=original&size=48"
 ```
 
-### HTML & No-Code
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `q` | `string` | `circle` | Icon name or `prefix:name` (e.g. `rocket`, `lucide:rocket`, `devicon:react`, `crypto:btc`). |
+| `color` | `string` | `000000` | Hex code or CSS color name. Ignored on multi-color logos unless explicit recolor is needed. |
+| `size` | `number` | `24` | Width and height in pixels (1–2048). |
+| `anim` | `string` | `null` | Optional keyframe animation: `spin`, `pulse`, `bounce`. |
+| `style` | `string` | `null` | Style variant: `outline`, `filled`, `solid`, `regular`, `duotone`, `color`, `black`, `original`, `plain`, `light`, `dark`. |
+| `set` | `string` | `null` | Optional target collection prefix hint. |
 
-The simplest integration — ideal for Webflow, WordPress, or plain HTML:
+### 2. `GET` / `POST /api/sprite`
+Batch icon resolution returning SVG symbol sprites or JSON arrays:
 
-```html
-<img 
-  src="https://sednicon.sednium.com/api/render?q=google&color=red&size=24&anim=bounce" 
-  alt="Google Logo" 
-  width="24" 
-/>
+```bash
+# Query-based GET batching
+curl "https://sednicon.sednium.com/api/sprite?icons=github,twitter,linkedin&size=24&color=000000"
 ```
 
-### React & Next.js
+### 3. `GET /api/status`
+Operational health check and dependency telemetry.
 
-Wrap the endpoint in a component and drive it with props:
+### 4. `GET /api/health/providers`
+Safe telemetry showing circuit states, rolling average latencies, and success rates across all registered providers:
 
-```jsx
-export const Icon = ({ name, color, size = 24 }) => (
-  <img 
-    src={`https://sednicon.sednium.com/api/render?q=${name}&color=${color}&size=${size}`}
-    className="w-6 h-6"
-    alt={`${name} icon`}
-  />
-);
-
-// Usage: <Icon name="github" color="black" />
-```
-
-### CSS Backgrounds
-
-Well suited to pseudo-elements and custom buttons:
-
-```css
-.btn-icon {
-  background-image: url('https://sednicon.sednium.com/api/render?q=menu&color=white&size=20');
-  background-repeat: no-repeat;
-  background-position: center;
+```json
+{
+  "status": "operational",
+  "timestamp": "2026-11-08T00:27:00.000Z",
+  "providers": [
+    {
+      "id": "jsdelivr-npm",
+      "health": "operational",
+      "circuitState": "CLOSED",
+      "avgLatencyMs": 38.4,
+      "successRate": 1.0,
+      "totalRequests": 142
+    }
+  ],
+  "cache": {
+    "l1Items": 28,
+    "l2Status": "connected"
+  }
 }
 ```
 
-## API Parameters
+---
 
-| Parameter | Type   | Default  | Example        | Description                                       |
-|-----------|--------|----------|-----------------|---------------------------------------------------|
-| `q`       | string | `circle` | `rocket`, `google` | The name of the icon or brand.                  |
-| `color`   | string | `black`  | `FF0000`, `blue`   | Hex code (without `#`) or CSS color name.       |
-| `size`    | number | `24`     | `48`, `128`         | The width and height of the SVG, in pixels.     |
-| `anim`    | string | `null`   | `spin`, `pulse`     | Optional CSS animation (`spin`, `pulse`, `bounce`). |
-| `set`     | string | `null`   | `lucide`, `mdi`     | Force a specific icon set, bypassing fallbacks. |
+## 💻 Environment Variables
 
-## Project Structure
-
-Sednicon is split into a frontend configurator and a lightweight, zero-database backend edge function:
-
-```
-sednicon/
-├── api/
-│   ├── _lib/
-│   │   ├── cors.js           # Shared CORS headers
-│   │   ├── icon-resolver.js  # Core logic, mirror failovers, aliases, and sanitization
-│   │   └── redis.js          # In-memory edge cache and rate limiter
-│   ├── generate.js           # Secure, headless proxy for AI generation
-│   ├── render.js             # The main API Edge Function (fetches & serves SVGs)
-│   ├── sprite.js             # Batch icon fetching for custom sprite sheets
-│   └── status.js             # Health check endpoint for dependencies
-├── bin/
-│   └── sednicon.js           # Terminal CLI execution script
-├── index.html                # The frontend UI (landing page & URL configurator)
-├── library.html              # The icon library explorer & sprite cart
-├── generate.html              # 100% private AI icon generator UI
-├── docs.html                  # Documentation UI
-├── status.html                # Live status UI
-├── package.json               # Dependencies & scripts
-├── polish.css                 # Global UI polish layer
-└── vercel.json                # Vercel routing configuration
-```
+| Variable | Description | Required |
+|---|---|---|
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST URL for distributed L2 cache | Optional (falls back to L1) |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST Bearer token | Optional |
+| `VERCEL_REGION` | Automatic Vercel deployment edge region | Automatic |
 
 ---
 
