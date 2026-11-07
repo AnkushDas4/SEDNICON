@@ -1,9 +1,12 @@
 /**
  * Sednicon API - Status Endpoint
- * GET /api/status → JSON health check + version info
+ * GET /api/status → JSON health check + multi-provider operational telemetry
  */
 
 export const config = { runtime: 'edge' };
+
+import { getAllProvidersHealth } from './_lib/metrics.js';
+import { getCacheMetrics } from './_lib/cache.js';
 
 const VERSION = '3.5.0';
 const RELEASED = '2026-11-06';
@@ -23,41 +26,52 @@ export default async function handler(request) {
 
   const startedAt = Date.now();
 
-  // Quick upstream health check against Iconify (with timeout)
-  let iconifyStatus = 'unknown';
-
+  // Test primary upstream
+  let primaryStatus = 'operational';
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
-    const res = await fetch('https://api.iconify.design/material-symbols/home.svg', {
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch('https://cdn.jsdelivr.net/npm/lucide-static@0.469.0/icons/rocket.svg', {
       signal: controller.signal,
     });
     clearTimeout(timeout);
-    iconifyStatus = res.ok ? 'operational' : 'degraded';
+    primaryStatus = res.ok ? 'operational' : 'degraded';
   } catch {
-    iconifyStatus = 'unreachable';
+    primaryStatus = 'degraded';
   }
 
   const latencyMs = Date.now() - startedAt;
+  const providerStats = getAllProvidersHealth();
+  const cacheStats = getCacheMetrics();
+
+  const dependencies = {
+    jsdelivr_npm: primaryStatus,
+  };
+  for (const p of providerStats) {
+    dependencies[p.id] = p.health;
+  }
+
+  const overallStatus = primaryStatus === 'operational' ? 'operational' : 'degraded';
 
   const body = {
-    status: iconifyStatus === 'operational' ? 'operational' : 'degraded',
+    status: overallStatus,
     version: VERSION,
     released: RELEASED,
     timestamp: new Date().toISOString(),
-    dependencies: {
-      iconify: iconifyStatus,
-    },
+    dependencies,
+    cache: cacheStats,
     upstream_check_ms: latencyMs,
     endpoints: {
       render: '/api/render',
+      sprite: '/api/sprite',
       status: '/api/status',
+      providers_health: '/api/health/providers',
     },
     region: process.env.VERCEL_REGION || 'unknown',
   };
 
   return new Response(JSON.stringify(body, null, 2), {
-    status: iconifyStatus === 'unreachable' ? 503 : 200,
+    status: 200,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',

@@ -1,13 +1,19 @@
 /**
- * Sednicon — Bulletproof Icon Resolution Pipeline
- * Features: Mirror domain failover, synonym aliasing, and multi-set probing.
+ * Sednicon — Bulletproof Multi-Provider Icon Resolution Pipeline
+ * Coordinates multi-provider orchestration, brand icons, alias normalization, and security sanitization.
  */
 
+import { sanitizeSvg, validateSvg } from './svg-sanitizer.js';
+import { svgTransformer } from './svg-transformer.js';
+import { resolveWithOrchestration } from './orchestrator.js';
+
+export { sanitizeSvg, validateSvg, svgTransformer };
+
 // ─── 1. HOSTS & FALLBACKS ───────────────────────────────────────────────────
-const ICONIFY_HOSTS = [
+export const ICONIFY_HOSTS = [
   'https://api.iconify.design',
   'https://api.simplesvg.com',
-  'https://api.unisvg.com'
+  'https://api.unisvg.com',
 ];
 
 export const BRAND_ICONS = {
@@ -16,7 +22,7 @@ export const BRAND_ICONS = {
 };
 
 // Common keyword aliases to normalize naming differences across sets
-const KEYWORD_ALIASES = {
+export const KEYWORD_ALIASES = {
   trash: 'delete',
   garbage: 'delete',
   remove: 'close',
@@ -55,123 +61,103 @@ export const PARALLEL_PROBE_SETS = ['material-symbols', 'lucide', 'heroicons'];
 
 export const FALLBACK_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>';
 
-import { sanitizeSvg, validateSvg } from './svg-sanitizer.js';
-export { sanitizeSvg, validateSvg };
-
-import { svgTransformer } from './svg-transformer.js';
-export { svgTransformer };
-
-// ─── ICONIFY FETCHER (With Host Failover) ────────────────────────────────────
-async function fetchIconify(prefix, name) {
-  for (const host of ICONIFY_HOSTS) {
-    try {
-      const url = `${host}/${prefix}/${name}.svg`;
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 2000); // 2s timeout per mirror
-
-      const res = await fetch(url, {
-        headers: { 'Accept': 'image/svg+xml' },
-        signal: controller.signal
-      });
-      clearTimeout(timeout);
-
-      if (res.status === 404) return null; // Icon does not exist in this set; don't hammer other mirrors
-      if (!res.ok) continue; // Try next mirror if 5xx
-      const text = await res.text();
-      if (text.startsWith('<') && text.includes('<svg')) {
-        return text;
-      }
-    } catch {
-      // Mirror failed or timed out, loop to next mirror
-    }
-  }
-  return null;
-}
-
 // ─── BRAND RESOLVER ─────────────────────────────────────────────────────────
 export function brandResolver(q) {
-  if (BRAND_ICONS[q]) return { svg: BRAND_ICONS[q], source: 'custom-brand' };
+  if (BRAND_ICONS[q]) return { svg: BRAND_ICONS[q], source: 'custom-brand', provider: 'custom-brand' };
   return null;
 }
 
-// ─── ICONIFY RESOLVER ───────────────────────────────────────────────────────
+// ─── ICONIFY RESOLVER (COMPATIBILITY WRAPPER) ───────────────────────────────
 export async function iconifyResolver(q, setHint) {
+  return resolveIcon(q, setHint);
+}
+
+// ─── MAIN RESOLVER ──────────────────────────────────────────────────────────
+export async function resolveIcon(q, setHint, options = {}) {
+  // 1. Direct custom brand match
+  let result = brandResolver(q);
+  if (result) {
+    result.svg = sanitizeSvg(result.svg);
+    return result;
+  }
+
+  // 2. Normalize query
   let cleanQ = (q || '').toLowerCase().trim();
-
-  // Normalize formatting: underscores and spaces to hyphens
   cleanQ = cleanQ.replace(/[_\s]+/g, '-');
-
-  // Check synonym alias map
   if (KEYWORD_ALIASES[cleanQ]) {
     cleanQ = KEYWORD_ALIASES[cleanQ];
   }
 
-  // Handle explicit set prefix (e.g., "lucide:rocket")
+  // 3. Explicit set prefix (e.g. "lucide:rocket", "devicon:python", "crypto:btc")
   if (cleanQ.includes(':')) {
     const [prefix, ...rest] = cleanQ.split(':');
     const name = rest.join(':');
-    const svg = await fetchIconify(prefix, name);
-    return svg ? { svg, source: `iconify:${prefix}` } : null;
-  }
-
-  // Handle set hint parameter
-  if (setHint) {
-    const svg = await fetchIconify(setHint, cleanQ);
-    if (svg) return { svg, source: `iconify:${setHint}` };
-  }
-
-  // Handle tech/brand sets
-  if (BRAND_SET.has(cleanQ)) {
-    const svg = await fetchIconify('simple-icons', cleanQ);
-    if (svg) return { svg, source: 'iconify:simple-icons' };
-  }
-
-  // Probe primary sets in parallel
-  const probes = await Promise.all(
-    PARALLEL_PROBE_SETS.map(p => fetchIconify(p, cleanQ).then(s => s ? { svg: s, source: `iconify:${p}` } : null))
-  );
-  const hit = probes.find(r => r);
-  if (hit) return hit;
-
-  // Concurrently probe remaining sets
-  const remainingSets = FALLBACK_SETS.filter(p => !PARALLEL_PROBE_SETS.includes(p));
-  try {
-    const fallbackHit = await Promise.any(
-      remainingSets.map(p =>
-        fetchIconify(p, cleanQ).then(s => s ? { svg: s, source: `iconify:${p}` } : Promise.reject())
-      )
-    );
-    if (fallbackHit) return fallbackHit;
-  } catch {
-    // Probing failed, proceed to search API
-  }
-
-  // Search API fallback for approximate/fuzzy matches
-  for (const host of ICONIFY_HOSTS) {
-    try {
-      const sr = await fetch(`${host}/search?query=${encodeURIComponent(cleanQ)}&limit=1`);
-      if (!sr.ok) continue;
-      const data = await sr.json();
-      const icons = data.icons || [];
-      if (!icons.length) break;
-
-      const [sp, sn] = icons[0].split(':');
-      const svg = await fetchIconify(sp, sn);
-      if (svg) return { svg, source: `iconify:search` };
-    } catch {
-      // Try next host for search
+    const orchestrated = await resolveWithOrchestration(prefix, name, options);
+    if (orchestrated) {
+      return {
+        svg: sanitizeSvg(orchestrated.svg),
+        source: orchestrated.source,
+        provider: orchestrated.provider,
+      };
     }
   }
 
-  return null;
-}
+  // 4. Set hint parameter
+  if (setHint) {
+    const orchestrated = await resolveWithOrchestration(setHint, cleanQ, options);
+    if (orchestrated) {
+      return {
+        svg: sanitizeSvg(orchestrated.svg),
+        source: orchestrated.source,
+        provider: orchestrated.provider,
+      };
+    }
+  }
 
-// ─── MAIN RESOLVER ──────────────────────────────────────────────────────────
-export async function resolveIcon(q, setHint) {
-  let result = brandResolver(q);
-  if (!result) result = await iconifyResolver(q, setHint);
-  if (!result) result = { svg: FALLBACK_SVG, source: 'generic-fallback' };
+  // 5. Tech / brand icons
+  if (BRAND_SET.has(cleanQ)) {
+    for (const brandCol of ['simple-icons', 'devicon', 'svgl']) {
+      const orchestrated = await resolveWithOrchestration(brandCol, cleanQ, options);
+      if (orchestrated) {
+        return {
+          svg: sanitizeSvg(orchestrated.svg),
+          source: orchestrated.source,
+          provider: orchestrated.provider,
+        };
+      }
+    }
+  }
 
-  result.svg = sanitizeSvg(result.svg);
-  return result;
+  // 6. Multi-set probing in parallel across primary sets
+  const probes = await Promise.all(
+    PARALLEL_PROBE_SETS.map((p) => resolveWithOrchestration(p, cleanQ, options))
+  );
+  const hit = probes.find((r) => r && r.svg);
+  if (hit) {
+    return {
+      svg: sanitizeSvg(hit.svg),
+      source: hit.source,
+      provider: hit.provider,
+    };
+  }
+
+  // 7. Sequentially check fallback sets
+  const remainingSets = FALLBACK_SETS.filter((p) => !PARALLEL_PROBE_SETS.includes(p));
+  for (const set of remainingSets) {
+    const orchestrated = await resolveWithOrchestration(set, cleanQ, options);
+    if (orchestrated) {
+      return {
+        svg: sanitizeSvg(orchestrated.svg),
+        source: orchestrated.source,
+        provider: orchestrated.provider,
+      };
+    }
+  }
+
+  // 8. Controlled fallback placeholder if not found anywhere
+  return {
+    svg: sanitizeSvg(FALLBACK_SVG),
+    source: 'generic-fallback',
+    provider: 'fallback',
+  };
 }

@@ -1,6 +1,6 @@
 /**
  * Sednicon API - The Unified Icon Engine v5 (Serverless Edition)
- * Uses shared resolver (_lib/icon-resolver.js), Edge cache + rate limiter
+ * Uses shared multi-provider resolver (_lib/icon-resolver.js), resilient L1/L2 cache + rate limiter.
  */
 
 export const config = { runtime: 'edge' };
@@ -35,6 +35,7 @@ export default async function handler(request) {
   const setHint = searchParams.get('set') || null;
   const animRaw = searchParams.get('anim');
   const anim    = animRaw && ALLOWED_ANIMS.has(animRaw) ? animRaw : null;
+  const style   = searchParams.get('style') || null;
 
   // Sanitize color: support hex with or without leading '#', as well as named colors
   const hexPart = color.replace(/^#/, '');
@@ -42,8 +43,8 @@ export default async function handler(request) {
     ? `#${hexPart}`
     : /^[a-zA-Z]+$/.test(color) ? color : '#000000';
 
-  // Cache key
-  const cacheKey = `${q}:${cleanColor}:${size}:${setHint || ''}:${anim || ''}`;
+  // Cache key includes all output-affecting parameters
+  const cacheKey = `${q}:${cleanColor}:${size}:${setHint || ''}:${anim || ''}:${style || ''}`;
 
   // ── Check edge cache ──
   const cached = await cacheGet(cacheKey);
@@ -52,8 +53,9 @@ export default async function handler(request) {
       headers: corsHeaders(request, {
         'Content-Type': 'image/svg+xml; charset=utf-8',
         'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000, immutable',
-        'X-Sednicon-Source': cached.source,
+        'X-Sednicon-Source': cached.source || 'cache',
         'X-Sednicon-Cache': 'HIT',
+        'X-Sednicon-Provider': cached.provider || 'cache',
         'X-RateLimit-Limit': String(RATE_LIMIT_MAX),
         'X-RateLimit-Window': '60s',
       }),
@@ -77,14 +79,15 @@ export default async function handler(request) {
     );
   }
 
-  // ── Resolve icon ──
-  const { svg: svgRaw, source } = await resolveIcon(q, setHint);
+  // ── Resolve icon across multi-provider infrastructure ──
+  const { svg: svgRaw, source, provider = 'iconify' } = await resolveIcon(q, setHint, { style });
 
-  // Apply style transforms
-  const output = svgTransformer(svgRaw, size, cleanColor, anim);
+  // Apply style transforms & animations
+  const preserveOriginal = style === 'original' || style === 'color';
+  const output = svgTransformer(svgRaw, size, cleanColor, anim, { style, preserveOriginal });
 
   // Cache result in edge cache
-  await cacheSet(cacheKey, { svg: output, source });
+  await cacheSet(cacheKey, { svg: output, source, provider });
 
   return new Response(output, {
     headers: corsHeaders(request, {
@@ -92,6 +95,7 @@ export default async function handler(request) {
       'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000, immutable',
       'X-Sednicon-Source': source,
       'X-Sednicon-Cache': 'MISS',
+      'X-Sednicon-Provider': provider,
       'X-RateLimit-Limit': String(RATE_LIMIT_MAX),
       'X-RateLimit-Window': '60s',
     }),
