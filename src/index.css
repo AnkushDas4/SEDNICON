@@ -88,13 +88,13 @@
   animation-play-state: paused;
 }
 
-/* Ambient subtle float for hero icon backdrop */
+/* Ambient subtle float for hero icon backdrop: strictly 6px vertical float over 24s, constant angle */
 @keyframes heroBackdropFloat {
   0%, 100% {
     transform: translateY(0px) rotate(-2.5deg) scale(1.05);
   }
   50% {
-    transform: translateY(-8px) rotate(-2.2deg) scale(1.05);
+    transform: translateY(-6px) rotate(-2.5deg) scale(1.05);
   }
 }
 
@@ -107,6 +107,6 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-backdrop {
     animation: none !important;
-    transform: rotate(-2.5deg) scale(1.05) !important;
+    transform: translateY(0px) rotate(-2.5deg) scale(1.05) !important;
   }
 }

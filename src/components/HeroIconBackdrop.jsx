@@ -99,7 +99,7 @@ function HeroIconBackdropComponent() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute -inset-x-12 -inset-y-10 select-none overflow-hidden -z-10"
+      className="pointer-events-none absolute inset-0 select-none overflow-hidden -z-10"
       style={{
         maskImage:
           'radial-gradient(ellipse 65% 50% at 50% 46%, transparent 12%, rgba(0,0,0,0.35) 36%, black 72%)',
