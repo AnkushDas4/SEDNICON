@@ -58,40 +58,8 @@ export const FALLBACK_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path 
 import { sanitizeSvg, validateSvg } from './svg-sanitizer.js';
 export { sanitizeSvg, validateSvg };
 
-// ─── SVG TRANSFORMER (Now with Animations) ──────────────────────────────────
-export function svgTransformer(svgRaw, size, cleanColor, anim) {
-  let svg = svgRaw
-    .replace(/\s+width="[^"]*"/g, '')
-    .replace(/\s+height="[^"]*"/g, '');
-  svg = svg.replace(/<svg\b/, `<svg width="${size}" height="${size}"`);
-  svg = svg.replace(/currentColor/gi, cleanColor);
-  svg = svg.replace(/fill="(?!none\b)[^"]+"/gi, `fill="${cleanColor}"`);
-  svg = svg.replace(/stroke="(?!none\b)[^"]+"/gi, `stroke="${cleanColor}"`);
-  if (!/fill=/.test(svg)) svg = svg.replace(/<svg\b/, `<svg fill="${cleanColor}"`);
-
-  // --- Add Magic Animations ---
-  if (anim) {
-    let animStyle = '';
-    const uid = Math.random().toString(36).substring(2, 8); // isolate styles to prevent CSS clashes
-    
-    if (anim === 'spin') {
-      animStyle = `@keyframes spin-${uid} { 100% { transform: rotate(360deg); } } svg { overflow: visible !important; } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: spin-${uid} 2s linear infinite; }`;
-    } else if (anim === 'pulse') {
-      animStyle = `@keyframes pulse-${uid} { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.85); opacity: 0.7; } } svg { overflow: visible !important; } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: pulse-${uid} 1.5s ease-in-out infinite; }`;
-    } else if (anim === 'bounce') {
-      animStyle = `@keyframes bounce-${uid} { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20%); } } svg { overflow: visible !important; } .sednicon-anim { transform-box: fill-box; transform-origin: center; animation: bounce-${uid} 1s cubic-bezier(0.28,0.84,0.42,1) infinite; }`;
-    }
-
-    if (animStyle) {
-      // Wrap SVG inner content in a group to apply the transform, and prepend the <style> block
-      svg = svg.replace(/(<svg[^>]*>)(.*)(<\/svg>)/is, (match, open, content, close) => {
-        return `${open}<style>${animStyle}</style><g class="sednicon-anim">${content}</g>${close}`;
-      });
-    }
-  }
-
-  return svg;
-}
+import { svgTransformer } from './svg-transformer.js';
+export { svgTransformer };
 
 // ─── ICONIFY FETCHER (With Host Failover) ────────────────────────────────────
 async function fetchIconify(prefix, name) {
