@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
@@ -7,16 +7,37 @@ export default function Navbar({ onOpenCart }) {
   const { theme, toggleTheme } = useTheme();
   const { cartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef(null);
 
   const navLinks = [
-    { to: '/library', label: 'Library' },
-    { to: '/generate', label: 'Generate' },
-    { to: '/docs', label: 'Docs' },
-    { to: '/status', label: 'Status' },
+    { to: '/library', label: 'Library', description: 'Browse the icon catalog', icon: 'M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z' },
+    { to: '/generate', label: 'Generate', description: 'Create a custom vector', icon: 'M12 3v4m0 10v4m9-9h-4M7 12H3m15.36 6.36-2.83-2.83M8.47 8.47 5.64 5.64m12.72 0-2.83 2.83m-7.06 7.06-2.83 2.83M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z' },
+    { to: '/docs', label: 'Docs', description: 'API guides and examples', icon: 'M6 3h9l4 4v14H6zM15 3v5h5M9 13h7M9 17h7' },
+    { to: '/status', label: 'Status', description: 'Live service health', icon: 'M3 12h4l3-8 4 16 3-8h4' },
   ];
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+    const closeOnOutsideClick = (event) => {
+      if (headerRef.current && !headerRef.current.contains(event.target)) {
+        setMobileMenuOpen(false);
+      }
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [mobileMenuOpen]);
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-blue-100/80 bg-[#fbfdff]/90 shadow-[0_1px_12px_rgba(37,99,235,.035)] backdrop-blur-xl transition-colors dark:border-zinc-800 dark:bg-zinc-950/85">
+    <header ref={headerRef} className="sticky top-0 z-40 w-full border-b border-blue-100/80 bg-[#fbfdff]/90 shadow-[0_1px_12px_rgba(37,99,235,.035)] backdrop-blur-xl transition-colors dark:border-zinc-800 dark:bg-zinc-950/85">
       <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand / Logo */}
         <div className="flex items-center gap-3">
@@ -114,7 +135,9 @@ export default function Navbar({ onOpenCart }) {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle mobile navigation"
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
             className="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-100 active:scale-95 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 md:hidden"
           >
             {mobileMenuOpen ? (
@@ -130,27 +153,57 @@ export default function Navbar({ onOpenCart }) {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile dropdown menu */}
       {mobileMenuOpen && (
-        <div className="border-b border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950 md:hidden">
-          <nav className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-800 ring-1 ring-blue-100 dark:bg-blue-950/50 dark:text-blue-200 dark:ring-blue-900'
-                      : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200'
-                  }`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
+        <div id="mobile-navigation" className="absolute left-0 right-0 top-full z-50 px-3 pb-3 md:hidden">
+          <div className="mobile-menu-panel mx-auto max-w-7xl overflow-hidden rounded-[1.35rem] border border-blue-100 bg-[#fbfdff]/[.98] p-3 shadow-[0_24px_64px_-24px_rgba(30,64,175,.32)] ring-1 ring-slate-900/5 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-950/[.98] dark:ring-white/10">
+            <div className="flex items-center justify-between px-1 pb-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-blue-700 dark:text-blue-300">Navigation</p>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Where would you like to go?</p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-white/80 px-2.5 py-1 font-mono text-[10px] text-blue-800 dark:border-slate-700 dark:bg-slate-900 dark:text-blue-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> v3.5.0 Edge
+              </span>
+            </div>
+            <nav className="grid grid-cols-2 gap-2">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `group flex min-h-[76px] items-center gap-2.5 rounded-xl border p-2.5 transition-all ${
+                      isActive
+                        ? 'border-blue-200 bg-blue-50/90 shadow-sm dark:border-blue-800 dark:bg-blue-950/50'
+                        : 'border-transparent bg-white/65 hover:border-blue-100 hover:bg-white dark:bg-slate-900/60 dark:hover:border-slate-700 dark:hover:bg-slate-900'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${isActive ? 'bg-blue-700 text-white shadow-sm' : 'bg-blue-50 text-blue-700 group-hover:bg-blue-100 dark:bg-slate-800 dark:text-blue-300 dark:group-hover:bg-slate-700'}`}>
+                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d={link.icon} />
+                        </svg>
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className={`block text-sm font-semibold ${isActive ? 'text-blue-900 dark:text-blue-100' : 'text-slate-800 dark:text-slate-100'}`}>{link.label}</span>
+                        <span className="mt-0.5 block truncate text-[10px] leading-4 text-slate-500 dark:text-slate-400">{link.description}</span>
+                      </span>
+                      <svg className={`h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 ${isActive ? 'text-blue-600 dark:text-blue-300' : 'text-slate-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
+                      </svg>
+                    </>
+                  )}
+                </NavLink>
+              ))}
+            </nav>
+            <div className="mt-3 flex items-center justify-between border-t border-blue-100/80 px-1 pt-3 text-[10px] text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <span>One URL · every icon</span>
+              <span className="font-mono text-blue-700 dark:text-blue-300">200k+ vectors</span>
+            </div>
+          </div>
         </div>
       )}
     </header>

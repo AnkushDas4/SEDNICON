@@ -77,6 +77,14 @@
   background-image: linear-gradient(rgba(59, 130, 246, .055) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, .055) 1px, transparent 1px);
   background-size: 22px 22px;
 }
+.mobile-menu-panel {
+  transform-origin: top right;
+  animation: mobile-menu-enter .18s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes mobile-menu-enter {
+  from { opacity: 0; transform: translateY(-6px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 .specimen-icon { animation: specimen-arrive .65s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes specimen-arrive { from { opacity: 0; transform: translateY(9px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
