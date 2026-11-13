@@ -220,24 +220,24 @@ export default function Generate() {
     <div className="py-10 sm:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Studio introduction */}
-        <header className="hero-paper relative isolate overflow-hidden rounded-[1.75rem] border border-blue-100 p-5 shadow-[0_20px_60px_-40px_rgba(30,64,175,.35)] sm:p-8 lg:p-9">
+        <header className="hero-paper relative isolate overflow-hidden rounded-[1.75rem] border border-blue-100 p-5 shadow-[0_20px_60px_-40px_rgba(30,64,175,.35)] dark:border-zinc-800 sm:p-8 lg:p-9">
           <div className="hero-contour pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
           <div className="relative grid items-end gap-7 lg:grid-cols-[1fr_310px]">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/85 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[.16em] text-blue-800 shadow-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" /> BYOK vector studio
+              <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/85 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[.16em] text-blue-800 shadow-sm dark:border-blue-900 dark:bg-zinc-900/85 dark:text-blue-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" /> BYOK vector studio
               </span>
-              <h1 className="display-type mt-5 text-4xl font-bold leading-[.98] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+              <h1 className="display-type mt-5 text-4xl font-bold leading-[.98] tracking-tight text-slate-950 dark:text-zinc-50 sm:text-5xl lg:text-6xl">
                 Make the icon<br /><span className="hero-blue-ink">you can’t find.</span>
               </h1>
-              <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+              <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 dark:text-zinc-400 sm:text-lg">
                 Describe the shape, pick a model and style, then export a clean SVG for your project.
               </p>
             </div>
-            <div className="rounded-2xl border border-blue-100 bg-white/90 p-4 shadow-[0_14px_40px_-24px_rgba(30,64,175,.32)] backdrop-blur sm:p-5">
+            <div className="rounded-2xl border border-blue-100 bg-white/90 p-4 shadow-[0_14px_40px_-24px_rgba(30,64,175,.32)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-5">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold text-slate-800">From brief to vector</span>
-                <span className="font-mono text-[10px] text-blue-700">3 STEPS</span>
+                <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">From brief to vector</span>
+                <span className="font-mono text-[10px] text-blue-700 dark:text-blue-300">3 STEPS</span>
               </div>
               <div className="mt-4 space-y-2">
                 {[
@@ -245,9 +245,9 @@ export default function Generate() {
                   ['02', 'Choose your model'],
                   ['03', 'Refine & export SVG'],
                 ].map(([number, label]) => (
-                  <div key={number} className="flex items-center gap-3 rounded-xl bg-[#f5f9ff] px-3 py-2.5">
-                    <span className="font-mono text-[10px] font-semibold text-blue-600">{number}</span>
-                    <span className="text-xs font-medium text-slate-700">{label}</span>
+                  <div key={number} className="flex items-center gap-3 rounded-xl bg-[#f5f9ff] px-3 py-2.5 dark:bg-zinc-950/60">
+                    <span className="font-mono text-[10px] font-semibold text-blue-600 dark:text-blue-400">{number}</span>
+                    <span className="text-xs font-medium text-slate-700 dark:text-zinc-300">{label}</span>
                   </div>
                 ))}
               </div>
@@ -704,7 +704,7 @@ export default function Generate() {
                         dangerouslySetInnerHTML={{ __html: item.svg }}
                         className="h-8 w-8 flex items-center justify-center overflow-hidden"
                       />
-                      <span className="mt-1 w-full truncate font-mono text-[10px] text-zinc-500 group-hover:text-blue-600">
+                      <span className="mt-1 w-full truncate font-mono text-[10px] text-zinc-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                         {item.prompt}
                       </span>
                     </button>

@@ -73,9 +73,27 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+.dark .hero-blue-ink {
+  color: #93c5fd;
+  background: linear-gradient(105deg, #93c5fd 8%, #67d8f0 58%, #8aa8f7 95%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Theme switch: suppress every transition for the swap so colors don't smear. */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
 .specimen-grid {
   background-image: linear-gradient(rgba(59, 130, 246, .055) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, .055) 1px, transparent 1px);
   background-size: 22px 22px;
+}
+.dark .specimen-grid {
+  background-image: linear-gradient(rgba(147, 197, 253, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(147, 197, 253, .07) 1px, transparent 1px);
 }
 .mobile-menu-panel {
   transform-origin: top right;

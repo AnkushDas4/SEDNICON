@@ -38,36 +38,36 @@ export default function Docs() {
   return (
     <div className="py-10 sm:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <header className="hero-paper docs-hero relative isolate overflow-hidden rounded-[1.75rem] border border-blue-100 p-5 shadow-[0_20px_60px_-40px_rgba(30,64,175,.35)] sm:p-8 lg:p-10">
+        <header className="hero-paper docs-hero relative isolate overflow-hidden rounded-[1.75rem] border border-blue-100 p-5 shadow-[0_20px_60px_-40px_rgba(30,64,175,.35)] dark:border-zinc-800 sm:p-8 lg:p-10">
           <div className="hero-contour pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
           <div className="relative grid items-end gap-8 lg:grid-cols-[1fr_330px]">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/85 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[.16em] text-blue-800 shadow-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/85 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[.16em] text-blue-800 shadow-sm dark:border-blue-900 dark:bg-zinc-900/85 dark:text-blue-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
                 Developer guide · v3.5
               </div>
-              <h1 className="display-type mt-5 text-4xl font-bold leading-[.98] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+              <h1 className="display-type mt-5 text-4xl font-bold leading-[.98] tracking-tight text-slate-950 dark:text-zinc-50 sm:text-5xl lg:text-6xl">
                 Less setup.<br /><span className="hero-blue-ink">More making.</span>
               </h1>
-              <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+              <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 dark:text-zinc-400 sm:text-lg">
                 The practical guide to serving icons, building sprites, generating vectors, and shipping with the Sednicon CLI.
               </p>
             </div>
-            <div className="relative rounded-2xl border border-blue-100 bg-white/90 p-4 shadow-[0_14px_40px_-24px_rgba(30,64,175,.32)] backdrop-blur sm:p-5">
+            <div className="relative rounded-2xl border border-blue-100 bg-white/90 p-4 shadow-[0_14px_40px_-24px_rgba(30,64,175,.32)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-5">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold text-slate-800">Your first icon</span>
-                <span className="rounded-full bg-emerald-50 px-2 py-1 font-mono text-[10px] font-semibold text-emerald-700">GET · SVG</span>
+                <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">Your first icon</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-1 font-mono text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">GET · SVG</span>
               </div>
-              <code className="mt-3 block break-all rounded-xl bg-[#f2f7ff] p-3 font-mono text-[11px] leading-5 text-blue-900">/api/render?q=heart&amp;color=2563eb&amp;size=24</code>
-              <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500">
-                <svg className="h-4 w-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="m13 2-3 8H4l7 12 3-8h6L13 2Z" /></svg>
+              <code className="mt-3 block break-all rounded-xl bg-[#f2f7ff] p-3 font-mono text-[11px] leading-5 text-blue-900 dark:bg-zinc-950/70 dark:text-blue-200">/api/render?q=heart&amp;color=2563eb&amp;size=24</code>
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500 dark:text-zinc-400">
+                <svg className="h-4 w-4 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="m13 2-3 8H4l7 12 3-8h6L13 2Z" /></svg>
                 One URL. Recolored at the edge.
               </div>
             </div>
           </div>
-          <div className="relative mt-7 flex flex-wrap gap-2 border-t border-blue-100 pt-4">
+          <div className="relative mt-7 flex flex-wrap gap-2 border-t border-blue-100 pt-4 dark:border-zinc-800">
             {['URL-first delivery', 'Multi-set fallback', 'BYOK vector generation'].map((item) => (
-              <span key={item} className="rounded-full border border-blue-100 bg-white/70 px-3 py-1.5 text-[11px] font-semibold text-blue-900">{item}</span>
+              <span key={item} className="rounded-full border border-blue-100 bg-white/70 px-3 py-1.5 text-[11px] font-semibold text-blue-900 dark:border-zinc-800 dark:bg-zinc-900/70 dark:text-blue-200">{item}</span>
             ))}
           </div>
         </header>
@@ -81,7 +81,7 @@ export default function Docs() {
               className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition ${
                 activeSection === sec.id
                   ? 'border-blue-700 bg-blue-700 text-white shadow-sm'
-                  : 'border-blue-100 bg-white/90 text-slate-600 hover:border-blue-300 hover:text-blue-800'
+                  : 'border-blue-100 bg-white/90 text-slate-600 hover:border-blue-300 hover:text-blue-800 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-blue-300'
               }`}
             >
               {sec.label}

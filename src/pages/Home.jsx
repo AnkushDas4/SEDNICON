@@ -114,15 +114,15 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* ── HERO SECTION ── */}
-      <section className="hero-paper relative isolate overflow-hidden border-b border-blue-100/80 py-16 sm:py-20 lg:py-24">
+      <section className="hero-paper relative isolate overflow-hidden border-b border-blue-100/80 py-16 dark:border-zinc-800 sm:py-20 lg:py-24">
         <div className="hero-contour pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
         <div className="relative z-10 mx-auto grid w-full min-w-0 grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:max-w-7xl lg:grid-cols-[1.04fr_.96fr] lg:px-8">
           <div className="w-full min-w-0 max-w-2xl">
-            <h1 className="display-type max-w-xl text-5xl font-semibold leading-[.98] tracking-[-.045em] text-slate-950 sm:text-6xl lg:text-[4.65rem]">
+            <h1 className="display-type max-w-xl text-5xl font-semibold leading-[.98] tracking-[-.045em] text-slate-950 dark:text-zinc-50 sm:text-6xl lg:text-[4.65rem]">
               Every icon.<br />
               <span className="hero-blue-ink">One tiny URL.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl sm:leading-8">
+            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600 dark:text-zinc-400 sm:text-xl sm:leading-8">
               A whole world of crisp, recolorable SVGs—served right where your interface needs them. No bundle, no setup, just a link.
             </p>
 
@@ -131,39 +131,39 @@ export default function Home() {
                 Browse the library
                 <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-6-6 6 6-6 6" /></svg>
               </Link>
-              <Link to="/docs" className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white/75 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-white hover:text-blue-800">
+              <Link to="/docs" className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white/75 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-white hover:text-blue-800 dark:border-zinc-700 dark:bg-zinc-900/75 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-blue-300">
                 Read the quickstart <span aria-hidden="true">↗</span>
               </Link>
             </div>
 
-            <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-blue-100 pt-5 text-sm text-slate-600">
-              <span className="inline-flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /><strong className="font-semibold text-slate-900">200k+</strong> icons</span>
-              <span><strong className="font-semibold text-slate-900">150+</strong> icon sets</span>
-              <span className="inline-flex items-center gap-2"><svg className="h-4 w-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0L16.95 7.05M7.05 16.95l-1.414 1.414M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>Edge-ready</span>
+            <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-blue-100 pt-5 text-sm text-slate-600 dark:border-zinc-800 dark:text-zinc-400">
+              <span className="inline-flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /><strong className="font-semibold text-slate-900 dark:text-zinc-100">200k+</strong> icons</span>
+              <span><strong className="font-semibold text-slate-900 dark:text-zinc-100">150+</strong> icon sets</span>
+              <span className="inline-flex items-center gap-2"><svg className="h-4 w-4 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0L16.95 7.05M7.05 16.95l-1.414 1.414M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>Edge-ready</span>
             </div>
           </div>
 
           <div className="hero-specimen relative mx-auto w-full min-w-0 max-w-[550px]">
-            <div className="absolute -right-5 -top-5 h-28 w-28 rounded-full bg-sky-200/70 blur-3xl" />
-            <div className="absolute -bottom-7 -left-6 h-36 w-36 rounded-full bg-blue-200/70 blur-3xl" />
-            <div className="relative min-w-0 overflow-hidden rounded-[1.65rem] border border-blue-200/80 bg-white/90 p-4 shadow-[0_28px_80px_-38px_rgba(30,64,175,.42)] backdrop-blur sm:p-7">
-              <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 border-b border-blue-100 pb-4">
+            <div className="absolute -right-5 -top-5 h-28 w-28 rounded-full bg-sky-200/70 blur-3xl dark:bg-sky-500/10" />
+            <div className="absolute -bottom-7 -left-6 h-36 w-36 rounded-full bg-blue-200/70 blur-3xl dark:bg-blue-500/10" />
+            <div className="relative min-w-0 overflow-hidden rounded-[1.65rem] border border-blue-200/80 bg-white/90 p-4 shadow-[0_28px_80px_-38px_rgba(30,64,175,.42)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-7">
+              <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 border-b border-blue-100 pb-4 dark:border-zinc-800">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-700 text-white"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h10M4 17h7" /></svg></div>
-                  <div><div className="text-sm font-bold text-slate-900">Icon, on demand</div><div className="text-[11px] text-slate-500">A live edge response</div></div>
+                  <div><div className="text-sm font-bold text-slate-900 dark:text-zinc-100">Icon, on demand</div><div className="text-[11px] text-slate-500 dark:text-zinc-400">A live edge response</div></div>
                 </div>
-                <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 font-mono text-[9px] font-semibold text-emerald-700 sm:px-2.5 sm:text-[10px]">200 OK · 18ms</span>
+                <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 font-mono text-[9px] font-semibold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300 sm:px-2.5 sm:text-[10px]">200 OK · 18ms</span>
               </div>
-              <div className="specimen-grid relative mt-5 flex min-h-[235px] items-center justify-center overflow-hidden rounded-2xl border border-blue-100 bg-[#f5f9ff]">
+              <div className="specimen-grid relative mt-5 flex min-h-[235px] items-center justify-center overflow-hidden rounded-2xl border border-blue-100 bg-[#f5f9ff] dark:border-zinc-800 dark:bg-zinc-950/70">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(96,165,250,.17),transparent_62%)]" />
                 <div className="relative grid grid-cols-3 gap-3 sm:gap-4">
                   {[
                     { name: 'sparkles', size: 66, box: 'bg-blue-700 text-white shadow-[0_16px_35px_-14px_rgba(29,78,216,.8)]' },
-                    { name: 'layers', size: 48, box: 'bg-white text-blue-700 border border-blue-100 shadow-lg' },
-                    { name: 'rocket', size: 52, box: 'bg-sky-100 text-blue-800 border border-sky-200' },
-                    { name: 'terminal', size: 46, box: 'bg-white text-slate-700 border border-blue-100' },
-                    { name: 'heart', size: 42, box: 'bg-blue-100 text-blue-700 border border-blue-200' },
-                    { name: 'globe', size: 48, box: 'bg-white text-blue-600 border border-blue-100 shadow-sm' },
+                    { name: 'layers', size: 48, box: 'bg-white text-blue-700 border border-blue-100 shadow-lg dark:bg-zinc-900 dark:text-blue-300 dark:border-zinc-700' },
+                    { name: 'rocket', size: 52, box: 'bg-sky-100 text-blue-800 border border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-900' },
+                    { name: 'terminal', size: 46, box: 'bg-white text-slate-700 border border-blue-100 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-700' },
+                    { name: 'heart', size: 42, box: 'bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-900' },
+                    { name: 'globe', size: 48, box: 'bg-white text-blue-600 border border-blue-100 shadow-sm dark:bg-zinc-900 dark:text-blue-400 dark:border-zinc-700' },
                   ].map((item, index) => (
                     <div key={item.name} className={`specimen-icon flex items-center justify-center rounded-2xl ${item.box}`} style={{ width: index === 0 ? 'clamp(72px, 23vw, 90px)' : 'clamp(58px, 19vw, 72px)', height: index === 0 ? 'clamp(72px, 23vw, 90px)' : 'clamp(58px, 19vw, 72px)', animationDelay: `${index * 110}ms` }}>
                       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className={index === 0 ? 'h-11 w-11' : 'h-8 w-8'}>
@@ -177,18 +177,18 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <div className="absolute bottom-3 right-3 rounded-lg border border-blue-100 bg-white/90 px-2.5 py-1.5 font-mono text-[10px] text-slate-500 shadow-sm">vectors, not bitmaps</div>
+                <div className="absolute bottom-3 right-3 rounded-lg border border-blue-100 bg-white/90 px-2.5 py-1.5 font-mono text-[10px] text-slate-500 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-400">vectors, not bitmaps</div>
               </div>
-              <div className="mt-4 flex items-center gap-3 rounded-xl border border-blue-100 bg-[#f8fbff] p-3">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="m13 2-3 8H4l7 12 3-8h6L13 2Z" /></svg></span>
-                <code className="min-w-0 truncate text-[11px] text-slate-600 sm:text-xs">sednicon.sednium.com/api/render?q=sparkles</code>
-                <span className="ml-auto shrink-0 font-mono text-[10px] font-semibold text-blue-700">GET</span>
+              <div className="mt-4 flex items-center gap-3 rounded-xl border border-blue-100 bg-[#f8fbff] p-3 dark:border-zinc-800 dark:bg-zinc-950/60">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="m13 2-3 8H4l7 12 3-8h6L13 2Z" /></svg></span>
+                <code className="min-w-0 truncate text-[11px] text-slate-600 dark:text-zinc-400 sm:text-xs">sednicon.sednium.com/api/render?q=sparkles</code>
+                <span className="ml-auto shrink-0 font-mono text-[10px] font-semibold text-blue-700 dark:text-blue-300">GET</span>
               </div>
             </div>
-            <div className="absolute -left-4 top-[31%] hidden items-center gap-2 rounded-xl border border-blue-100 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-lg sm:flex">
+            <div className="absolute -left-4 top-[31%] hidden items-center gap-2 rounded-xl border border-blue-100 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-lg dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 sm:flex">
               <span className="h-2 w-2 rounded-full bg-blue-500" /> Recolorable SVG
             </div>
-            <div className="absolute -right-3 bottom-[18%] hidden rounded-xl border border-blue-100 bg-white px-3 py-2 font-mono text-[11px] text-blue-800 shadow-lg md:block">#2563eb</div>
+            <div className="absolute -right-3 bottom-[18%] hidden rounded-xl border border-blue-100 bg-white px-3 py-2 font-mono text-[11px] text-blue-800 shadow-lg dark:border-zinc-700 dark:bg-zinc-900 dark:text-blue-300 md:block">#2563eb</div>
           </div>
         </div>
       </section>
