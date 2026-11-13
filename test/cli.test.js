@@ -8,10 +8,39 @@ const execFileAsync = promisify(execFile);
 const CLI_PATH = path.resolve('bin/sednicon.js');
 
 describe('Sednicon CLI Script', () => {
-  test('exits with 0 and prints usage on "help"', async () => {
+  test('exits with 0 and prints current command and output options on "help"', async () => {
     const { stdout } = await execFileAsync('node', [CLI_PATH, 'help']);
     assert.ok(stdout.includes('Sednicon CLI'));
     assert.ok(stdout.includes('Usage:'));
+    assert.ok(stdout.includes('--format <svg|react|url>'));
+    assert.ok(stdout.includes('--output <path>'));
+  });
+
+  test('prints a complete resolver URL without making a request', async () => {
+    const { stdout } = await execFileAsync('node', [CLI_PATH, 'get', 'lucide:rocket', '--format', 'url', '--size', '48', '--color', '2563eb']);
+    assert.match(stdout.trim(), /api\/render\?q=lucide%3Arocket&color=2563eb&size=48/);
+  });
+
+  test('rejects an unsupported output format before making a request', async () => {
+    await assert.rejects(
+      () => execFileAsync('node', [CLI_PATH, 'get', 'rocket', '--format', 'png']),
+      (err) => {
+        assert.equal(err.code, 1);
+        assert.ok(err.stderr.includes('Format must be one of'));
+        return true;
+      }
+    );
+  });
+
+  test('rejects sizes outside the rendered icon bounds', async () => {
+    await assert.rejects(
+      () => execFileAsync('node', [CLI_PATH, 'get', 'rocket', '--size', '0']),
+      (err) => {
+        assert.equal(err.code, 1);
+        assert.ok(err.stderr.includes('between 1 and 2048'));
+        return true;
+      }
+    );
   });
 
   test('exits with non-zero on unknown command', async () => {

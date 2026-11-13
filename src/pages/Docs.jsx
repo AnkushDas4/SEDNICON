@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CodeBlock from '../components/CodeBlock';
 
 const SECTIONS = [
@@ -15,6 +15,21 @@ const SECTIONS = [
 export default function Docs() {
   const [activeSection, setActiveSection] = useState('quickstart');
 
+  useEffect(() => {
+    if (!('IntersectionObserver' in window)) return undefined;
+    const observer = new IntersectionObserver((entries) => {
+      const current = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (current) setActiveSection(current.target.id);
+    }, { rootMargin: '-96px 0px -68% 0px' });
+    SECTIONS.forEach(({ id }) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+    return () => observer.disconnect();
+  }, []);
+
   const scrollTo = (id) => {
     setActiveSection(id);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -23,38 +38,79 @@ export default function Docs() {
   return (
     <div className="py-10 sm:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-0.5 font-mono text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-            <span>Sednicon API Reference & Developer Guide</span>
+        <header className="hero-paper docs-hero relative isolate overflow-hidden rounded-[1.75rem] border border-blue-100 p-5 shadow-[0_20px_60px_-40px_rgba(30,64,175,.35)] sm:p-8 lg:p-10">
+          <div className="hero-contour pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
+          <div className="relative grid items-end gap-8 lg:grid-cols-[1fr_330px]">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/85 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[.16em] text-blue-800 shadow-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                Developer guide · v3.5
+              </div>
+              <h1 className="display-type mt-5 text-4xl font-bold leading-[.98] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+                Less setup.<br /><span className="hero-blue-ink">More making.</span>
+              </h1>
+              <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+                The practical guide to serving icons, building sprites, generating vectors, and shipping with the Sednicon CLI.
+              </p>
+            </div>
+            <div className="relative rounded-2xl border border-blue-100 bg-white/90 p-4 shadow-[0_14px_40px_-24px_rgba(30,64,175,.32)] backdrop-blur sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-semibold text-slate-800">Your first icon</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-1 font-mono text-[10px] font-semibold text-emerald-700">GET · SVG</span>
+              </div>
+              <code className="mt-3 block break-all rounded-xl bg-[#f2f7ff] p-3 font-mono text-[11px] leading-5 text-blue-900">/api/render?q=heart&amp;color=2563eb&amp;size=24</code>
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500">
+                <svg className="h-4 w-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="m13 2-3 8H4l7 12 3-8h6L13 2Z" /></svg>
+                One URL. Recolored at the edge.
+              </div>
+            </div>
           </div>
-          <h1 className="mt-3 font-sans text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl dark:text-zinc-50">
-            Documentation
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">
-            Learn how to stream icons via edge HTTP, generate dynamic SVG sprites, use BYOK AI generation, and integrate with your frameworks.
-          </p>
-        </div>
+          <div className="relative mt-7 flex flex-wrap gap-2 border-t border-blue-100 pt-4">
+            {['URL-first delivery', 'Multi-set fallback', 'BYOK vector generation'].map((item) => (
+              <span key={item} className="rounded-full border border-blue-100 bg-white/70 px-3 py-1.5 text-[11px] font-semibold text-blue-900">{item}</span>
+            ))}
+          </div>
+        </header>
+
+        <nav aria-label="Documentation sections" className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+          {SECTIONS.map((sec) => (
+            <button
+              key={sec.id}
+              type="button"
+              onClick={() => scrollTo(sec.id)}
+              className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition ${
+                activeSection === sec.id
+                  ? 'border-blue-700 bg-blue-700 text-white shadow-sm'
+                  : 'border-blue-100 bg-white/90 text-slate-600 hover:border-blue-300 hover:text-blue-800'
+              }`}
+            >
+              {sec.label}
+            </button>
+          ))}
+        </nav>
 
         <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-12">
           {/* ── STICKY SIDEBAR NAV ── */}
           <aside className="hidden lg:col-span-3 lg:block">
-            <div className="sticky top-20 space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-                On this page
+            <div className="sticky top-24 rounded-2xl border border-blue-100 bg-white/85 p-4 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85">
+              <span className="px-2 text-[10px] font-bold uppercase tracking-[.18em] text-blue-700 dark:text-blue-300">
+                In this guide
               </span>
-              <nav className="mt-2 flex flex-col space-y-1 border-l border-zinc-200 pl-3 dark:border-zinc-800">
-                {SECTIONS.map((sec) => (
+              <nav className="mt-3 flex flex-col gap-1">
+                {SECTIONS.map((sec, index) => (
                   <button
                     key={sec.id}
                     type="button"
                     onClick={() => scrollTo(sec.id)}
-                    className={`text-left text-xs font-medium transition ${
+                    className={`flex items-center gap-2.5 rounded-lg px-2 py-2 text-left text-xs transition ${
                       activeSection === sec.id
-                        ? 'text-blue-600 dark:text-blue-400 font-semibold'
-                        : 'text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-200'
+                        ? 'bg-blue-50 font-semibold text-blue-900 dark:bg-blue-950/60 dark:text-blue-100'
+                        : 'text-slate-600 hover:bg-blue-50/70 hover:text-blue-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
                     }`}
                   >
+                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md font-mono text-[9px] ${activeSection === sec.id ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'}`}>
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
                     {sec.label}
                   </button>
                 ))}
@@ -63,9 +119,9 @@ export default function Docs() {
           </aside>
 
           {/* ── CONTENT BODY ── */}
-          <div className="space-y-16 lg:col-span-9">
+          <div className="space-y-5 lg:col-span-9">
             {/* 1. Quick Start */}
-            <section id="quickstart" className="space-y-4">
+            <section id="quickstart" className="doc-section scroll-mt-28 space-y-5 rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/[.025] dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-7">
               <h2 className="text-xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
                 Quick Start
               </h2>
@@ -115,7 +171,7 @@ export default function Docs() {
             </section>
 
             {/* 2. GET /api/render */}
-            <section id="render-api" className="space-y-4 border-t border-zinc-200 pt-10 dark:border-zinc-800">
+            <section id="render-api" className="doc-section scroll-mt-28 space-y-5 rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/[.025] dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-7">
               <div className="flex items-center gap-2">
                 <span className="rounded bg-blue-100 px-2 py-0.5 font-mono text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                   GET
@@ -186,14 +242,14 @@ export default function Docs() {
                 <ol className="mt-2 list-decimal space-y-1.5 pl-4 text-xs text-zinc-600 dark:text-zinc-400">
                   <li><strong>Tier 1 (Edge Cache):</strong> High-speed L1 in-memory LRU cache + non-blocking distributed L2 Upstash Redis.</li>
                   <li><strong>Tier 2 (Direct npm CDNs):</strong> Instant resolution from pinned packages (Lucide, Simple Icons, Tabler, Heroicons, Phosphor, Bootstrap, Feather, Octicons).</li>
-                  <li><strong>Tier 3 (Universal Extractors & Mirrors):</strong> unpkg fallback mirror, Universal Iconify JSON package extractor (100% offline-capable), and 3-host Iconify API failover cluster.</li>
+                  <li><strong>Tier 3 (Universal extractors & mirrors):</strong> unpkg fallback, package-based Iconify JSON resolution, and a three-host Iconify API failover cluster.</li>
                   <li><strong>Tier 4 (Specialized Repos):</strong> Devicon (tech stacks), SVGL (modern branded vectors with dark/light modes), and Cryptocurrency Icons.</li>
                 </ol>
               </div>
             </section>
 
             {/* 3. GET /api/sprite */}
-            <section id="sprite-api" className="space-y-4 border-t border-zinc-200 pt-10 dark:border-zinc-800">
+            <section id="sprite-api" className="doc-section scroll-mt-28 space-y-5 rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/[.025] dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-7">
               <div className="flex items-center gap-2">
                 <span className="rounded bg-blue-100 px-2 py-0.5 font-mono text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                   GET
@@ -207,18 +263,15 @@ export default function Docs() {
               </p>
 
               <CodeBlock
-                code={`<!-- 1. Fetch sprite sheet -->
-<svg style="display:none;" src="https://sednicon.sednium.com/api/sprite?icons=github,twitter,linkedin&size=24&color=000000"></svg>
-
-<!-- 2. Reference any symbol by ID -->
-<svg class="icon"><use href="#github"></use></svg>
-<svg class="icon"><use href="#twitter"></use></svg>`}
+                code={`<!-- The endpoint returns one SVG containing symbols for the requested icons. -->
+<svg class="icon"><use href="https://sednicon.sednium.com/api/sprite?icons=github,twitter,linkedin&size=24&color=000000#github"></use></svg>
+<svg class="icon"><use href="https://sednicon.sednium.com/api/sprite?icons=github,twitter,linkedin&size=24&color=000000#twitter"></use></svg>`}
                 language="html"
               />
             </section>
 
             {/* 4. POST /api/generate */}
-            <section id="generate-api" className="space-y-4 border-t border-zinc-200 pt-10 dark:border-zinc-800">
+            <section id="generate-api" className="doc-section scroll-mt-28 space-y-5 rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/[.025] dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-7">
               <div className="flex items-center gap-2">
                 <span className="rounded bg-emerald-100 px-2 py-0.5 font-mono text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                   POST
@@ -267,7 +320,7 @@ export default function Docs() {
             </section>
 
             {/* 5. GET /api/status */}
-            <section id="status-api" className="space-y-4 border-t border-zinc-200 pt-10 dark:border-zinc-800">
+            <section id="status-api" className="doc-section scroll-mt-28 space-y-5 rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/[.025] dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-7">
               <div className="flex items-center gap-2">
                 <span className="rounded bg-blue-100 px-2 py-0.5 font-mono text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                   GET
@@ -300,7 +353,7 @@ export default function Docs() {
             </section>
 
             {/* 5.1 GET /api/health/providers */}
-            <section id="providers-health" className="space-y-4 border-t border-zinc-200 pt-10 dark:border-zinc-800">
+            <section id="providers-health" className="doc-section scroll-mt-28 space-y-5 rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/[.025] dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-7">
               <div className="flex items-center gap-2">
                 <span className="rounded bg-emerald-100 px-2 py-0.5 font-mono text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                   GET
@@ -344,29 +397,39 @@ export default function Docs() {
             </section>
 
             {/* 6. CLI Tooling */}
-            <section id="cli" className="space-y-4 border-t border-zinc-200 pt-10 dark:border-zinc-800">
+            <section id="cli" className="doc-section scroll-mt-28 space-y-5 rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/[.025] dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-7">
               <h2 className="text-xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
                 Command-Line Interface (npx sednicon)
               </h2>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Fetch icons directly into your repository or terminal without creating npm configuration files.
+              <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                Pull an optimized SVG into your project without installing a runtime dependency. The CLI downloads the rendered asset and writes it where you need it.
               </p>
 
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  { title: 'No install step', detail: 'Run it on demand with npx.' },
+                  { title: 'Any icon set', detail: 'Use names like lucide:rocket.' },
+                  { title: 'Project-ready', detail: 'Choose the output path and size.' },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-xl border border-blue-100 bg-[#f6f9ff] p-3.5 dark:border-zinc-800 dark:bg-zinc-950/60">
+                    <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">{item.title}</p>
+                    <p className="mt-1 text-[11px] leading-4 text-slate-500 dark:text-slate-400">{item.detail}</p>
+                  </div>
+                ))}
+              </div>
+
               <CodeBlock
-                code={`# Download SVG directly to assets/
-npx sednicon get sparkles --output ./src/assets/sparkles.svg
-
-# Specify size and custom color
-npx sednicon get github --size 48 --color 2563eb
-
-# Output as a React JSX component
-npx sednicon get terminal --format react > TerminalIcon.jsx`}
+                code={`# Save a vector into your source tree\nnpx sednicon get sparkles --out ./src/assets/sparkles.svg\n\n# Download a specific set at a custom size and color\nnpx sednicon get lucide:rocket --size 48 --color 2563eb --out ./src/assets/rocket.svg\n\n# Generate a ready-to-import React component\nnpx sednicon get terminal --format react --out ./src/icons/TerminalIcon.jsx`}
+                language="bash"
+              />
+              <CodeBlock
+                code={`# See all commands and supported formats\nnpx sednicon help`}
                 language="bash"
               />
             </section>
 
             {/* 7. Edge Caching & Performance */}
-            <section id="caching" className="space-y-4 border-t border-zinc-200 pt-10 dark:border-zinc-800">
+            <section id="caching" className="doc-section scroll-mt-28 space-y-5 rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm shadow-blue-950/[.025] dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-7">
               <h2 className="text-xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
                 Edge Caching & Performance
               </h2>
@@ -374,7 +437,7 @@ npx sednicon get terminal --format react > TerminalIcon.jsx`}
                 Sednicon uses Vercel Edge Network routing and sets aggressive browser and CDN cache control headers:
               </p>
               <CodeBlock
-                code={`Cache-Control: public, max-age=86400, s-maxage=31536000, stale-while-revalidate=86400`}
+                code={`Cache-Control: public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000, immutable`}
                 language="text"
               />
               <p className="text-xs text-zinc-500 dark:text-zinc-400">

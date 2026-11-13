@@ -111,6 +111,26 @@ Safe telemetry showing circuit states, rolling average latencies, and success ra
 
 ---
 
+## 🧰 Command-Line Interface
+
+Fetch an icon without adding a runtime dependency:
+
+```bash
+npx sednicon get lucide:rocket --size 48 --color 2563eb --out ./src/assets/rocket.svg
+```
+
+Write a React component instead, or print a reusable endpoint URL:
+
+```bash
+npx sednicon get terminal --format react --out ./src/icons/TerminalIcon.jsx
+npx sednicon get heart --format url
+npx sednicon help
+```
+
+`--out` (also `--output`) accepts a filename or a directory. The CLI supports `svg`, `react`/`jsx`, and `url` formats.
+
+---
+
 ## 💻 Environment Variables
 
 | Variable | Description | Required |

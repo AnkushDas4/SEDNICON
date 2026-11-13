@@ -21,7 +21,7 @@ export function ToastProvider({ children }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto px-4 py-2.5 rounded-lg text-xs font-mono font-medium shadow-lg border transition-all duration-200 flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2 ${
+            className={`pointer-events-auto px-4 py-2.5 rounded-lg text-xs font-mono font-medium shadow-lg border transition-[opacity,transform] duration-200 flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2 ${
               toast.type === 'error'
                 ? 'bg-rose-950/90 text-rose-200 border-rose-800/80 shadow-rose-950/20'
                 : 'bg-zinc-900 text-zinc-100 border-zinc-700/80 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-300 shadow-zinc-950/20'

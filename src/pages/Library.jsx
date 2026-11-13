@@ -231,7 +231,7 @@ export default function Library() {
                     key={s}
                     type="button"
                     onClick={() => setIconSize(s)}
-                    className={`rounded px-2.5 py-1 font-mono text-xs font-medium transition active:scale-95 ${
+                    className={`rounded px-2.5 py-1 font-mono text-xs font-medium transition active:scale-[0.96] ${
                       iconSize === s
                         ? 'bg-blue-600 text-white font-bold shadow-sm'
                         : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
@@ -258,7 +258,7 @@ export default function Library() {
                     type="button"
                     onClick={() => setColor(swatch)}
                     style={{ backgroundColor: swatch }}
-                    className={`h-4 w-4 rounded-full border border-zinc-300 transition-transform active:scale-95 dark:border-zinc-700 ${
+                    className={`h-4 w-4 rounded-full border border-zinc-300 transition-transform active:scale-[0.96] dark:border-zinc-700 ${
                       color === swatch ? 'scale-110 ring-2 ring-blue-500' : ''
                     }`}
                   />
@@ -269,7 +269,7 @@ export default function Library() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 active:scale-95 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                className="rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 active:scale-[0.96] dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800"
               >
                 Reset
               </button>
@@ -281,7 +281,7 @@ export default function Library() {
             <button
               type="button"
               onClick={() => setSelectedCat('all')}
-              className={`rounded-lg px-3 py-1 text-xs font-medium transition active:scale-95 ${
+              className={`rounded-lg px-3 py-1 text-xs font-medium transition active:scale-[0.96] ${
                 selectedCat === 'all'
                   ? 'bg-blue-600 text-white font-bold shadow-sm'
                   : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
@@ -294,7 +294,7 @@ export default function Library() {
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCat(cat.id)}
-                className={`rounded-lg px-3 py-1 text-xs font-medium transition active:scale-95 ${
+                className={`rounded-lg px-3 py-1 text-xs font-medium transition active:scale-[0.96] ${
                   selectedCat === cat.id
                     ? 'bg-blue-600 text-white font-bold shadow-sm'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
@@ -353,7 +353,7 @@ export default function Library() {
                       <div
                         key={name}
                         onClick={() => setInspectIcon(name)}
-                        className={`group relative flex flex-col items-center justify-center rounded-xl border p-3.5 transition-all duration-150 cursor-pointer active:scale-95 ${
+                        className={`group relative flex flex-col items-center justify-center rounded-xl border p-3.5 transition-[border-color,background-color,box-shadow,transform] duration-150 cursor-pointer active:scale-[0.96] ${
                           selected
                             ? 'border-blue-600 bg-blue-50/50 shadow-sm ring-1 ring-blue-600 dark:border-blue-500 dark:bg-blue-950/40 dark:ring-blue-500'
                             : 'border-zinc-200 bg-white hover:border-blue-400 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700'
@@ -451,7 +451,7 @@ export default function Library() {
                     <div
                       key={id}
                       onClick={() => setInspectIcon(id)}
-                      className={`group relative flex flex-col items-center justify-center rounded-xl border p-3.5 transition active:scale-95 cursor-pointer ${
+                      className={`group relative flex flex-col items-center justify-center rounded-xl border p-3.5 transition active:scale-[0.96] cursor-pointer ${
                         selected
                           ? 'border-blue-600 bg-blue-50/50 shadow-sm ring-1 ring-blue-600 dark:border-blue-500 dark:bg-blue-950/40'
                           : 'border-zinc-200 bg-white hover:border-blue-400 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700'
@@ -510,7 +510,7 @@ export default function Library() {
               <button
                 type="button"
                 onClick={() => setDisplayLimit((prev) => prev + 96)}
-                className="rounded-lg border border-zinc-200 bg-white px-5 py-2 text-xs font-semibold text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="rounded-lg border border-zinc-200 bg-white px-5 py-2 text-xs font-semibold text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-[0.96] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
               >
                 Load More Icons
               </button>

@@ -105,7 +105,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
             {/* Visual Stage */}
             <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50/60 p-8 dark:border-zinc-800 dark:bg-zinc-950/60 md:col-span-5">
               <div
-                className="flex items-center justify-center transition-all duration-150"
+                className="flex items-center justify-center transition-[width,height] duration-150"
                 style={{ width: `${size}px`, height: `${size}px` }}
               >
                 <img
@@ -182,7 +182,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
                 <button
                   type="button"
                   onClick={() => toggleInCart(iconName)}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold shadow-sm transition active:scale-95 ${
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold shadow-sm transition active:scale-[0.96] ${
                     selected
                       ? 'bg-blue-50 text-blue-700 border border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700'
                       : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200'
@@ -197,7 +197,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
                 <button
                   type="button"
                   onClick={handleDownloadSvg}
-                  className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50 active:scale-95 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50 active:scale-[0.96] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

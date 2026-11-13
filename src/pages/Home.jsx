@@ -242,7 +242,7 @@ export default function Home() {
                             key={p}
                             type="button"
                             onClick={() => setQuery(p)}
-                            className={`rounded-md px-2.5 py-1 font-mono text-xs transition active:scale-95 ${
+                            className={`rounded-md px-2.5 py-1 font-mono text-xs transition active:scale-[0.96] ${
                               isSelected
                                 ? 'bg-blue-600 text-white font-bold shadow-sm ring-1 ring-blue-500'
                                 : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
@@ -305,7 +305,7 @@ export default function Home() {
                             key={s}
                             type="button"
                             onClick={() => setSize(s)}
-                            className={`flex-1 rounded py-1.5 font-mono text-xs font-medium transition active:scale-95 ${
+                            className={`flex-1 rounded py-1.5 font-mono text-xs font-medium transition active:scale-[0.96] ${
                               size === s
                                 ? 'bg-blue-600 text-white font-bold shadow-sm ring-1 ring-blue-500'
                                 : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
@@ -377,7 +377,7 @@ export default function Home() {
                             key={tab}
                             type="button"
                             onClick={() => setExportTab(tab)}
-                            className={`rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition active:scale-95 sm:px-3 sm:text-xs ${
+                            className={`rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition active:scale-[0.96] sm:px-3 sm:text-xs ${
                               isTabActive
                                 ? 'bg-blue-600 text-white font-bold shadow-sm'
                                 : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'

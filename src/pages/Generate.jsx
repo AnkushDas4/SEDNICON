@@ -219,28 +219,48 @@ export default function Generate() {
   return (
     <div className="py-10 sm:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 font-mono text-xs font-medium text-blue-600 dark:text-blue-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-              BYOK Privacy-First AI
-            </span>
+        {/* Studio introduction */}
+        <header className="hero-paper relative isolate overflow-hidden rounded-[1.75rem] border border-blue-100 p-5 shadow-[0_20px_60px_-40px_rgba(30,64,175,.35)] sm:p-8 lg:p-9">
+          <div className="hero-contour pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
+          <div className="relative grid items-end gap-7 lg:grid-cols-[1fr_310px]">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/85 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[.16em] text-blue-800 shadow-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" /> BYOK vector studio
+              </span>
+              <h1 className="display-type mt-5 text-4xl font-bold leading-[.98] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+                Make the icon<br /><span className="hero-blue-ink">you can’t find.</span>
+              </h1>
+              <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+                Describe the shape, pick a model and style, then export a clean SVG for your project.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-blue-100 bg-white/90 p-4 shadow-[0_14px_40px_-24px_rgba(30,64,175,.32)] backdrop-blur sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-semibold text-slate-800">From brief to vector</span>
+                <span className="font-mono text-[10px] text-blue-700">3 STEPS</span>
+              </div>
+              <div className="mt-4 space-y-2">
+                {[
+                  ['01', 'Describe the shape'],
+                  ['02', 'Choose your model'],
+                  ['03', 'Refine & export SVG'],
+                ].map(([number, label]) => (
+                  <div key={number} className="flex items-center gap-3 rounded-xl bg-[#f5f9ff] px-3 py-2.5">
+                    <span className="font-mono text-[10px] font-semibold text-blue-600">{number}</span>
+                    <span className="text-xs font-medium text-slate-700">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <h1 className="font-sans text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl dark:text-zinc-50">
-            Vector AI Icon Workbench
-          </h1>
-          <p className="max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">
-            Describe any icon in natural language. Powered by your choice of 8 state-of-the-art vision & code LLMs with real-time DOM recoloring.
-          </p>
-        </div>
+        </header>
 
         {/* ── WORKBENCH GRID ── */}
-        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="mt-7 grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
           {/* ── LEFT PANEL: CONTROLS ── */}
-          <div className="space-y-6 lg:col-span-6">
+          <div className="space-y-5 lg:col-span-7">
             {/* Prompt Card */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-2xl border border-blue-100 bg-white/95 p-5 shadow-[0_12px_30px_-24px_rgba(30,64,175,.35)] dark:border-zinc-800 dark:bg-zinc-900">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                   Prompt
@@ -254,12 +274,29 @@ export default function Generate() {
                 onChange={(e) => setPrompt(e.target.value.slice(0, 300))}
                 placeholder="A geometric cyber skull with glowing monocle, minimalist vector lines..."
                 rows={3}
-                className="mt-2.5 w-full rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-600"
+                className="mt-2.5 w-full resize-y rounded-xl border border-blue-100 bg-[#f8fbff] p-3.5 text-sm leading-6 text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/15 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-600"
               />
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="mr-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Try a brief</span>
+                {[
+                  'A tiny paper plane, one-color outline',
+                  'A friendly cloud with a small sun',
+                  'A clean checkmark inside a soft square',
+                ].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => setPrompt(suggestion)}
+                    className="rounded-full border border-blue-100 bg-white px-2.5 py-1.5 text-[10px] font-medium text-blue-800 transition hover:border-blue-300 hover:bg-blue-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-blue-200 dark:hover:bg-zinc-800"
+                  >
+                    {suggestion.split(',')[0]}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Style Parameters Card */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-2xl border border-blue-100 bg-white/95 p-5 shadow-[0_12px_30px_-24px_rgba(30,64,175,.35)] dark:border-zinc-800 dark:bg-zinc-900">
               <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                 Vector Geometry & Style
               </h2>
@@ -344,7 +381,7 @@ export default function Generate() {
                           key={st}
                           type="button"
                           onClick={() => setRenderStyle(st)}
-                          className={`flex-1 rounded py-1 text-xs font-medium capitalize transition active:scale-95 ${
+                          className={`flex-1 rounded py-1 text-xs font-medium capitalize transition active:scale-[0.96] ${
                             isActive
                               ? 'bg-blue-600 text-white font-bold shadow-sm'
                               : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
@@ -369,7 +406,7 @@ export default function Generate() {
                           key={cs}
                           type="button"
                           onClick={() => setCornerStyle(cs)}
-                          className={`flex-1 rounded py-1 text-xs font-medium capitalize transition active:scale-95 ${
+                          className={`flex-1 rounded py-1 text-xs font-medium capitalize transition active:scale-[0.96] ${
                             isActive
                               ? 'bg-blue-600 text-white font-bold shadow-sm'
                               : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
@@ -385,7 +422,7 @@ export default function Generate() {
             </div>
 
             {/* Provider & BYOK Card with Authentic Logos */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-2xl border border-blue-100 bg-white/95 p-5 shadow-[0_12px_30px_-24px_rgba(30,64,175,.35)] dark:border-zinc-800 dark:bg-zinc-900">
               <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                 AI Provider Selection
               </h2>
@@ -399,7 +436,7 @@ export default function Generate() {
                       key={p.id}
                       type="button"
                       onClick={() => setProvider(p.id)}
-                      className={`flex flex-col items-center justify-center rounded-xl border p-3 text-xs font-medium transition active:scale-95 ${
+                      className={`flex flex-col items-center justify-center rounded-xl border p-3 text-xs font-medium transition active:scale-[0.96] ${
                         isSelected
                           ? 'border-blue-600 bg-blue-50/60 text-blue-700 shadow-sm ring-1 ring-blue-600 dark:border-blue-500 dark:bg-blue-950/40 dark:text-blue-300'
                           : 'border-zinc-200 bg-zinc-50/50 text-zinc-700 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-300 dark:hover:border-zinc-700'
@@ -478,10 +515,10 @@ export default function Generate() {
                     </svg>
                     <div className="flex flex-col">
                       <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-                        Browser-Encrypted Key Storage
+                        Remember key on this browser
                       </span>
                       <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
-                        Saved in client localStorage only &bull; Never leaves your device
+                        Stored in this browser; sent with your generation request
                       </span>
                     </div>
                   </div>
@@ -511,7 +548,7 @@ export default function Generate() {
                 type="button"
                 disabled={generating}
                 onClick={handleGenerate}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 active:scale-[0.98] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 enabled:active:scale-[0.96] disabled:opacity-50"
               >
                 {generating ? (
                   <>
@@ -538,8 +575,8 @@ export default function Generate() {
           </div>
 
           {/* ── RIGHT PANEL: PREVIEW & CODE ── */}
-          <div className="space-y-6 lg:col-span-6">
-            <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="space-y-5 self-start lg:sticky lg:top-24 lg:col-span-5">
+            <div className="rounded-2xl border border-blue-100 bg-white/95 p-5 shadow-[0_12px_30px_-24px_rgba(30,64,175,.35)] dark:border-zinc-800 dark:bg-zinc-900">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-zinc-200 pb-3 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
@@ -557,7 +594,7 @@ export default function Generate() {
                   <button
                     type="button"
                     onClick={handleDownloadSvg}
-                    className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 active:scale-95 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
+                    className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 active:scale-[0.96] dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300"
                   >
                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -569,12 +606,20 @@ export default function Generate() {
                 )}
               </div>
 
+              <div className="mt-3 flex items-center justify-between gap-3 text-[11px]">
+                <span className="inline-flex min-w-0 items-center gap-2 text-zinc-500 dark:text-zinc-400">
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${generating ? 'animate-pulse bg-blue-500' : currentSvg ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                  <span className="truncate">{generating ? statusMessage : currentSvg ? 'Vector ready to refine' : 'Preview is waiting for a brief'}</span>
+                </span>
+                <span className="shrink-0 font-mono text-zinc-400">{generating ? `${elapsedTime}s` : currentSvg ? `${size}px SVG` : 'SVG'}</span>
+              </div>
+
               {/* Visual Display Stage */}
-              <div className="relative mt-4 flex min-h-[260px] items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50/70 p-8 dark:border-zinc-800 dark:bg-zinc-950/70">
+              <div className="specimen-grid relative mt-3 flex min-h-[260px] items-center justify-center overflow-hidden rounded-2xl border border-blue-100 bg-[#f6f9ff] p-8 dark:border-zinc-800 dark:bg-zinc-950/70">
                 {currentSvg ? (
                   <div
                     dangerouslySetInnerHTML={{ __html: currentSvg }}
-                    className="transition-all duration-150"
+                    className="transition-[color] duration-150"
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center text-zinc-400 dark:text-zinc-500">
@@ -591,7 +636,7 @@ export default function Generate() {
               {currentSvg && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between border-b border-zinc-200 pb-2 dark:border-zinc-800">
-                    <div className="flex gap-1.5">
+                    <div className="flex flex-wrap gap-1 sm:gap-1.5">
                       {[
                         { id: 'react', label: 'React' },
                         { id: 'html', label: 'HTML' },
@@ -605,7 +650,7 @@ export default function Generate() {
                             key={tab.id}
                             type="button"
                             onClick={() => setExportTab(tab.id)}
-                            className={`rounded-md px-3 py-1 text-xs font-semibold tracking-wider transition active:scale-95 ${
+                            className={`rounded-md px-2 py-1 text-[11px] font-semibold tracking-wider transition active:scale-[0.96] sm:px-3 sm:text-xs ${
                               isTabActive
                                 ? 'bg-blue-600 text-white font-bold shadow-sm'
                                 : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
@@ -629,7 +674,7 @@ export default function Generate() {
             </div>
 
             {/* Session History Strip with Click Highlights */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-2xl border border-blue-100 bg-white/95 p-5 shadow-[0_12px_30px_-24px_rgba(30,64,175,.35)] dark:border-zinc-800 dark:bg-zinc-900">
               <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                 Session Generations ({sessionHistory.length})
               </h2>
@@ -653,7 +698,7 @@ export default function Generate() {
                         setPrompt(item.prompt);
                         addToast(`Loaded "${item.prompt.slice(0, 20)}..." into workbench`, 'info');
                       }}
-                      className="group flex flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 transition hover:border-blue-500 hover:bg-blue-50/20 active:scale-95 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-blue-500"
+                      className="group flex flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 transition hover:border-blue-500 hover:bg-blue-50/20 active:scale-[0.96] dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-blue-500"
                     >
                       <div
                         dangerouslySetInnerHTML={{ __html: item.svg }}
