@@ -16,20 +16,20 @@ export default function Navbar({ onOpenCart }) {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md transition-colors dark:border-zinc-800 dark:bg-zinc-950/80">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 w-full border-b border-blue-100/80 bg-[#fbfdff]/90 shadow-[0_1px_12px_rgba(37,99,235,.035)] backdrop-blur-xl transition-colors dark:border-zinc-800 dark:bg-zinc-950/85">
+      <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand / Logo */}
         <div className="flex items-center gap-3">
           <Link
             to="/"
             className="group flex items-center gap-2.5 text-zinc-900 transition-colors dark:text-zinc-100"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm ring-1 ring-blue-700/20 transition-transform group-hover:scale-105 active:scale-95">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-700 text-white shadow-[0_5px_12px_-4px_rgba(29,78,216,.7)] ring-1 ring-blue-800/20 transition-transform group-hover:scale-105 active:scale-95">
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="font-sans text-base font-bold tracking-tight">Sednicon</span>
+            <span className="font-sans text-lg font-bold tracking-[-.03em]">Sednicon</span>
           </Link>
 
           <span className="hidden rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 font-mono text-[11px] font-medium text-blue-600 dark:text-blue-400 sm:inline-flex items-center gap-1.5">
@@ -45,9 +45,9 @@ export default function Navbar({ onOpenCart }) {
               key={link.to}
               to={link.to}
               className={({ isActive }) =>
-                `rounded-md px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors ${
+                `rounded-lg px-3.5 py-2 text-sm font-semibold tracking-normal transition-colors ${
                   isActive
-                    ? 'bg-zinc-100 text-zinc-950 dark:bg-zinc-800 dark:text-zinc-100'
+                    ? 'bg-blue-50 text-blue-800 ring-1 ring-blue-100 dark:bg-blue-950/50 dark:text-blue-200 dark:ring-blue-900'
                     : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200'
                 }`
               }
@@ -137,9 +137,9 @@ export default function Navbar({ onOpenCart }) {
                 to={link.to}
                 onClick={() => setMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  `rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                     isActive
-                      ? 'bg-zinc-100 text-zinc-950 dark:bg-zinc-800 dark:text-zinc-100'
+                      ? 'bg-blue-50 text-blue-800 ring-1 ring-blue-100 dark:bg-blue-950/50 dark:text-blue-200 dark:ring-blue-900'
                       : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200'
                   }`
                 }

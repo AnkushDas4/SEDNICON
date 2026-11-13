@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { getRenderUrl } from '../utils/api';
 import CodeBlock from '../components/CodeBlock';
 import CustomSelect from '../components/CustomSelect';
-import HeroIconBackdrop from '../components/HeroIconBackdrop';
-import { useToast } from '../components/Toast';
 
 const PRESET_ICONS = ['github', 'vercel', 'sparkles', 'terminal', 'rocket', 'heart', 'settings'];
 const SIZES = [16, 24, 32, 48, 64];
@@ -43,8 +41,6 @@ const ICON_SETS = [
 ];
 
 export default function Home() {
-  const { addToast } = useToast();
-
   // Configurator state
   const [query, setQuery] = useState('sparkles');
   const [color, setColor] = useState('#2563eb');
@@ -115,66 +111,88 @@ export default function Home() {
     }
   };
 
-  const copyCli = () => {
-    navigator.clipboard.writeText('npx sednicon get sparkles --size 48 --color 2563eb');
-    addToast('Copied CLI command to clipboard!', 'success');
-  };
-
   return (
     <div className="flex flex-col">
       {/* ── HERO SECTION ── */}
-      <section className="relative overflow-hidden border-b border-zinc-200 py-20 transition-colors dark:border-zinc-800 lg:py-24">
-        <HeroIconBackdrop />
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="font-sans text-4xl font-extrabold tracking-tight text-zinc-950 sm:text-6xl dark:text-zinc-50">
-              Instant Vector Icons <br />
-              <span className="text-blue-600 dark:text-blue-500">via Edge HTTP.</span>
-            </h1>
-
-            {/* Repositioned & Refined Tagline */}
-            <p className="mt-4 text-xs sm:text-sm font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">
-              One URL &bull; Every Icon &bull; Zero Setup
-            </p>
-
-            <p className="mt-3 text-base text-zinc-600 sm:text-lg dark:text-zinc-400">
-              Stream clean, recolorable SVGs straight into your HTML, JSX, markdown, or CSS.
-              No multi-megabyte bundle dependencies, no icon font bloat, sub-50ms edge caching.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                to="/library"
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 active:scale-[0.98]"
-              >
-                <span>Explore 200k+ Icons</span>
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </Link>
-
-              <Link
-                to="/generate"
-                className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-50 active:scale-[0.98] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-              >
-                <svg className="h-4 w-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                </svg>
-                <span>Generate with AI</span>
-              </Link>
-
-              <button
-                type="button"
-                onClick={copyCli}
-                className="group flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 font-mono text-xs text-zinc-700 transition hover:border-zinc-300 active:scale-[0.98] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700"
-              >
-                <span className="text-blue-500">$</span>
-                <span>npx sednicon</span>
-                <span className="rounded bg-zinc-200 px-1 py-0.5 text-[10px] text-zinc-600 transition group-hover:bg-zinc-300 dark:bg-zinc-800 dark:text-zinc-400">
-                  Copy
-                </span>
-              </button>
+      <section className="hero-paper relative isolate overflow-hidden border-b border-blue-100/80 py-16 sm:py-20 lg:py-24">
+        <div className="hero-contour pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.04fr_.96fr] lg:px-8">
+          <div className="max-w-2xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.18em] text-blue-800 shadow-sm shadow-blue-900/5">
+              <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-50" /><span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" /></span>
+              The open icon edge
             </div>
+            <h1 className="display-type max-w-xl text-5xl font-semibold leading-[.98] tracking-[-.045em] text-slate-950 sm:text-6xl lg:text-[4.65rem]">
+              Every icon.<br />
+              <span className="hero-blue-ink">One tiny URL.</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl sm:leading-8">
+              A whole world of crisp, recolorable SVGs—served right where your interface needs them. No bundle, no setup, just a link.
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link to="/library" className="group inline-flex items-center gap-3 rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-[0_8px_20px_-8px_rgba(29,78,216,.65)] transition hover:-translate-y-0.5 hover:bg-blue-800 hover:shadow-[0_12px_24px_-8px_rgba(29,78,216,.55)] active:translate-y-0">
+                Browse the library
+                <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-6-6 6 6-6 6" /></svg>
+              </Link>
+              <Link to="/docs" className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white/75 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-white hover:text-blue-800">
+                Read the quickstart <span aria-hidden="true">↗</span>
+              </Link>
+            </div>
+
+            <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-blue-100 pt-5 text-sm text-slate-600">
+              <span className="inline-flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /><strong className="font-semibold text-slate-900">200k+</strong> icons</span>
+              <span><strong className="font-semibold text-slate-900">150+</strong> icon sets</span>
+              <span className="inline-flex items-center gap-2"><svg className="h-4 w-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0L16.95 7.05M7.05 16.95l-1.414 1.414M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>Edge-ready</span>
+            </div>
+          </div>
+
+          <div className="hero-specimen relative mx-auto w-full max-w-[550px]">
+            <div className="absolute -right-5 -top-5 h-28 w-28 rounded-full bg-sky-200/70 blur-3xl" />
+            <div className="absolute -bottom-7 -left-6 h-36 w-36 rounded-full bg-blue-200/70 blur-3xl" />
+            <div className="relative overflow-hidden rounded-[1.65rem] border border-blue-200/80 bg-white/90 p-5 shadow-[0_28px_80px_-38px_rgba(30,64,175,.42)] backdrop-blur sm:p-7">
+              <div className="flex items-center justify-between border-b border-blue-100 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-700 text-white"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h10M4 17h7" /></svg></div>
+                  <div><div className="text-sm font-bold text-slate-900">Icon, on demand</div><div className="text-[11px] text-slate-500">A live edge response</div></div>
+                </div>
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-mono text-[10px] font-semibold text-emerald-700">200 OK · 18ms</span>
+              </div>
+              <div className="specimen-grid relative mt-5 flex min-h-[235px] items-center justify-center overflow-hidden rounded-2xl border border-blue-100 bg-[#f5f9ff]">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(96,165,250,.17),transparent_62%)]" />
+                <div className="relative grid grid-cols-3 gap-3 sm:gap-4">
+                  {[
+                    { name: 'sparkles', size: 66, box: 'bg-blue-700 text-white shadow-[0_16px_35px_-14px_rgba(29,78,216,.8)]' },
+                    { name: 'layers', size: 48, box: 'bg-white text-blue-700 border border-blue-100 shadow-lg' },
+                    { name: 'rocket', size: 52, box: 'bg-sky-100 text-blue-800 border border-sky-200' },
+                    { name: 'terminal', size: 46, box: 'bg-white text-slate-700 border border-blue-100' },
+                    { name: 'heart', size: 42, box: 'bg-blue-100 text-blue-700 border border-blue-200' },
+                    { name: 'globe', size: 48, box: 'bg-white text-blue-600 border border-blue-100 shadow-sm' },
+                  ].map((item, index) => (
+                    <div key={item.name} className={`specimen-icon flex items-center justify-center rounded-2xl ${item.box}`} style={{ width: index === 0 ? 90 : 72, height: index === 0 ? 90 : 72, animationDelay: `${index * 110}ms` }}>
+                      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className={index === 0 ? 'h-11 w-11' : 'h-8 w-8'}>
+                        {item.name === 'sparkles' && <><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-2-5.8L4 11l6-2.2L12 3Z" /><path d="m19 14 1 2.5 2 1-2 1-1 2.5-1-2.5-2-1 2-1 1-2.5Z" /></>}
+                        {item.name === 'layers' && <><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 16l9 5 9-5" /></>}
+                        {item.name === 'rocket' && <><path d="M5 13c-2 1-2 5-2 6 1 0 5 0 6-2" /><path d="M9 15 6 12c2-5 6-8 14-9-1 8-4 12-9 14l-2-2Z" /><circle cx="15" cy="9" r="1.5" /></>}
+                        {item.name === 'terminal' && <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="m7 9 3 3-3 3m6 0h4" /></>}
+                        {item.name === 'heart' && <path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11A4.8 4.8 0 0 1 12 6.4a4.8 4.8 0 0 1 8.8 2.4Z" />}
+                        {item.name === 'globe' && <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></>}
+                      </svg>
+                    </div>
+                  ))}
+                </div>
+                <div className="absolute bottom-3 right-3 rounded-lg border border-blue-100 bg-white/90 px-2.5 py-1.5 font-mono text-[10px] text-slate-500 shadow-sm">vectors, not bitmaps</div>
+              </div>
+              <div className="mt-4 flex items-center gap-3 rounded-xl border border-blue-100 bg-[#f8fbff] p-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="m13 2-3 8H4l7 12 3-8h6L13 2Z" /></svg></span>
+                <code className="min-w-0 truncate text-[11px] text-slate-600 sm:text-xs">sednicon.sednium.com/api/render?q=sparkles</code>
+                <span className="ml-auto shrink-0 font-mono text-[10px] font-semibold text-blue-700">GET</span>
+              </div>
+            </div>
+            <div className="absolute -left-4 top-[31%] hidden items-center gap-2 rounded-xl border border-blue-100 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-lg sm:flex">
+              <span className="h-2 w-2 rounded-full bg-blue-500" /> Recolorable SVG
+            </div>
+            <div className="absolute -right-3 bottom-[18%] hidden rounded-xl border border-blue-100 bg-white px-3 py-2 font-mono text-[11px] text-blue-800 shadow-lg md:block">#2563eb</div>
           </div>
         </div>
       </section>

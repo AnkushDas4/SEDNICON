@@ -17,7 +17,7 @@ function ScrollToTop() {
 
 export default function Layout({ children }) {
   return (
-    <div className="flex min-h-screen flex-col bg-white text-zinc-900 antialiased transition-colors dark:bg-zinc-950 dark:text-zinc-100">
+    <div className="flex min-h-screen flex-col bg-transparent text-zinc-900 antialiased transition-colors dark:text-zinc-100">
       <ScrollToTop />
       <Navbar />
       <main className="flex-1">

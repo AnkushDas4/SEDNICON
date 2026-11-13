@@ -1,112 +1,103 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    color-scheme: light;
-  }
-  
-  html.dark {
-    color-scheme: dark;
-  }
-
-  * {
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    scroll-padding-top: 80px;
-  }
-
+  :root { color-scheme: light; }
+  html.dark { color-scheme: dark; }
+  * { -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
   body {
     @apply bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-sans antialiased;
     user-select: text;
     -webkit-user-select: text;
+    background-color: #f9fbff;
+    background-image:
+      radial-gradient(ellipse at 12% 0%, rgba(219, 234, 254, .4), transparent 36rem),
+      linear-gradient(rgba(59, 130, 246, .025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, .025) 1px, transparent 1px);
+    background-size: auto, 34px 34px, 34px 34px;
   }
-
-  ::selection {
-    @apply bg-blue-600 text-white dark:bg-blue-500;
+  html.dark body {
+    background-color: #090e19;
+    background-image: radial-gradient(ellipse at 12% 0%, rgba(30, 58, 138, .14), transparent 36rem);
   }
-
-  /* Accessible focus ring on keyboard navigation */
-  :focus-visible {
-    @apply outline-none ring-2 ring-blue-600 dark:ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950;
-  }
-
-  /* Custom subtle scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-zinc-300 dark:bg-zinc-800 rounded-full;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-zinc-400 dark:bg-zinc-700;
-  }
+  ::selection { @apply bg-blue-600 text-white dark:bg-blue-500; }
+  :focus-visible { @apply outline-none ring-2 ring-blue-600 dark:ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-zinc-300 dark:bg-zinc-800 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-zinc-400 dark:bg-zinc-700; }
 }
+
+/* A quiet, tactile paper-and-blue identity instead of a flat app canvas. */
+.hero-paper {
+  background-color: #f8fbff;
+  background-image:
+    radial-gradient(ellipse 42rem 28rem at 88% 44%, rgba(219, 234, 254, .72), transparent 76%),
+    radial-gradient(ellipse 40rem 24rem at 4% 0%, rgba(239, 246, 255, .96), transparent 82%),
+    linear-gradient(rgba(37, 99, 235, .04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, .04) 1px, transparent 1px);
+  background-size: auto, auto, 32px 32px, 32px 32px;
+}
+.hero-paper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .2;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+.dark .hero-paper {
+  background-color: #0d1423;
+  background-image: radial-gradient(ellipse 42rem 28rem at 88% 44%, rgba(30, 64, 175, .18), transparent 76%), linear-gradient(rgba(96, 165, 250, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(96, 165, 250, .035) 1px, transparent 1px);
+  background-size: auto, 32px 32px, 32px 32px;
+}
+.dark .hero-paper::after { mix-blend-mode: screen; opacity: .07; }
+.hero-contour {
+  background-image: repeating-radial-gradient(ellipse at 75% 45%, transparent 0 55px, rgba(59, 130, 246, .075) 56px, transparent 57px 78px);
+  opacity: .65;
+}
+.display-type { font-family: 'Newsreader', Georgia, serif; }
+.hero-blue-ink {
+  color: #1d4ed8;
+  background: linear-gradient(105deg, #1d4ed8 8%, #1684c7 58%, #3970df 95%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.specimen-grid {
+  background-image: linear-gradient(rgba(59, 130, 246, .055) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, .055) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.specimen-icon { animation: specimen-arrive .65s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes specimen-arrive { from { opacity: 0; transform: translateY(9px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
 /* Subtle checkerboard transparency canvas */
 .bg-checker {
   background-color: #fafafa;
-  background-image: 
-    linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%),
-    linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%);
+  background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%), linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%);
   background-size: 16px 16px;
   background-position: 0 0, 8px 8px;
 }
-
 .dark .bg-checker {
   background-color: #121214;
-  background-image: 
-    linear-gradient(45deg, #1c1c1f 25%, transparent 25%, transparent 75%, #1c1c1f 75%),
-    linear-gradient(45deg, #1c1c1f 25%, transparent 25%, transparent 75%, #1c1c1f 75%);
+  background-image: linear-gradient(45deg, #1c1c1f 25%, transparent 25%, transparent 75%, #1c1c1f 75%), linear-gradient(45deg, #1c1c1f 25%, transparent 25%, transparent 75%, #1c1c1f 75%);
   background-size: 16px 16px;
   background-position: 0 0, 8px 8px;
 }
 
-/* Continuous infinite marquee */
-@keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
-}
-
-.animate-marquee-continuous {
-  display: flex;
-  width: max-content;
-  animation: marquee 30s linear infinite;
-}
-
-.animate-marquee-continuous:hover {
-  animation-play-state: paused;
-}
-
-/* Ambient subtle float for hero icon backdrop: strictly 6px vertical float over 24s, constant angle */
+@keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
+.animate-marquee-continuous { display: flex; width: max-content; animation: marquee 30s linear infinite; }
+.animate-marquee-continuous:hover { animation-play-state: paused; }
 @keyframes heroBackdropFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(-2.5deg) scale(1.05);
-  }
-  50% {
-    transform: translateY(-6px) rotate(-2.5deg) scale(1.05);
-  }
+  0%, 100% { transform: translateY(0px) rotate(-2.5deg) scale(1.05); }
+  50% { transform: translateY(-6px) rotate(-2.5deg) scale(1.05); }
 }
-
-.animate-hero-backdrop {
-  animation: heroBackdropFloat 24s ease-in-out infinite;
-  transform-origin: center center;
-  will-change: transform;
-}
-
+.animate-hero-backdrop { animation: heroBackdropFloat 24s ease-in-out infinite; transform-origin: center center; will-change: transform; }
 @media (prefers-reduced-motion: reduce) {
-  .animate-hero-backdrop {
-    animation: none !important;
-    transform: translateY(0px) rotate(-2.5deg) scale(1.05) !important;
-  }
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .animate-hero-backdrop { animation: none !important; transform: translateY(0px) rotate(-2.5deg) scale(1.05) !important; }
 }
