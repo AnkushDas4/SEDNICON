@@ -150,13 +150,13 @@ export default function Home() {
           <div className="hero-specimen relative mx-auto w-full max-w-[550px]">
             <div className="absolute -right-5 -top-5 h-28 w-28 rounded-full bg-sky-200/70 blur-3xl" />
             <div className="absolute -bottom-7 -left-6 h-36 w-36 rounded-full bg-blue-200/70 blur-3xl" />
-            <div className="relative overflow-hidden rounded-[1.65rem] border border-blue-200/80 bg-white/90 p-5 shadow-[0_28px_80px_-38px_rgba(30,64,175,.42)] backdrop-blur sm:p-7">
-              <div className="flex items-center justify-between border-b border-blue-100 pb-4">
+            <div className="relative min-w-0 overflow-hidden rounded-[1.65rem] border border-blue-200/80 bg-white/90 p-4 shadow-[0_28px_80px_-38px_rgba(30,64,175,.42)] backdrop-blur sm:p-7">
+              <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 border-b border-blue-100 pb-4">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-700 text-white"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h10M4 17h7" /></svg></div>
                   <div><div className="text-sm font-bold text-slate-900">Icon, on demand</div><div className="text-[11px] text-slate-500">A live edge response</div></div>
                 </div>
-                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-mono text-[10px] font-semibold text-emerald-700">200 OK · 18ms</span>
+                <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 font-mono text-[9px] font-semibold text-emerald-700 sm:px-2.5 sm:text-[10px]">200 OK · 18ms</span>
               </div>
               <div className="specimen-grid relative mt-5 flex min-h-[235px] items-center justify-center overflow-hidden rounded-2xl border border-blue-100 bg-[#f5f9ff]">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(96,165,250,.17),transparent_62%)]" />
@@ -169,7 +169,7 @@ export default function Home() {
                     { name: 'heart', size: 42, box: 'bg-blue-100 text-blue-700 border border-blue-200' },
                     { name: 'globe', size: 48, box: 'bg-white text-blue-600 border border-blue-100 shadow-sm' },
                   ].map((item, index) => (
-                    <div key={item.name} className={`specimen-icon flex items-center justify-center rounded-2xl ${item.box}`} style={{ width: index === 0 ? 90 : 72, height: index === 0 ? 90 : 72, animationDelay: `${index * 110}ms` }}>
+                    <div key={item.name} className={`specimen-icon flex items-center justify-center rounded-2xl ${item.box}`} style={{ width: index === 0 ? 'clamp(72px, 23vw, 90px)' : 'clamp(58px, 19vw, 72px)', height: index === 0 ? 'clamp(72px, 23vw, 90px)' : 'clamp(58px, 19vw, 72px)', animationDelay: `${index * 110}ms` }}>
                       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className={index === 0 ? 'h-11 w-11' : 'h-8 w-8'}>
                         {item.name === 'sparkles' && <><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-2-5.8L4 11l6-2.2L12 3Z" /><path d="m19 14 1 2.5 2 1-2 1-1 2.5-1-2.5-2-1 2-1 1-2.5Z" /></>}
                         {item.name === 'layers' && <><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 16l9 5 9-5" /></>}
@@ -200,7 +200,7 @@ export default function Home() {
       {/* ── INTERACTIVE CONFIGURATOR WORKBENCH ── */}
       <section className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="mb-8 flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <h2 className="text-xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
                 Interactive URL Workbench
@@ -218,7 +218,7 @@ export default function Home() {
           <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             <div className="grid grid-cols-1 lg:grid-cols-12">
               {/* Controls Column */}
-              <div className="border-b border-zinc-200 p-6 dark:border-zinc-800 lg:col-span-5 lg:border-b-0 lg:border-r">
+              <div className="min-w-0 border-b border-zinc-200 p-4 dark:border-zinc-800 sm:p-6 lg:col-span-5 lg:border-b-0 lg:border-r">
                 <div className="space-y-6">
                   {/* Icon Query */}
                   <div>
@@ -338,9 +338,9 @@ export default function Home() {
               </div>
 
               {/* Stage & Code Output Column */}
-              <div className="flex flex-col justify-between p-6 lg:col-span-7">
+              <div className="flex min-w-0 flex-col justify-between p-4 sm:p-6 lg:col-span-7">
                 {/* Visual Stage - No cutting, clean stage with generous breathing room */}
-                <div className="relative flex min-h-[240px] flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50/70 p-10 dark:border-zinc-800 dark:bg-zinc-950/70 overflow-visible">
+                <div className="relative flex min-h-[220px] flex-col items-center justify-center overflow-visible rounded-xl border border-zinc-200 bg-zinc-50/70 p-6 dark:border-zinc-800 dark:bg-zinc-950/70 sm:min-h-[240px] sm:p-10">
                   {/* Telemetry pill */}
                   <div className="absolute left-3 top-3 flex items-center gap-2 rounded-md border border-zinc-200 bg-white/90 px-2.5 py-1 font-mono text-[11px] text-zinc-600 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-400">
                     <span>{size}&times;{size}px</span>
@@ -373,7 +373,7 @@ export default function Home() {
                 {/* Code Export Tabs with Click Highlight */}
                 <div className="mt-6">
                   <div className="flex items-center justify-between border-b border-zinc-200 pb-2 dark:border-zinc-800">
-                    <div className="flex gap-1.5">
+                    <div className="flex flex-wrap gap-1 sm:gap-1.5">
                       {['url', 'html', 'react', 'vue', 'css'].map((tab) => {
                         const isTabActive = exportTab === tab;
                         return (
@@ -381,7 +381,7 @@ export default function Home() {
                             key={tab}
                             type="button"
                             onClick={() => setExportTab(tab)}
-                            className={`rounded-md px-3 py-1 text-xs font-semibold uppercase tracking-wider transition active:scale-95 ${
+                            className={`rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition active:scale-95 sm:px-3 sm:text-xs ${
                               isTabActive
                                 ? 'bg-blue-600 text-white font-bold shadow-sm'
                                 : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
