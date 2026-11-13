@@ -116,8 +116,8 @@ export default function Home() {
       {/* ── HERO SECTION ── */}
       <section className="hero-paper relative isolate overflow-hidden border-b border-blue-100/80 py-16 sm:py-20 lg:py-24">
         <div className="hero-contour pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
-        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.04fr_.96fr] lg:px-8">
-          <div className="max-w-2xl">
+        <div className="relative z-10 mx-auto grid w-full min-w-0 grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:max-w-7xl lg:grid-cols-[1.04fr_.96fr] lg:px-8">
+          <div className="w-full min-w-0 max-w-2xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.18em] text-blue-800 shadow-sm shadow-blue-900/5">
               <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-50" /><span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" /></span>
               The open icon edge
@@ -147,7 +147,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hero-specimen relative mx-auto w-full max-w-[550px]">
+          <div className="hero-specimen relative mx-auto w-full min-w-0 max-w-[550px]">
             <div className="absolute -right-5 -top-5 h-28 w-28 rounded-full bg-sky-200/70 blur-3xl" />
             <div className="absolute -bottom-7 -left-6 h-36 w-36 rounded-full bg-blue-200/70 blur-3xl" />
             <div className="relative min-w-0 overflow-hidden rounded-[1.65rem] border border-blue-200/80 bg-white/90 p-4 shadow-[0_28px_80px_-38px_rgba(30,64,175,.42)] backdrop-blur sm:p-7">

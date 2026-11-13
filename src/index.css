@@ -6,11 +6,12 @@
   :root { color-scheme: light; }
   html.dark { color-scheme: dark; }
   * { -webkit-tap-highlight-color: transparent; }
-  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; overflow-x: clip; }
   body {
     @apply bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-sans antialiased;
     user-select: text;
     -webkit-user-select: text;
+    overflow-x: clip;
     background-color: #f9fbff;
     background-image:
       radial-gradient(ellipse at 12% 0%, rgba(219, 234, 254, .4), transparent 36rem),
@@ -60,7 +61,11 @@
   background-image: repeating-radial-gradient(ellipse at 75% 45%, transparent 0 55px, rgba(59, 130, 246, .075) 56px, transparent 57px 78px);
   opacity: .65;
 }
-.display-type { font-family: 'Newsreader', Georgia, serif; }
+.display-type {
+  font-family: 'Barlow Semi Condensed', 'Barlow', sans-serif;
+  font-weight: 700;
+  letter-spacing: -.035em;
+}
 .hero-blue-ink {
   color: #1d4ed8;
   background: linear-gradient(105deg, #1d4ed8 8%, #1684c7 58%, #3970df 95%);

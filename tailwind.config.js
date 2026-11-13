@@ -8,8 +8,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Source Sans 3', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['Newsreader', 'Georgia', 'serif'],
+        sans: ['Barlow', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Barlow Semi Condensed', 'Barlow', 'sans-serif'],
         mono: ['IBM Plex Mono', 'monospace'],
       },
       colors: {
