@@ -118,10 +118,6 @@ export default function Home() {
         <div className="hero-contour pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
         <div className="relative z-10 mx-auto grid w-full min-w-0 grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:max-w-7xl lg:grid-cols-[1.04fr_.96fr] lg:px-8">
           <div className="w-full min-w-0 max-w-2xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.18em] text-blue-800 shadow-sm shadow-blue-900/5">
-              <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-50" /><span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" /></span>
-              The open icon edge
-            </div>
             <h1 className="display-type max-w-xl text-5xl font-semibold leading-[.98] tracking-[-.045em] text-slate-950 sm:text-6xl lg:text-[4.65rem]">
               Every icon.<br />
               <span className="hero-blue-ink">One tiny URL.</span>
@@ -173,7 +169,7 @@ export default function Home() {
                       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" className={index === 0 ? 'h-11 w-11' : 'h-8 w-8'}>
                         {item.name === 'sparkles' && <><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-2-5.8L4 11l6-2.2L12 3Z" /><path d="m19 14 1 2.5 2 1-2 1-1 2.5-1-2.5-2-1 2-1 1-2.5Z" /></>}
                         {item.name === 'layers' && <><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 16l9 5 9-5" /></>}
-                        {item.name === 'rocket' && <><path d="M5 13c-2 1-2 5-2 6 1 0 5 0 6-2" /><path d="M9 15 6 12c2-5 6-8 14-9-1 8-4 12-9 14l-2-2Z" /><circle cx="15" cy="9" r="1.5" /></>}
+                        {item.name === 'rocket' && <g transform="translate(-1 1)"><path d="M5 13c-2 1-2 5-2 6 1 0 5 0 6-2" /><path d="M9 15 6 12c2-5 6-8 14-9-1 8-4 12-9 14l-2-2Z" /><circle cx="15" cy="9" r="1.5" /></g>}
                         {item.name === 'terminal' && <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="m7 9 3 3-3 3m6 0h4" /></>}
                         {item.name === 'heart' && <path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11A4.8 4.8 0 0 1 12 6.4a4.8 4.8 0 0 1 8.8 2.4Z" />}
                         {item.name === 'globe' && <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></>}

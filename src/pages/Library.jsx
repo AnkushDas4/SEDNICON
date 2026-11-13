@@ -38,13 +38,23 @@ export default function Library() {
   // Iconify search results state
   const [iconifyResults, setIconifyResults] = useState([]);
   const [iconifySearching, setIconifySearching] = useState(false);
+  const searchControllerRef = useRef(null);
 
-  // Debounce search
+  // Debounce typing and immediately cancel stale network results while the query changes.
   useEffect(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    searchControllerRef.current?.abort();
+    setIconifyResults([]);
+    setIconifySearching(normalizedQuery.length >= 2);
+
     const timer = setTimeout(() => {
-      setDebouncedQuery(query.trim().toLowerCase());
-    }, 120);
-    return () => clearTimeout(timer);
+      setDebouncedQuery(normalizedQuery);
+    }, 220);
+
+    return () => {
+      clearTimeout(timer);
+      searchControllerRef.current?.abort();
+    };
   }, [query]);
 
   // Keyboard shortcut: '/' to focus search, 'Escape' to blur
@@ -85,31 +95,52 @@ export default function Library() {
     return filteredCategories.reduce((acc, cat) => acc + cat.icons.length, 0);
   }, [filteredCategories]);
 
-  // Search Iconify API when query has 2+ characters
+  // Query the full Iconify ecosystem and keep late responses from replacing newer searches.
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setIconifyResults([]);
       setIconifySearching(false);
-      return;
+      return undefined;
     }
 
-    let isCurrent = true;
+    const controller = new AbortController();
+    searchControllerRef.current = controller;
     setIconifySearching(true);
 
-    fetch(`https://api.iconify.design/search?query=${encodeURIComponent(debouncedQuery)}&limit=48`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!isCurrent) return;
-        const icons = data.icons || [];
-        setIconifyResults(icons);
-        setIconifySearching(false);
+    fetch(`https://api.iconify.design/search?query=${encodeURIComponent(debouncedQuery)}&limit=48`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error('Icon search is unavailable');
+        return response.json();
       })
-      .catch(() => {
-        if (isCurrent) setIconifySearching(false);
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        const queryKey = debouncedQuery.replace(/[\s_-]+/g, '');
+        const icons = (Array.isArray(data.icons) ? data.icons : [])
+          .filter((id) => typeof id === 'string' && id.includes(':'))
+          .sort((left, right) => {
+            const rank = (id) => {
+              const name = id.split(':').slice(1).join(':').toLowerCase().replace(/[\s_-]+/g, '');
+              if (name === queryKey) return 0;
+              if (name.startsWith(queryKey)) return 1;
+              if (name.includes(queryKey)) return 2;
+              return 3;
+            };
+            return rank(left) - rank(right);
+          });
+        setIconifyResults(icons);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) setIconifyResults([]);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIconifySearching(false);
       });
 
     return () => {
-      isCurrent = false;
+      controller.abort();
+      if (searchControllerRef.current === controller) searchControllerRef.current = null;
     };
   }, [debouncedQuery]);
 
@@ -412,14 +443,14 @@ export default function Library() {
               <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
                 {iconifyResults.map((id) => {
                   const [prefix, iconName] = id.split(':');
-                  const selected = isInCart(iconName);
+                  const selected = isInCart(id);
                   const iconifyUrl = `https://api.iconify.design/${prefix}/${iconName}.svg?color=%23${cleanColorHex}&width=${iconSize}&height=${iconSize}`;
                   const resolverFallbackSrc = getRenderUrl({ q: id, color, size: iconSize });
 
                   return (
                     <div
                       key={id}
-                      onClick={() => setInspectIcon(iconName)}
+                      onClick={() => setInspectIcon(id)}
                       className={`group relative flex flex-col items-center justify-center rounded-xl border p-3.5 transition active:scale-95 cursor-pointer ${
                         selected
                           ? 'border-blue-600 bg-blue-50/50 shadow-sm ring-1 ring-blue-600 dark:border-blue-500 dark:bg-blue-950/40'
@@ -430,7 +461,7 @@ export default function Library() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleInCart(iconName);
+                          toggleInCart(id);
                         }}
                         className={`absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-md text-xs transition ${
                           selected
@@ -463,8 +494,8 @@ export default function Library() {
                         />
                       </div>
 
-                      <span className="mt-2.5 w-full truncate text-center font-mono text-[11px] text-zinc-600 transition-colors group-hover:text-zinc-950 dark:text-zinc-400 dark:group-hover:text-zinc-100">
-                        {iconName}
+                      <span title={id} className="mt-2.5 w-full truncate text-center font-mono text-[10px] text-zinc-600 transition-colors group-hover:text-zinc-950 dark:text-zinc-400 dark:group-hover:text-zinc-100">
+                        <span className="font-semibold text-blue-600 dark:text-blue-400">{prefix}:</span>{iconName}
                       </span>
                     </div>
                   );

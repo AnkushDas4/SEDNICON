@@ -261,15 +261,50 @@ export const PROVIDERS_LIST = [
 // Variations generator for any icon across multiple styles and icon sets
 export function getIconVariations(iconName, color = '2563eb', size = 32) {
   const cleanColor = encodeURIComponent(color.replace(/^#/, ''));
-  const cleanName = iconName.toLowerCase().replace(/_/g, '-');
-  const isBrand = CATEGORIES.find((c) => c.id === 'brands')?.icons.includes(iconName);
+  const [requestedPrefix, ...nameParts] = String(iconName).split(':');
+  const hasRequestedPrefix = nameParts.length > 0;
+  const sourceName = hasRequestedPrefix ? nameParts.join(':') : requestedPrefix;
+  const cleanName = sourceName.toLowerCase().replace(/_/g, '-');
+  const isBrand = !hasRequestedPrefix && CATEGORIES.find((c) => c.id === 'brands')?.icons.includes(iconName);
+
+  if (hasRequestedPrefix) {
+    const safePrefix = encodeURIComponent(requestedPrefix);
+    const safeName = encodeURIComponent(cleanName);
+    const exactQuery = `${requestedPrefix}:${cleanName}`;
+    return [
+      {
+        id: `search-${requestedPrefix}`,
+        label: `${requestedPrefix} (Search match)`,
+        url: `https://api.iconify.design/${safePrefix}/${safeName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+        renderUrl: getRenderUrl({ q: exactQuery, color, size }),
+      },
+      {
+        id: 'material-symbols',
+        label: 'Material Symbols',
+        url: `https://api.iconify.design/material-symbols/${safeName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+        renderUrl: getRenderUrl({ q: `material-symbols:${cleanName}`, color, size }),
+      },
+      {
+        id: 'lucide',
+        label: 'Lucide Clean Line',
+        url: `https://api.iconify.design/lucide/${safeName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+        renderUrl: getRenderUrl({ q: `lucide:${cleanName}`, color, size }),
+      },
+      {
+        id: 'tabler',
+        label: 'Tabler Linear',
+        url: `https://api.iconify.design/tabler/${safeName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+        renderUrl: getRenderUrl({ q: `tabler:${cleanName}`, color, size }),
+      },
+    ];
+  }
 
   if (isBrand) {
     return [
       {
         id: 'simple-icons',
         label: 'Simple Icons (Official)',
-        url: `https://api.iconify.design/simple-icons/${iconName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
+        url: `https://api.iconify.design/simple-icons/${cleanName}.svg?color=%23${cleanColor}&width=${size}&height=${size}`,
         renderUrl: getRenderUrl({ q: iconName, color, size, set: 'simple-icons' }),
       },
       {

@@ -24,6 +24,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
 
   if (!iconName) return null;
 
+  const displayName = iconName.includes(':') ? iconName.split(':').pop() : iconName;
   const variations = getIconVariations(iconName, color, size);
   const activeVariation = variations[selectedVariationIndex] || variations[0];
   const activeRenderUrl = activeVariation?.renderUrl || getRenderUrl({ q: iconName, color, size });
@@ -34,13 +35,13 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
       case 'url':
         return activeRenderUrl;
       case 'html':
-        return `<img src="${activeRenderUrl}" alt="${iconName}" width="${size}" height="${size}" />`;
+        return `<img src="${activeRenderUrl}" alt="${displayName}" width="${size}" height="${size}" />`;
       case 'react':
-        return `<img\n  src="${activeRenderUrl}"\n  alt="${iconName}"\n  width={${size}}\n  height={${size}}\n  loading="lazy"\n/>`;
+        return `<img\n  src="${activeRenderUrl}"\n  alt="${displayName}"\n  width={${size}}\n  height={${size}}\n  loading="lazy"\n/>`;
       case 'vue':
-        return `<img :src="'${activeRenderUrl}'" alt="${iconName}" width="${size}" height="${size}" />`;
+        return `<img :src="'${activeRenderUrl}'" alt="${displayName}" width="${size}" height="${size}" />`;
       case 'css':
-        return `.icon-${iconName} {\n  background-image: url('${activeRenderUrl}');\n  width: ${size}px;\n  height: ${size}px;\n  background-size: contain;\n  background-repeat: no-repeat;\n}`;
+        return `.icon-${displayName} {\n  background-image: url('${activeRenderUrl}');\n  width: ${size}px;\n  height: ${size}px;\n  background-size: contain;\n  background-repeat: no-repeat;\n}`;
       default:
         return activeRenderUrl;
     }
@@ -54,12 +55,12 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${iconName}-${activeVariation.id}.svg`;
+      a.download = `${displayName}-${activeVariation.id}.svg`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      addToast(`Downloaded ${iconName}.svg!`, 'success');
+      addToast(`Downloaded ${displayName}.svg!`, 'success');
     } catch {
       addToast('Failed to download SVG file.', 'error');
     }
@@ -69,7 +70,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`${iconName} icon details`}
+      aria-label={`${displayName} icon details`}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in duration-200"
     >
       {/* Modal Container */}
@@ -81,7 +82,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
         <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
           <div className="flex items-center gap-3">
             <span className="font-mono text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-              {iconName}
+              {displayName}
             </span>
             <span className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[11px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
               {activeVariation.label}
@@ -109,7 +110,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
               >
                 <img
                   src={activeRenderUrl}
-                  alt={iconName}
+                  alt={displayName}
                   width={size}
                   height={size}
                   className="transition-transform duration-150"
