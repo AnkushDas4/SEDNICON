@@ -48,7 +48,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
 
   const handleDownloadSvg = async () => {
     try {
-      const res = await fetch(activeVariation.url);
+      const res = await fetch(activeRenderUrl);
       const svgText = await res.text();
       const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(blob);
@@ -108,7 +108,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
                 style={{ width: `${size}px`, height: `${size}px` }}
               >
                 <img
-                  src={activeVariation.url}
+                  src={activeRenderUrl}
                   alt={iconName}
                   width={size}
                   height={size}
@@ -229,7 +229,7 @@ export default function IconDetailModal({ iconName, initialColor = '#2563eb', on
                     }`}
                   >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-white dark:bg-zinc-900">
-                      <img src={v.url} alt={v.label} width={20} height={20} />
+                      <img src={v.renderUrl || v.url} alt={v.label} width={20} height={20} loading="lazy" />
                     </div>
                     <span className="truncate text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
                       {v.label}

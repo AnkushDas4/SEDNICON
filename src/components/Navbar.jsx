@@ -24,11 +24,14 @@ export default function Navbar({ onOpenCart }) {
             to="/"
             className="group flex items-center gap-2.5 text-zinc-900 transition-colors dark:text-zinc-100"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-700 text-white shadow-[0_5px_12px_-4px_rgba(29,78,216,.7)] ring-1 ring-blue-800/20 transition-transform group-hover:scale-105 active:scale-95">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
+            <img
+              src="/favicon.svg"
+              alt=""
+              aria-hidden="true"
+              width="36"
+              height="36"
+              className="h-9 w-9 rounded-xl shadow-[0_5px_12px_-4px_rgba(29,78,216,.7)] ring-1 ring-blue-800/20 transition-transform group-hover:scale-105 active:scale-95"
+            />
             <span className="font-sans text-lg font-bold tracking-[-.03em]">Sednicon</span>
           </Link>
 

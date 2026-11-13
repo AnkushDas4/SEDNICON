@@ -10,11 +10,11 @@ export default function CustomSelect({
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
+  const triggerRef = useRef(null);
 
-  // Close on click outside
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
         setOpen(false);
       }
     }
@@ -22,22 +22,21 @@ export default function CustomSelect({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close on Escape
   useEffect(() => {
-    function handleKeyDown(e) {
-      if (e.key === 'Escape') setOpen(false);
+    if (!open) return undefined;
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
     }
-    if (open) {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open]);
 
-  // Find currently selected label
-  const selectedOption = options.find((opt) =>
-    typeof opt === 'object' ? opt.value === value || opt.id === value : opt === value
+  const selectedOption = options.find((option) =>
+    typeof option === 'object' ? option.value === value || option.id === value : option === value
   );
-
   const displayLabel = selectedOption
     ? typeof selectedOption === 'object'
       ? selectedOption.label || selectedOption.name || selectedOption.value
@@ -45,53 +44,64 @@ export default function CustomSelect({
     : value || placeholder;
 
   return (
-    <div ref={containerRef} className={`relative inline-block w-full text-left ${className}`}>
-      {/* Trigger Button */}
+    <div ref={containerRef} className={`relative w-full text-left ${className}`}>
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => setOpen(!open)}
-        className={`flex w-full items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-medium text-zinc-900 transition hover:border-zinc-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:border-zinc-700 ${buttonClassName}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((wasOpen) => !wasOpen)}
+        className={`flex min-h-10 w-full items-center justify-between gap-3 rounded-xl border border-blue-100 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 shadow-sm shadow-blue-950/[0.025] transition hover:border-blue-300 hover:bg-blue-50/40 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-blue-700 dark:hover:bg-slate-800 ${buttonClassName}`}
       >
-        <span className="truncate">{displayLabel}</span>
+        <span className="min-w-0 truncate">{displayLabel}</span>
         <svg
-          className={`ml-2 h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${
-            open ? 'rotate-180 text-blue-500' : ''
-          }`}
+          aria-hidden="true"
+          className={`h-4 w-4 shrink-0 text-blue-600 transition-transform duration-200 dark:text-blue-400 ${open ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
-          strokeWidth="2.5"
+          strokeWidth="2"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
         </svg>
       </button>
 
-      {/* Dropdown Menu */}
       {open && (
-        <div className="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto rounded-lg border border-zinc-200 bg-white/95 p-1 shadow-lg backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/95 scrollbar-thin">
-          {options.map((opt) => {
-            const optVal = typeof opt === 'object' ? (opt.value !== undefined ? opt.value : opt.id) : opt;
-            const optLabel = typeof opt === 'object' ? opt.label || opt.name || opt.value : opt;
-            const isSelected = optVal === value;
+        <div
+          role="listbox"
+          aria-label={typeof displayLabel === 'string' ? displayLabel : 'Options'}
+          className="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-xl border border-blue-100 bg-white/95 p-1.5 shadow-[0_18px_44px_-18px_rgba(30,64,175,.32)] ring-1 ring-slate-900/5 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-black/40 dark:ring-white/10"
+        >
+          {options.map((option) => {
+            const optionValue = typeof option === 'object'
+              ? option.value !== undefined ? option.value : option.id
+              : option;
+            const optionLabel = typeof option === 'object'
+              ? option.label || option.name || option.value
+              : option;
+            const isSelected = optionValue === value;
 
             return (
               <button
-                key={optVal}
+                key={optionValue}
                 type="button"
+                role="option"
+                aria-selected={isSelected}
                 onClick={() => {
-                  onChange(optVal);
+                  onChange(optionValue);
                   setOpen(false);
+                  triggerRef.current?.focus();
                 }}
-                className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs transition-colors ${
+                className={`flex min-h-9 w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
                   isSelected
-                    ? 'bg-blue-50 font-semibold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400'
-                    : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                    ? 'bg-blue-700 font-semibold text-white shadow-sm shadow-blue-900/20'
+                    : 'text-slate-700 hover:bg-blue-50 hover:text-blue-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
                 }`}
               >
-                <span className="truncate">{optLabel}</span>
+                <span className="min-w-0 truncate">{optionLabel}</span>
                 {isSelected && (
-                  <svg className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12" />
+                  <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m5 12 4 4L19 6" />
                   </svg>
                 )}
               </button>

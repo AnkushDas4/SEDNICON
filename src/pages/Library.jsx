@@ -7,6 +7,17 @@ import IconDetailModal from '../components/IconDetailModal';
 const SIZES = [16, 24, 32, 48, 64];
 const SWATCHES = ['#2563eb', '#09090b', '#ffffff', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6'];
 
+function fallbackPreview(event, fallbackUrl) {
+  const image = event.currentTarget;
+  if (image.dataset.resolverFallback) {
+    image.onerror = null;
+    image.src = '/favicon.svg';
+    return;
+  }
+  image.dataset.resolverFallback = 'true';
+  image.src = fallbackUrl;
+}
+
 export default function Library() {
   const { isInCart, toggleInCart } = useCart();
   const { addToast } = useToast();
@@ -300,6 +311,12 @@ export default function Library() {
                     const fastPreviewSrc = isBrand
                       ? `https://api.iconify.design/simple-icons/${name}.svg?color=%23${cleanColorHex}&width=${iconSize}&height=${iconSize}`
                       : `https://api.iconify.design/material-symbols/${name.replace(/_/g, '-')}.svg?color=%23${cleanColorHex}&width=${iconSize}&height=${iconSize}`;
+                    const resolverFallbackSrc = getRenderUrl({
+                      q: name,
+                      color,
+                      size: iconSize,
+                      set: isBrand ? 'simple-icons' : null,
+                    });
 
                     return (
                       <div
@@ -352,11 +369,14 @@ export default function Library() {
                           style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
                         >
                           <img
+                            key={`${name}-${fastPreviewSrc}`}
                             src={fastPreviewSrc}
                             alt={name}
                             loading="lazy"
+                            decoding="async"
                             width={iconSize}
                             height={iconSize}
+                            onError={(event) => fallbackPreview(event, resolverFallbackSrc)}
                           />
                         </div>
 
@@ -394,6 +414,7 @@ export default function Library() {
                   const [prefix, iconName] = id.split(':');
                   const selected = isInCart(iconName);
                   const iconifyUrl = `https://api.iconify.design/${prefix}/${iconName}.svg?color=%23${cleanColorHex}&width=${iconSize}&height=${iconSize}`;
+                  const resolverFallbackSrc = getRenderUrl({ q: id, color, size: iconSize });
 
                   return (
                     <div
@@ -431,11 +452,14 @@ export default function Library() {
                         style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
                       >
                         <img
+                          key={`${id}-${iconifyUrl}`}
                           src={iconifyUrl}
                           alt={iconName}
                           loading="lazy"
+                          decoding="async"
                           width={iconSize}
                           height={iconSize}
+                          onError={(event) => fallbackPreview(event, resolverFallbackSrc)}
                         />
                       </div>
 
